@@ -14,8 +14,9 @@ interface ControlTarget {
     getOptions(): GenericOptionsObject | void;
     update(options: GenericOptionsObject, redraw?: boolean, oneToOne?: boolean, animation?: boolean): void;
 }
+type ControlTypes = 'boolean' | 'color' | 'number' | 'array-of-strings';
 interface ControlParams {
-    type: 'boolean' | 'color' | 'number' | 'array-of-strings';
+    type: ControlTypes;
     path: string;
     value?: any;
 }

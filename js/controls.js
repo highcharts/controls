@@ -335,7 +335,8 @@ class Controls {
         }
         if (!('value' in params)) {
             // Set default value from chart options
-            params.value = getNestedValue(Product.defaultOptions, params.path);
+            const targetOptions = this.target.getOptions?.();
+            params.value = (targetOptions && getNestedValue(targetOptions, params.path)) ?? getNestedValue(Product?.defaultOptions, params.path);
         }
         const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-control' }));
         const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-key' }));
@@ -404,12 +405,17 @@ window.HighchartsControls = Controls;
 // </highcharts-controls>
 class HighchartsControlElement extends HTMLElement {
     getConfig() {
-        return {
+        const config = {
             type: this.getAttribute('type'),
-            path: this.getAttribute('path'),
-            value: parseValue(this.getAttribute('value')),
-            options: parseOptions(this.getAttribute('options'))
+            path: this.getAttribute('path') || ''
         };
+        if (this.hasAttribute('value')) {
+            config.value = parseValue(this.getAttribute('value'));
+        }
+        if (this.hasAttribute('options')) {
+            config.options = parseOptions(this.getAttribute('options'));
+        }
+        return config;
     }
 }
 class HighchartsControlsElement extends HTMLElement {
@@ -458,7 +464,7 @@ function parseOptions(options) {
     if (options) {
         return options.split(',').map((s) => s.trim());
     }
-    return void 0;
+    return [];
 }
 export default Controls;
 //# sourceMappingURL=controls.js.map

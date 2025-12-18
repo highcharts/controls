@@ -24,8 +24,10 @@ interface ControlTarget {
     ): void;
 }
 
+type ControlTypes = 'boolean'|'color'|'number'|'array-of-strings';
+
 interface ControlParams {
-    type: 'boolean'|'color'|'number'|'array-of-strings';
+    type: ControlTypes;
     path: string;
     value?: any;
 }
@@ -635,10 +637,13 @@ class Controls {
 
         if (!('value' in params)) {
             // Set default value from chart options
-            params.value = getNestedValue(
-                Product.defaultOptions,
-                params.path
-            );
+            const targetOptions = this.target.getOptions?.();
+            params.value = (
+                targetOptions && getNestedValue(
+                    targetOptions,
+                    params.path
+                )
+            ) ?? getNestedValue(Product?.defaultOptions, params.path)
         }
 
         const div = this.container.appendChild(
@@ -722,12 +727,22 @@ class Controls {
 // </highcharts-controls>
 class HighchartsControlElement extends HTMLElement {
   getConfig() {
-    return {
-      type: this.getAttribute('type'),
-      path: this.getAttribute('path'),
-      value: parseValue(this.getAttribute('value')),
-      options: parseOptions(this.getAttribute('options'))
+    const config: ControlParams = {
+      type: this.getAttribute('type') as ControlTypes,
+      path: this.getAttribute('path') || ''
     };
+
+    if (this.hasAttribute('value')) {
+        config.value = parseValue(this.getAttribute('value'));
+    }
+
+    if (this.hasAttribute('options')) {
+        (config as ArrayControlParams).options = parseOptions(
+            this.getAttribute('options')
+        );
+    }
+
+    return config;
   }
 }
 class HighchartsControlsElement extends HTMLElement {
@@ -782,11 +797,11 @@ function parseValue(value: string | null): any {
     return value;
 }
 
-function parseOptions(options: string | null): string[] | undefined {
+function parseOptions(options: string | null): string[] {
     if (options) {
         return options.split(',').map((s): string => s.trim());
     }
-    return void 0;
+    return [];
 }
 
 export default Controls;
