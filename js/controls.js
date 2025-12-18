@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Highcharts Controls
  *
@@ -337,4 +336,81 @@ Controls.controls = function (container, options) {
     return new Controls(container, options);
 };
 window.HighchartsControls = Controls;
+// Create a web component around the Controls class
+// @example
+// <highcharts-controls target="#container">
+//     <highcharts-control
+//         type="color"
+//         path="chart.backgroundColor"
+//         value="#ff0000"
+//     ></highcharts-control>
+//     <highcharts-control
+//         type="boolean"
+//         path="legend.enabled"
+//         value="true"
+//     ></highcharts-control>
+//     <highcharts-control
+//         type="array-of-strings"
+//         path="legend.align"
+//         options="left,center,right"
+//         value="right"
+//     ></highcharts-control>
+// </highcharts-controls>
+class HighchartsControlElement extends HTMLElement {
+    getConfig() {
+        return {
+            type: this.getAttribute('type'),
+            path: this.getAttribute('path'),
+            value: parseValue(this.getAttribute('value')),
+            options: parseOptions(this.getAttribute('options'))
+        };
+    }
+}
+class HighchartsControlsElement extends HTMLElement {
+    connectedCallback() {
+        const controls = [];
+        this.querySelectorAll('highcharts-control').forEach((controlEl) => {
+            const control = controlEl.getConfig();
+            if (control.type && control.path) {
+                controls.push(control);
+            }
+        });
+        Controls.controls(this, {
+            target: this.getTarget(),
+            controls: controls
+        });
+    }
+    getTarget() {
+        const targetAttr = this.getAttribute('target');
+        if (targetAttr) {
+            const el = document.querySelector(targetAttr);
+            const target = el?.chart || el?.grid;
+            if (target) {
+                return target;
+            }
+        }
+        return Product?.charts?.[0] || Product?.grids?.[0];
+    }
+}
+customElements.define('highcharts-control', HighchartsControlElement);
+customElements.define('highcharts-controls', HighchartsControlsElement);
+function parseValue(value) {
+    if (value === 'true') {
+        return true;
+    }
+    if (value === 'false') {
+        return false;
+    }
+    if (!isNaN(Number(value))) {
+        return Number(value);
+    }
+    return value;
+}
+function parseOptions(options) {
+    if (options) {
+        return options.split(',').map((s) => s.trim());
+    }
+    return void 0;
+}
+export default Controls;
 //# sourceMappingURL=controls.js.map

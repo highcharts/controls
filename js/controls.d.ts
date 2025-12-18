@@ -6,7 +6,6 @@
  * Used by the sample generator to create interactive samples:
  * - node tools/sample-generator/index.ts
  */
-declare const Product: any;
 interface GenericOptionsObject {
     [key: string]: any;
 }
@@ -43,30 +42,6 @@ interface ControlsOptionsObject {
     target?: ControlTarget;
     controls: Array<ArrayControlParams | BooleanControlParams | ColorControlParams | NumberControlParams>;
 }
-/**
- * Type guard for ArrayControlParams
- */
-declare function isArrayControlParams(params: ControlParams): params is ArrayControlParams;
-/**
- * Type guard for BooleanControlParams
- */
-declare function isBooleanControlParams(params: ControlParams): params is BooleanControlParams;
-/**
- * Type guard for ColorControlParams
- */
-declare function isColorControlParams(params: ControlParams): params is ColorControlParams;
-/**
- * Type guard for NumberControlParams
- */
-declare function isNumberControlParams(params: ControlParams): params is NumberControlParams;
-/**
- * Get a nested value from an object given a dot-separated path.
- */
-declare function getNestedValue(obj: any, path: string): any;
-/**
- * Set a nested value on the chart given a dot-separated path.
- */
-declare function setNestedValue(chart: ControlTarget, path: string, value: any, animation?: boolean): void;
 declare class Controls {
     /**
      * Construct Highcharts Controls
@@ -104,4 +79,5 @@ declare class Controls {
      */
     private updateOptionsPreview;
 }
+export default Controls;
 //# sourceMappingURL=controls.d.ts.map
