@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Highcharts Controls - Web Components Test</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script type="module" src="/js/controls.js"></script>
+</head>
+<body>
+    <div id="container" style="height: 400px; margin: 20px;"></div>
+
+    <script>
+        // Create a chart
+        Highcharts.chart('container', {
+            title: { text: 'Test Chart' },
+            legend: {
+                enabled: true,
+                align: 'center',
+                x: 0,
+                backgroundColor: '#FFEEAA'
+            },
+            series: [{
+                name: 'Series 1',
+                data: [1, 2, 3, 4, 5]
+            }]
+        });
+    </script>
+
+    <highcharts-controls target="#container">
+        <highcharts-control
+            type="boolean"
+            path="legend.enabled"
+            value="true">
+        </highcharts-control>
+
+        <highcharts-control
+            type="array-of-strings"
+            path="legend.align"
+            options="left,center,right"
+            value="center">
+        </highcharts-control>
+
+        <highcharts-control
+            type="number"
+            path="legend.x">
+        </highcharts-control>
+
+        <highcharts-control
+            type="color"
+            path="legend.backgroundColor"
+            value="#FFEEAA">
+        </highcharts-control>
+    </highcharts-controls>
+</body>
+</html>

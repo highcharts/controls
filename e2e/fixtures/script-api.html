@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Highcharts Controls - Script API Test</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script type="module" src="/js/controls.js"></script>
+</head>
+<body>
+    <div id="container" style="height: 400px; margin: 20px;"></div>
+    <div id="controls-container"></div>
+
+    <script type="module">
+        import HighchartsControls from '/js/controls.js';
+
+        // Create a chart
+        const chart = Highcharts.chart('container', {
+            title: { text: 'Test Chart' },
+            legend: {
+                enabled: true,
+                align: 'center',
+                x: 0,
+                backgroundColor: '#FFEEAA'
+            },
+            series: [{
+                name: 'Series 1',
+                data: [1, 2, 3, 4, 5]
+            }]
+        });
+
+        // Add controls using script API
+        HighchartsControls.controls('controls-container', {
+            controls: [
+                {
+                    type: 'boolean',
+                    path: 'legend.enabled',
+                    value: true
+                },
+                {
+                    type: 'array-of-strings',
+                    path: 'legend.align',
+                    options: ['left', 'center', 'right'],
+                    value: 'center'
+                },
+                {
+                    type: 'number',
+                    path: 'legend.x',
+                    range: [-100, 100],
+                    step: 10
+                },
+                {
+                    type: 'color',
+                    path: 'legend.backgroundColor',
+                    value: '#FFEEAA'
+                }
+            ]
+        });
+    </script>
+</body>
+</html>
