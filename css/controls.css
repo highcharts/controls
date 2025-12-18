@@ -239,6 +239,16 @@
         margin-top: 1.5em;
     }
 
+    .show-preview-button .toggle-icon {
+        display: inline-block;
+        transform: rotate(90deg);
+        transition: transform 250ms;
+    }
+
+    .show-preview-button .toggle-icon-expanded {
+        transform: rotate(270deg);
+    }
+
     /* Color input styles */
     .hc-row label.opacity-label {
         display: inline;

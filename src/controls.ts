@@ -234,7 +234,7 @@ class Controls {
                 document.createElement('button'),
                 {
                     className: 'highcharts-controls-button show-preview-button',
-                    innerText: 'Preview Options'
+                    innerHTML: '<span>Preview Options</span> <span class="toggle-icon">❯</span>'
                 }
             )
         );
@@ -243,12 +243,10 @@ class Controls {
             const previewSection = this.container.querySelector(
                 '.preview-section'
             ) as HTMLElement;
+            const toggleIcon = button.querySelector('.toggle-icon') as HTMLElement;
             if (previewSection) {
-                const isHidden = previewSection.classList.contains('hidden');
                 previewSection.classList.toggle('hidden');
-                button.innerText = isHidden ?
-                    'Hide Options Preview' :
-                    'Show Options Preview';
+                toggleIcon.classList.toggle('toggle-icon-expanded');
             }
         });
 

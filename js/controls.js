@@ -90,16 +90,14 @@ class Controls {
         // Add the button
         const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
             className: 'highcharts-controls-button show-preview-button',
-            innerText: 'Preview Options'
+            innerHTML: '<span>Preview Options</span> <span class="toggle-icon">❯</span>'
         }));
         button.addEventListener('click', () => {
             const previewSection = this.container.querySelector('.preview-section');
+            const toggleIcon = button.querySelector('.toggle-icon');
             if (previewSection) {
-                const isHidden = previewSection.classList.contains('hidden');
                 previewSection.classList.toggle('hidden');
-                button.innerText = isHidden ?
-                    'Hide Options Preview' :
-                    'Show Options Preview';
+                toggleIcon.classList.toggle('toggle-icon-expanded');
             }
         });
         // Add the preview element
