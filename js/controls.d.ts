@@ -40,6 +40,7 @@ interface NumberControlParams extends ControlParams {
 }
 interface ControlsOptionsObject {
     target?: ControlTarget;
+    injectCSS?: boolean;
     controls: Array<ArrayControlParams | BooleanControlParams | ColorControlParams | NumberControlParams>;
 }
 declare class Controls {
@@ -53,6 +54,7 @@ declare class Controls {
     container: HTMLElement;
     target: ControlTarget;
     constructor(renderTo: string | HTMLElement, options: ControlsOptionsObject);
+    private injectCSS;
     private addPreview;
     /**
      * Add an array of strings control

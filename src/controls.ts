@@ -55,6 +55,7 @@ interface NumberControlParams extends ControlParams {
 
 interface ControlsOptionsObject {
     target?: ControlTarget;
+    injectCSS?: boolean;
     controls: Array<
         ArrayControlParams|
         BooleanControlParams|
@@ -183,6 +184,11 @@ class Controls {
             throw new Error('No target chart found for Highcharts Controls');
         }
 
+        // Inject CSS if requested
+        if (options.injectCSS !== false) {
+            this.injectCSS();
+        }
+
         // Add the controls
         options.controls?.forEach((control): void => {
             this.addControl(control);
@@ -197,6 +203,25 @@ class Controls {
             'render',
             this.updateOptionsPreview.bind(this)
         );
+    }
+
+    private injectCSS(): void {
+        // Check if CSS is already injected
+        if (document.getElementById('highcharts-controls-css')) {
+            return;
+        }
+
+        // Get the CSS URL from the module URL
+        const cssUrl = import.meta.url.replace(
+            /\/js\/[^/]+$/,
+            '/css/controls.css'
+        );
+
+        const link = document.createElement('link');
+        link.id = 'highcharts-controls-css';
+        link.rel = 'stylesheet';
+        link.href = cssUrl;
+        document.head.appendChild(link);
     }
 
     private addPreview(): void {
@@ -680,8 +705,10 @@ class HighchartsControlsElement extends HTMLElement {
                 }
             }
         );
+        const injectCSS = this.getAttribute('inject-css');
         Controls.controls(this, {
             target: this.getTarget(),
+            injectCSS: injectCSS !== 'false',
             controls: controls as unknown as Array<
                 ArrayControlParams|
                 BooleanControlParams|

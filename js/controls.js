@@ -71,6 +71,10 @@ class Controls {
         if (!this.target) {
             throw new Error('No target chart found for Highcharts Controls');
         }
+        // Inject CSS if requested
+        if (options.injectCSS !== false) {
+            this.injectCSS();
+        }
         // Add the controls
         options.controls?.forEach((control) => {
             this.addControl(control);
@@ -79,6 +83,19 @@ class Controls {
         // Keep the options preview updated
         this.updateOptionsPreview();
         Product.addEvent?.(this.target, 'render', this.updateOptionsPreview.bind(this));
+    }
+    injectCSS() {
+        // Check if CSS is already injected
+        if (document.getElementById('highcharts-controls-css')) {
+            return;
+        }
+        // Get the CSS URL from the module URL
+        const cssUrl = import.meta.url.replace(/\/js\/[^/]+$/, '/css/controls.css');
+        const link = document.createElement('link');
+        link.id = 'highcharts-controls-css';
+        link.rel = 'stylesheet';
+        link.href = cssUrl;
+        document.head.appendChild(link);
     }
     addPreview() {
         const div = this.container.appendChild(Object.assign(document.createElement('div'), {
@@ -373,8 +390,10 @@ class HighchartsControlsElement extends HTMLElement {
                 controls.push(control);
             }
         });
+        const injectCSS = this.getAttribute('inject-css');
         Controls.controls(this, {
             target: this.getTarget(),
+            injectCSS: injectCSS !== 'false',
             controls: controls
         });
     }
