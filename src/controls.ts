@@ -536,12 +536,23 @@ class Controls {
         // chart
         const currentValue = params.value !== void 0 ?
             params.value :
-            (getNestedValue(this.target.options, params.path) || '#000000');
-        const hcColor = Product.color(currentValue);
-        const opacity = (hcColor.rgba[3] || 1) * 100;
-        colorInput.value = currentValue;
+            (getNestedValue(this.target.options, params.path)
+        );
+
+        let hcColor = Product.color(currentValue);
+
+        if (hcColor.rgba.toString().indexOf('NaN') !== -1) {
+            hcColor = Product.color('rgba(128, 128, 128, 0.5)'); // Fallback to gray
+            console.warn(
+                `Highcharts Controls: Invalid color value for path "${params.path}": ${currentValue}`
+            );
+        }
+
+        const hex = getHex(hcColor),
+            opacity = (hcColor.rgba[3] || 1) * 100;
+        colorInput.value = hex;
+        valueEl.textContent = hex;
         opacityInput.value = String(opacity);
-        valueEl.textContent = getHex(hcColor);
 
         const update = (): void => {
             const rgba = colorInput.value; // E.g. #RRGGBB
