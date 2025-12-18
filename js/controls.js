@@ -144,20 +144,20 @@ class Controls {
         // Add the button
         const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
             className: 'highcharts-controls-button show-preview-button',
-            innerHTML: '<span>Preview Options</span> <span class="toggle-icon">❯</span>'
+            innerText: '{…}',
+            title: 'Show / hide options preview'
         }));
         button.addEventListener('click', () => {
             const previewSection = this.container.querySelector('.preview-section');
-            const toggleIcon = button.querySelector('.toggle-icon');
             if (previewSection) {
                 previewSection.classList.toggle('hidden');
-                toggleIcon.classList.toggle('toggle-icon-expanded');
+                button.classList.toggle('active');
             }
         });
         // Add the preview element
         this.container.appendChild(Object.assign(document.createElement('div'), {
             className: 'preview-section hidden',
-            innerHTML: '<h3>Chart Options Preview</h3>' +
+            innerHTML: '<h3>Current Options</h3>' +
                 '<pre class="options-preview"></pre>'
         }));
     }

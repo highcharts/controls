@@ -237,6 +237,8 @@
 
     .show-preview-button {
         margin-top: 1.5em;
+        padding: 0.3rem 0.5rem;
+        font-weight: 600;
     }
 
     .show-preview-button .toggle-icon {
