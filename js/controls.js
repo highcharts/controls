@@ -89,12 +89,32 @@ class Controls {
         if (document.getElementById('highcharts-controls-css')) {
             return;
         }
+        // Add minimal inline styles to prevent FOUC
+        const inlineStyle = document.createElement('style');
+        inlineStyle.id = 'highcharts-controls-inline';
+        inlineStyle.nonce = 'highcharts';
+        inlineStyle.textContent = `
+            .highcharts-controls { opacity: 0.5; transition: opacity 0.1s; }
+            .highcharts-controls.loaded { opacity: 1; none; }
+            .highcharts-controls .highcharts-controls-control {
+                max-height: 2.6em;
+            }
+            .highcharts-controls .hidden {
+                display: none;
+            }
+
+        `;
+        document.head.appendChild(inlineStyle);
         // Get the CSS URL from the module URL
         const cssUrl = import.meta.url.replace(/\/js\/[^/]+$/, '/css/controls.css');
         const link = document.createElement('link');
         link.id = 'highcharts-controls-css';
         link.rel = 'stylesheet';
         link.href = cssUrl;
+        // Show controls when CSS is loaded
+        link.onload = () => {
+            document.querySelectorAll('.highcharts-controls').forEach((el) => el.classList.add('loaded'));
+        };
         document.head.appendChild(link);
     }
     addPreview() {
