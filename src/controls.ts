@@ -241,7 +241,7 @@ class Controls {
                     max-height: 3em;
                 }
                 .hidden {
-                    display: none;
+                    max-height: 0;
                 }
             }
 
