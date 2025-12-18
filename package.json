@@ -12,11 +12,13 @@
     "dev": "tsc --watch",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "http-server": "^14.1.1",
+    "husky": "^9.1.7",
     "typescript": "^5.3.0"
   }
 }
