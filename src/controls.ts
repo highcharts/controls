@@ -216,13 +216,24 @@ class Controls {
         inlineStyle.id = 'highcharts-controls-inline';
         inlineStyle.nonce = 'highcharts';
         inlineStyle.textContent = `
-            .highcharts-controls { opacity: 0.5; transition: opacity 0.1s; }
-            .highcharts-controls.loaded { opacity: 1; none; }
-            .highcharts-controls .highcharts-controls-control {
-                max-height: 2.6em;
+            .highcharts-controls {
+                opacity: 0;
+                transition: opacity 0.1s;
+
+                .highcharts-controls-control {
+                    max-height: 3em;
+                }
+                .hidden {
+                    display: none;
+                }
             }
-            .highcharts-controls .hidden {
-                display: none;
+
+            .highcharts-controls.loaded {
+                opacity: 1;
+
+                .highcharts-controls-control {
+                    max-height: none;
+                }
             }
 
         `;
