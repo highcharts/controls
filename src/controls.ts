@@ -24,7 +24,7 @@ interface ControlTarget {
     ): void;
 }
 
-type ControlTypes = 'boolean'|'color'|'number'|'array-of-strings';
+type ControlTypes = 'boolean'|'color'|'number'|'array-of-strings'|'text';
 
 interface ControlParams {
     type: ControlTypes;
@@ -55,6 +55,11 @@ interface NumberControlParams extends ControlParams {
     value?: number;
 }
 
+interface TextControlParams extends ControlParams {
+    type: 'text';
+    value?: string;
+}
+
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
@@ -62,7 +67,8 @@ interface ControlsOptionsObject {
         ArrayControlParams|
         BooleanControlParams|
         ColorControlParams|
-        NumberControlParams
+        NumberControlParams|
+        TextControlParams
     >;
 }
 
@@ -100,6 +106,15 @@ function isNumberControlParams(
     params: ControlParams
 ): params is NumberControlParams {
     return params.type === 'number';
+}
+
+/**
+ * Type guard for TextControlParams
+ */
+function isTextControlParams(
+    params: ControlParams
+): params is TextControlParams {
+    return params.type === 'text';
 }
 
 /**
@@ -638,6 +653,51 @@ class Controls {
     }
 
     /**
+     * Add a text control
+     */
+    private addTextControl(
+        params: TextControlParams,
+        keyDiv: HTMLElement,
+        valueDiv: HTMLElement
+    ): void {
+
+        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+
+        keyDiv.appendChild(
+            Object.assign(
+                document.createElement('label'),
+                {
+                    htmlFor: `text-input-${rid}`,
+                    innerText: params.path
+                }
+            )
+        );
+
+        const input = valueDiv.appendChild(
+            Object.assign(
+                document.createElement('input'),
+                {
+                    type: 'text',
+                    id: `text-input-${rid}`,
+                    className: 'hc-text-input'
+                }
+            )
+        );
+
+        // Use override value if provided, otherwise get current value from
+        // chart
+        const currentValue = params.value !== void 0 ?
+            params.value :
+            (getNestedValue(this.target.options, params.path) || '');
+        input.value = String(currentValue);
+
+        input.addEventListener('input', (): void => {
+            const value = input.value;
+            setNestedValue(this.target, params.path, value, false);
+        });
+    }
+
+    /**
      * Add a control
      */
     public addControl(params: ControlParams): void {
@@ -691,6 +751,8 @@ class Controls {
             this.addColorControl(params, keyDiv, valueDivInner);
         } else if (isNumberControlParams(params)) {
             this.addNumberControl(params, keyDiv, valueDivInner);
+        } else if (isTextControlParams(params)) {
+            this.addTextControl(params, keyDiv, valueDivInner);
         }
     }
 
@@ -775,7 +837,8 @@ class HighchartsControlsElement extends HTMLElement {
                 ArrayControlParams|
                 BooleanControlParams|
                 ColorControlParams|
-                NumberControlParams
+                NumberControlParams|
+                TextControlParams
             >
         });
     }

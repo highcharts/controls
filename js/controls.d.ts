@@ -14,7 +14,7 @@ interface ControlTarget {
     getOptions(): GenericOptionsObject | void;
     update(options: GenericOptionsObject, redraw?: boolean, oneToOne?: boolean, animation?: boolean): void;
 }
-type ControlTypes = 'boolean' | 'color' | 'number' | 'array-of-strings';
+type ControlTypes = 'boolean' | 'color' | 'number' | 'array-of-strings' | 'text';
 interface ControlParams {
     type: ControlTypes;
     path: string;
@@ -39,10 +39,14 @@ interface NumberControlParams extends ControlParams {
     step?: number;
     value?: number;
 }
+interface TextControlParams extends ControlParams {
+    type: 'text';
+    value?: string;
+}
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
-    controls: Array<ArrayControlParams | BooleanControlParams | ColorControlParams | NumberControlParams>;
+    controls: Array<ArrayControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
 }
 declare class Controls {
     /**
@@ -73,6 +77,10 @@ declare class Controls {
      * Add a number control
      */
     private addNumberControl;
+    /**
+     * Add a text control
+     */
+    private addTextControl;
     /**
      * Add a control
      */

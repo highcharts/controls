@@ -33,6 +33,12 @@ function isNumberControlParams(params) {
     return params.type === 'number';
 }
 /**
+ * Type guard for TextControlParams
+ */
+function isTextControlParams(params) {
+    return params.type === 'text';
+}
+/**
  * Get a nested value from an object given a dot-separated path.
  */
 function getNestedValue(obj, path) {
@@ -331,6 +337,31 @@ class Controls {
         });
     }
     /**
+     * Add a text control
+     */
+    addTextControl(params, keyDiv, valueDiv) {
+        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            htmlFor: `text-input-${rid}`,
+            innerText: params.path
+        }));
+        const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+            type: 'text',
+            id: `text-input-${rid}`,
+            className: 'hc-text-input'
+        }));
+        // Use override value if provided, otherwise get current value from
+        // chart
+        const currentValue = params.value !== void 0 ?
+            params.value :
+            (getNestedValue(this.target.options, params.path) || '');
+        input.value = String(currentValue);
+        input.addEventListener('input', () => {
+            const value = input.value;
+            setNestedValue(this.target, params.path, value, false);
+        });
+    }
+    /**
      * Add a control
      */
     addControl(params) {
@@ -357,6 +388,9 @@ class Controls {
         }
         else if (isNumberControlParams(params)) {
             this.addNumberControl(params, keyDiv, valueDivInner);
+        }
+        else if (isTextControlParams(params)) {
+            this.addTextControl(params, keyDiv, valueDivInner);
         }
     }
     /**

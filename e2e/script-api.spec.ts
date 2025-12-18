@@ -28,6 +28,10 @@ test.describe('Highcharts Controls - Script API', () => {
     // Check for color control
     const colorInput = page.locator('input[type="color"]');
     await expect(colorInput).toBeVisible();
+
+    // Check for text control
+    const textInput = page.locator('input.hc-text-input');
+    await expect(textInput).toBeVisible();
   });
 
   test('boolean control toggles legend', async ({ page }) => {
@@ -136,5 +140,22 @@ test.describe('Highcharts Controls - Script API', () => {
     // Should contain JSON representation of options
     expect(content).toContain('legend');
     expect(content).toContain('title');
+  });
+
+  test('text control changes chart title', async ({ page }) => {
+    const textInput = page.locator('input.hc-text-input');
+
+    // Verify initial value
+    await expect(textInput).toHaveValue('Test Chart');
+
+    // Change the text
+    await textInput.fill('New Title');
+
+    // Verify chart option changed
+    const titleText = await page.evaluate(() => {
+      const chart = (window as any).Highcharts.charts[0];
+      return chart.options.title.text;
+    });
+    expect(titleText).toBe('New Title');
   });
 });

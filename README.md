@@ -201,6 +201,18 @@ Choose colors with a color picker and opacity control.
 }
 ```
 
+#### Text Control
+
+Edit text values with a text input field.
+
+```typescript
+{
+    type: 'text',
+    path: 'title.text',
+    value: 'My Chart Title'  // Initial text (optional)
+}
+```
+
 ### Web Component API
 
 #### `<highcharts-controls>`
@@ -223,7 +235,7 @@ Container element for controls.
 Individual control element. Must be a child of `<highcharts-controls>`.
 
 **Attributes:**
-- `type` (required) - Control type: `"boolean"`, `"array-of-strings"`, `"number"`, or `"color"`
+- `type` (required) - Control type: `"boolean"`, `"array-of-strings"`, `"number"`, `"color"`, or `"text"`
 - `path` (required) - Dot-separated path to chart option (e.g., `"legend.enabled"`)
 - `value` (optional) - Initial value
 - `options` (required for array-of-strings) - Comma-separated list of options
@@ -259,6 +271,13 @@ Individual control element. Must be a child of `<highcharts-controls>`.
     type="color"
     path="chart.backgroundColor"
     value="#FFFFFF">
+</highcharts-control>
+
+<!-- Text -->
+<highcharts-control
+    type="text"
+    path="title.text"
+    value="My Chart Title">
 </highcharts-control>
 ```
 

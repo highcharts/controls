@@ -316,4 +316,21 @@
         width: calc(100% - 60px);
         accent-color: light-dark(#141414, #ffffff);
     }
+
+    /* Text input styles */
+    .hc-text-input {
+        width: 100%;
+        padding: 0.5em 0.8em;
+        border-radius: 7px;
+        border: 1px solid light-dark(#dddddd, #555555);
+        background: light-dark(#ffffff, #2d2d2d);
+        color: light-dark(#141414, #ffffff);
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .hc-text-input:focus {
+        outline: 2px solid light-dark(#6366f1, #818cf8);
+        outline-offset: 1px;
+    }
 }

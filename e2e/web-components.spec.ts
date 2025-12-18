@@ -20,7 +20,7 @@ test.describe('Highcharts Controls - Web Components', () => {
   test('parses and renders all control elements', async ({ page }) => {
     // Count highcharts-control elements
     const controls = page.locator('highcharts-control');
-    await expect(controls).toHaveCount(4);
+    await expect(controls).toHaveCount(5);
 
     // Verify they are rendered as actual controls
     const checkbox = page.locator('input[type="checkbox"]');
@@ -34,6 +34,9 @@ test.describe('Highcharts Controls - Web Components', () => {
 
     const colorInput = page.locator('input[type="color"]');
     await expect(colorInput).toBeVisible();
+
+    const textInput = page.locator('input.hc-text-input');
+    await expect(textInput).toBeVisible();
   });
 
   test('boolean web component control works', async ({ page }) => {
@@ -133,5 +136,22 @@ test.describe('Highcharts Controls - Web Components', () => {
       return typeof chart.options.legend.enabled === 'boolean';
     });
     expect(isBoolean).toBe(true);
+  });
+
+  test('text web component control works', async ({ page }) => {
+    const textInput = page.locator('input.hc-text-input');
+
+    // Verify initial value
+    await expect(textInput).toHaveValue('Test Chart');
+
+    // Change the text
+    await textInput.fill('Updated Chart Title');
+
+    // Verify chart option changed
+    const titleText = await page.evaluate(() => {
+      const chart = (window as any).Highcharts.charts[0];
+      return chart.options.title.text;
+    });
+    expect(titleText).toBe('Updated Chart Title');
   });
 });
