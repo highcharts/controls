@@ -300,6 +300,23 @@ class Controls {
      */
     addNumberControl(params, keyDiv, valueDiv) {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+        // Extract unit from current value if it's a string
+        let unit = '';
+        let numericValue = 0;
+        // Use override value if provided, otherwise get current value from chart
+        const currentValue = params.value !== void 0 ?
+            params.value :
+            (getNestedValue(this.target.options, params.path) ?? 0);
+        if (typeof currentValue === 'string') {
+            const match = currentValue.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
+            if (match) {
+                numericValue = parseFloat(match[1]);
+                unit = match[2] || unit;
+            }
+        }
+        else {
+            numericValue = currentValue;
+        }
         // Set default min/max if not provided
         if (params.min === void 0 || params.max === void 0) {
             if (/(lineWidth|borderWidth)$/i.test(params.path)) {
@@ -314,6 +331,10 @@ class Controls {
                 params.min = params.min ?? 0;
                 params.max = params.max ?? 100;
             }
+        }
+        // Set default step for em/rem units
+        if (!params.step && (unit === 'em' || unit === 'rem')) {
+            params.step = 0.1;
         }
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `range-input-${rid}`,
@@ -330,17 +351,14 @@ class Controls {
             max: String(params.max),
             step: String(params.step || 1)
         }));
-        // Use override value if provided, otherwise get current value from
-        // chart
-        const currentValue = params.value !== void 0 ?
-            params.value :
-            (getNestedValue(this.target.options, params.path) ?? 0);
-        input.value = String(currentValue);
-        valueEl.textContent = String(currentValue);
+        input.value = String(numericValue);
+        valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
         input.addEventListener('input', () => {
-            const value = parseFloat(input.value);
-            valueEl.textContent = String(value);
-            setNestedValue(this.target, params.path, value, false);
+            const numValue = parseFloat(input.value);
+            const displayValue = unit ? `${numValue}${unit}` : String(numValue);
+            const chartValue = unit ? `${numValue}${unit}` : numValue;
+            valueEl.textContent = displayValue;
+            setNestedValue(this.target, params.path, chartValue, false);
         });
     }
     /**

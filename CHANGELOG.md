@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Number control now supports length units (`px`, `em`, `rem`, `%`, etc.)
+  - Units are automatically extracted from string values (e.g., `'1.5em'`, `'60px'`, `'80%'`)
+  - Display shows numeric value with unit
+  - Chart options receive the value with unit as a string
+  - For `em` and `rem` units, `step` defaults to `0.1` for finer control
+
 ### Changed
 - **BREAKING**: Renamed control type from `array-of-strings` to `select`
   - Update `type: 'array-of-strings'` to `type: 'select'` in JavaScript API

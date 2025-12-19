@@ -171,7 +171,7 @@ Select from predefined options with button group.
 
 #### Number Control
 
-Adjust numeric values with a range slider.
+Adjust numeric values with a range slider. Supports length units like `px`, `em`, `rem`, and `%`.
 
 ```typescript
 {
@@ -180,7 +180,31 @@ Adjust numeric values with a range slider.
     min: -100,   // Minimum value (optional)
     max: 100,    // Maximum value (optional)
     step: 10,    // Step increment (optional, defaults to 1)
-    value: 0     // Initial value (optional)
+    value: 0     // Initial value (optional, can be number or string with unit)
+}
+```
+
+**Unit Support:**
+
+The number control seamlessly handles length units commonly used in Highcharts:
+
+```typescript
+// With em units (step defaults to 0.1 for em/rem)
+{
+    type: 'number',
+    path: 'title.style.fontSize',
+    min: 0.5,
+    max: 3,
+    value: '1.5em'  // Unit extracted from string value
+}
+
+// With percentage units
+{
+    type: 'number',
+    path: 'chart.height',
+    min: 50,
+    max: 100,
+    value: '80%'
 }
 ```
 
@@ -188,6 +212,12 @@ Adjust numeric values with a range slider.
 - Properties ending in `lineWidth` or `borderWidth`: min: 0, max: 5
 - Properties ending in `x`, `y`, `offsetX`, `offsetY`, or `offset`: min: -100, max: 100
 - Other properties: min: 0, max: 100
+
+**Unit behavior:**
+- Units are extracted from the `value` string (e.g., `'1.5em'`, `'60px'`, `'80%'`)
+- The control displays the numeric value with the unit (e.g., "1.5em")
+- Chart options receive the value with the unit as a string
+- For `em` and `rem` units, `step` defaults to `0.1` if not specified
 
 #### Color Control
 
@@ -268,6 +298,23 @@ Individual control element. Must be a child of `<highcharts-controls>`.
     min="-100"
     max="100"
     step="10">
+</highcharts-control>
+
+<!-- Number with units -->
+<highcharts-control
+    type="number"
+    path="title.style.fontSize"
+    min="0.5"
+    max="3"
+    value="1.5em">
+</highcharts-control>
+
+<highcharts-control
+    type="number"
+    path="chart.marginTop"
+    min="0"
+    max="200"
+    value="60px">
 </highcharts-control>
 
 <!-- Color -->

@@ -38,7 +38,7 @@ interface NumberControlParams extends ControlParams {
     min?: number;
     max?: number;
     step?: number;
-    value?: number;
+    value?: number | string;
 }
 interface TextControlParams extends ControlParams {
     type: 'text';
