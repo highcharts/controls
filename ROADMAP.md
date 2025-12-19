@@ -8,6 +8,7 @@ This document outlines planned features and improvements for Highcharts Controls
 - [ ] Numbers with units. When for example `16px` or `50%` is given as value for
   a number control, it should be handled under the hood.
 - [ ] Support for Dashboards
+- [ ] Wider Current Options view, don't limit to the width of the controls.
 - [ ] Smart rendering of `select` control: buttons for 2-3 options, dropdown for 4+ options
 
 ---
