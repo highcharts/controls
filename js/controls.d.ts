@@ -35,7 +35,8 @@ interface ColorControlParams extends ControlParams {
 }
 interface NumberControlParams extends ControlParams {
     type: 'number';
-    range?: [number, number];
+    min?: number;
+    max?: number;
     step?: number;
     value?: number;
 }

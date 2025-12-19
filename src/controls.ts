@@ -50,7 +50,8 @@ interface ColorControlParams extends ControlParams {
 
 interface NumberControlParams extends ControlParams {
     type: 'number';
-    range?: [number, number];
+    min?: number;
+    max?: number;
     step?: number;
     value?: number;
 }
@@ -594,12 +595,18 @@ class Controls {
 
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
 
-        if (!params.range) {
+        // Set default min/max if not provided
+        if (params.min === void 0 || params.max === void 0) {
             if (/(lineWidth|borderWidth)$/i.test(params.path)) {
-                params.range = [0, 5];
+                params.min = params.min ?? 0;
+                params.max = params.max ?? 5;
 
             } else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(params.path)) {
-                params.range = [-100, 100];
+                params.min = params.min ?? -100;
+                params.max = params.max ?? 100;
+            } else {
+                params.min = params.min ?? 0;
+                params.max = params.max ?? 100;
             }
         }
 
@@ -630,8 +637,8 @@ class Controls {
                 {
                     type: 'range',
                     id: `range-input-${rid}`,
-                    min: String(params.range ? params.range[0] : 0),
-                    max: String(params.range ? params.range[1] : 100),
+                    min: String(params.min),
+                    max: String(params.max),
                     step: String(params.step || 1)
                 }
             )
@@ -812,6 +819,24 @@ class HighchartsControlElement extends HTMLElement {
     if (this.hasAttribute('options')) {
         (config as ArrayControlParams).options = parseOptions(
             this.getAttribute('options')
+        );
+    }
+
+    if (this.hasAttribute('min')) {
+        (config as NumberControlParams).min = parseFloat(
+            this.getAttribute('min') || '0'
+        );
+    }
+
+    if (this.hasAttribute('max')) {
+        (config as NumberControlParams).max = parseFloat(
+            this.getAttribute('max') || '100'
+        );
+    }
+
+    if (this.hasAttribute('step')) {
+        (config as NumberControlParams).step = parseFloat(
+            this.getAttribute('step') || '1'
         );
     }
 

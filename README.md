@@ -52,7 +52,8 @@ npm install @highcharts/controls
                 {
                     type: 'number',
                     path: 'legend.x',
-                    range: [-100, 100],
+                    min: -100,
+                    max: 100,
                     step: 10
                 },
                 {
@@ -178,16 +179,17 @@ Adjust numeric values with a range slider.
 {
     type: 'number',
     path: 'legend.x',
-    range: [-100, 100],  // Min and max values (optional)
-    step: 10,            // Step increment (optional, defaults to 1)
-    value: 0             // Initial value (optional)
+    min: -100,   // Minimum value (optional)
+    max: 100,    // Maximum value (optional)
+    step: 10,    // Step increment (optional, defaults to 1)
+    value: 0     // Initial value (optional)
 }
 ```
 
-**Default ranges (when not specified):**
-- Properties ending in `lineWidth` or `borderWidth`: [0, 5]
-- Properties ending in `x`, `y`, `offsetX`, `offsetY`, or `offset`: [-100, 100]
-- Other properties: [0, 100]
+**Default min/max (when not specified):**
+- Properties ending in `lineWidth` or `borderWidth`: min: 0, max: 5
+- Properties ending in `x`, `y`, `offsetX`, `offsetY`, or `offset`: min: -100, max: 100
+- Other properties: min: 0, max: 100
 
 #### Color Control
 
@@ -239,8 +241,9 @@ Individual control element. Must be a child of `<highcharts-controls>`.
 - `path` (required) - Dot-separated path to chart option (e.g., `"legend.enabled"`)
 - `value` (optional) - Initial value
 - `options` (required for array-of-strings) - Comma-separated list of options
-- `range` (optional for number) - Not yet supported via attribute
-- `step` (optional for number) - Not yet supported via attribute
+- `min` (optional for number) - Minimum value for range slider
+- `max` (optional for number) - Maximum value for range slider
+- `step` (optional for number) - Step increment for range slider
 
 **Examples:**
 
@@ -263,7 +266,10 @@ Individual control element. Must be a child of `<highcharts-controls>`.
 <!-- Number -->
 <highcharts-control
     type="number"
-    path="legend.x">
+    path="legend.x"
+    min="-100"
+    max="100"
+    step="10">
 </highcharts-control>
 
 <!-- Color -->
