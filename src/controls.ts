@@ -727,6 +727,40 @@ class Controls {
     }
 
     /**
+     * Deduce control type based on the params
+     */
+    private deduceControlType(params: ControlParams): ControlTypes {
+        const value = params.value;
+        if (typeof value === 'boolean') {
+            return 'boolean';
+        }
+        if (
+            typeof value === 'number' ||
+            // Allow numeric strings with units limited to px, em, rem, %
+            (
+                typeof value === 'string' &&
+                /^-?\d+\.?\d*\s*(px|em|rem|%)$/.test(value)
+            )
+        ) {
+            return 'number';
+        }
+        if (Array.isArray((params as SelectControlParams).options)) {
+            return 'select';
+        }
+        if (typeof value === 'string') {
+            if (
+                params.path.toLowerCase().indexOf('color') !== -1 ||
+                Product.color(value).rgba.toString().indexOf('NaN') === -1
+            ) {
+                return 'color';
+            }
+            return 'text';
+        }
+        // Default to text
+        return 'text';
+    }
+
+    /**
      * Add a control
      */
     public addControl(params: ControlParams): void {
@@ -745,6 +779,8 @@ class Controls {
                 )
             ) ?? getNestedValue(Product?.defaultOptions, params.path)
         }
+
+        params.type ||= this.deduceControlType(params);
 
         const div = this.container.appendChild(
             Object.assign(
@@ -871,7 +907,7 @@ class HighchartsControlsElement extends HTMLElement {
         this.querySelectorAll('highcharts-control').forEach(
             (controlEl): void => {
                 const control = (controlEl as HighchartsControlElement).getConfig();
-                if (control.type && control.path) {
+                if (control.path) {
                     controls.push(control as ControlParams);
                 }
             }

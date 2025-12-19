@@ -88,25 +88,23 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
         HighchartsControls.controls('controls-container', {
             controls: [
                 {
-                    type: 'boolean',
+                    // Type is optional - automatically deduced from value
                     path: 'legend.enabled',
                     value: true
                 },
                 {
-                    type: 'select',
                     path: 'legend.align',
                     options: ['left', 'center', 'right'],
                     value: 'center'
                 },
                 {
-                    type: 'number',
                     path: 'legend.x',
                     min: -100,
                     max: 100,
-                    step: 10
+                    step: 10,
+                    value: 0
                 },
                 {
-                    type: 'color',
                     path: 'legend.backgroundColor',
                     value: '#FFEEAA'
                 }
@@ -143,6 +141,13 @@ interface ControlsOptionsObject {
 ```
 
 ### Control Types
+
+**Note:** The `type` parameter is optional. If omitted, the library will automatically deduce the control type based on the value and other parameters:
+- Boolean values → `boolean` control
+- Numeric values or strings with units (px, em, rem, %) → `number` control
+- Presence of `options` array → `select` control
+- Strings containing "color" in the path or valid color values → `color` control
+- Other string values → `text` control (fallback)
 
 #### Boolean Control
 

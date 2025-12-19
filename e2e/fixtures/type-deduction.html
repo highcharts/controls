@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Highcharts Controls - Type Deduction Test</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script type="module" src="/js/controls.js"></script>
+</head>
+<body>
+    <div id="container" style="height: 400px; margin: 20px;"></div>
+    <div id="controls-container"></div>
+
+    <script type="module">
+        import HighchartsControls from '/js/controls.js';
+
+        // Create a chart
+        const chart = Highcharts.chart('container', {
+            title: { text: 'Test Chart' },
+            chart: {
+                backgroundColor: '#FF0000',
+                marginTop: 60,
+                height: '80%'
+            },
+            legend: {
+                enabled: true,
+                align: 'center',
+                x: 0
+            },
+            plotOptions: {
+                series: {
+                    borderColor: '#00FF00'
+                }
+            },
+            series: [{
+                name: 'Series 1',
+                data: [1, 2, 3, 4, 5]
+            }]
+        });
+
+        // Add controls WITHOUT explicit type - let the library deduce them
+        HighchartsControls.controls('controls-container', {
+            controls: [
+                // Boolean type - deduced from boolean value
+                {
+                    path: 'legend.enabled',
+                    value: true
+                },
+                // Number type - deduced from numeric value
+                {
+                    path: 'legend.x',
+                    min: -100,
+                    max: 100,
+                    value: 0
+                },
+                // Number type - deduced from numeric string with px
+                {
+                    path: 'chart.marginTop',
+                    min: 0,
+                    max: 200,
+                    value: '60px'
+                },
+                // Number type - deduced from numeric string with em
+                {
+                    path: 'title.style.fontSize',
+                    min: 0.5,
+                    max: 3,
+                    value: '1.5em'
+                },
+                // Number type - deduced from numeric string with %
+                {
+                    path: 'chart.height',
+                    min: 50,
+                    max: 100,
+                    value: '80%'
+                },
+                // Select type - deduced from options array
+                {
+                    path: 'legend.align',
+                    options: ['left', 'center', 'right'],
+                    value: 'center'
+                },
+                // Color type - deduced from color in path name
+                {
+                    path: 'chart.backgroundColor',
+                    value: '#FF0000'
+                },
+                // Color type - deduced from valid color string
+                {
+                    path: 'plotOptions.series.borderColor',
+                    value: '#00FF00'
+                },
+                // Text type - deduced from string value without color indication
+                {
+                    path: 'title.text',
+                    value: 'Test Chart'
+                },
+                // Text type - deduced from string that's not a valid color
+                {
+                    path: 'subtitle.text',
+                    value: 'Not a color'
+                }
+            ]
+        });
+    </script>
+</body>
+</html>

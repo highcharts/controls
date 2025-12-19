@@ -4,8 +4,6 @@ This document outlines planned features and improvements for Highcharts Controls
 
 ## Planned Features
 
-- [ ] Guess control type from the value or evaluated path. Fall back to `text`.
-- [ ] Support for Dashboards
 - [ ] More compact view with one or two controls, which is probably the most
   common use case.
 - [ ] Wider Current Options view, don't limit to the width of the controls.

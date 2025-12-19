@@ -83,6 +83,10 @@ declare class Controls {
      */
     private addTextControl;
     /**
+     * Deduce control type based on the params
+     */
+    private deduceControlType;
+    /**
      * Add a control
      */
     addControl(params: ControlParams): void;

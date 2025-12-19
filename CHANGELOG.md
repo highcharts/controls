@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Automatic control type deduction** - The `type` parameter is now optional
+  - Boolean values automatically create boolean controls
+  - Numeric values and strings with units (px, em, rem, %) create number controls
+  - Presence of `options` array creates select controls
+  - Color values or paths containing "color" create color controls
+  - Other string values default to text controls
 - Number control now supports length units (`px`, `em`, `rem`, `%`, etc.)
   - Units are automatically extracted from string values (e.g., `'1.5em'`, `'60px'`, `'80%'`)
   - Display shows numeric value with unit
