@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Groups/sections with collapsible headers** - Organize controls into groups
+  - JavaScript API: Use `GroupParams` objects with `group` and `controls` properties
+  - Web Components: Use `<highcharts-group header="...">` wrapper element
+  - Optional `collapsed` state to start groups collapsed
+  - Optional `collapsible` property to enable expand/collapse (default: false)
+  - Mix grouped and ungrouped controls in the same container
 - **Automatic control type deduction** - The `type` parameter is now optional
   - Boolean values automatically create boolean controls
   - Numeric values and strings with units (px, em, rem, %) create number controls

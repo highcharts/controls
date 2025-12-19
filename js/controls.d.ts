@@ -44,10 +44,17 @@ interface TextControlParams extends ControlParams {
     type: 'text';
     value?: string;
 }
+interface GroupParams {
+    group: string;
+    collapsed?: boolean;
+    collapsible?: boolean;
+    className?: string;
+    controls: ControlParams[];
+}
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
-    controls: Array<SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
+    controls: Array<GroupParams | SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
 }
 declare class Controls {
     /**
@@ -82,6 +89,10 @@ declare class Controls {
      * Add a text control
      */
     private addTextControl;
+    /**
+     * Add a group of controls
+     */
+    private addGroup;
     /**
      * Deduce control type based on the params
      */

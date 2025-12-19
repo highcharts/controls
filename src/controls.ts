@@ -61,10 +61,19 @@ interface TextControlParams extends ControlParams {
     value?: string;
 }
 
+interface GroupParams {
+    group: string;
+    collapsed?: boolean;
+    collapsible?: boolean;
+    className?: string;
+    controls: ControlParams[];
+}
+
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
     controls: Array<
+        GroupParams|
         SelectControlParams|
         BooleanControlParams|
         ColorControlParams|
@@ -116,6 +125,15 @@ function isTextControlParams(
     params: ControlParams
 ): params is TextControlParams {
     return params.type === 'text';
+}
+
+/**
+ * Type guard for GroupParams
+ */
+function isGroupParams(
+    params: any
+): params is GroupParams {
+    return 'group' in params && Array.isArray(params.controls);
 }
 
 /**
@@ -209,7 +227,11 @@ class Controls {
 
         // Add the controls
         options.controls?.forEach((control): void => {
-            this.addControl(control);
+            if (isGroupParams(control)) {
+                this.addGroup(control);
+            } else {
+                this.addControl(control);
+            }
         });
 
         this.addPreview();
@@ -727,6 +749,82 @@ class Controls {
     }
 
     /**
+     * Add a group of controls
+     */
+    private addGroup(params: GroupParams): void {
+        if (!this.container) {
+            throw new Error('Container for controls not found');
+        }
+
+        // Create group container
+        const groupDiv = this.container.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                {
+                    className: `hcc-group${params.className ? ' ' + params.className : ''}${params.collapsed ? ' hcc-group-collapsed' : ''}`
+                }
+            )
+        );
+
+        // Create group header
+        const headerDiv = groupDiv.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                { className: 'hcc-group-header' }
+            )
+        );
+
+        // Add collapse button if collapsible
+        if (params.collapsible === true) {
+            const collapseButton = headerDiv.appendChild(
+                Object.assign(
+                    document.createElement('button'),
+                    {
+                        className: 'hcc-group-toggle',
+                        innerHTML: '❯',
+                        'aria-label': 'Toggle group'
+                    }
+                )
+            );
+
+            collapseButton.addEventListener('click', (): void => {
+                groupDiv.classList.toggle('hcc-group-collapsed');
+            });
+        }
+
+        // Add group title
+        headerDiv.appendChild(
+            Object.assign(
+                document.createElement('h3'),
+                {
+                    className: 'hcc-group-title',
+                    textContent: params.group
+                }
+            )
+        );
+
+        // Create controls container within group
+        const groupControlsDiv = groupDiv.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                { className: 'hcc-group-controls' }
+            )
+        );
+
+        // Temporarily swap container to add controls to group
+        const originalContainer = this.container;
+        this.container = groupControlsDiv;
+
+        // Add controls to the group
+        params.controls.forEach((control): void => {
+            this.addControl(control);
+        });
+
+        // Restore original container
+        this.container = originalContainer;
+    }
+
+    /**
      * Deduce control type based on the params
      */
     private deduceControlType(params: ControlParams): ControlTypes {
@@ -901,22 +999,52 @@ class HighchartsControlElement extends HTMLElement {
     return config;
   }
 }
+
+class HighchartsGroupElement extends HTMLElement {
+  getConfig(): GroupParams {
+    const controls: ControlParams[] = [];
+    this.querySelectorAll(':scope > highcharts-control').forEach(
+      (controlEl): void => {
+        const control = (controlEl as HighchartsControlElement).getConfig();
+        if (control.path) {
+          controls.push(control as ControlParams);
+        }
+      }
+    );
+
+    return {
+      group: this.getAttribute('header') || 'Group',
+      collapsed: this.hasAttribute('collapsed'),
+      collapsible: this.getAttribute('collapsible') === 'true',
+      className: this.getAttribute('class') || undefined,
+      controls
+    };
+  }
+}
+
 class HighchartsControlsElement extends HTMLElement {
     connectedCallback() {
-        const controls: ControlParams[] = [];
-        this.querySelectorAll('highcharts-control').forEach(
-            (controlEl): void => {
-                const control = (controlEl as HighchartsControlElement).getConfig();
+        const controls: (ControlParams | GroupParams)[] = [];
+
+        // Process direct children (both controls and groups)
+        Array.from(this.children).forEach((child): void => {
+            if (child.tagName.toLowerCase() === 'highcharts-group') {
+                const groupConfig = (child as HighchartsGroupElement).getConfig();
+                controls.push(groupConfig);
+            } else if (child.tagName.toLowerCase() === 'highcharts-control') {
+                const control = (child as HighchartsControlElement).getConfig();
                 if (control.path) {
                     controls.push(control as ControlParams);
                 }
             }
-        );
+        });
+
         const injectCSS = this.getAttribute('inject-css');
         Controls.controls(this, {
             target: this.getTarget(),
             injectCSS: injectCSS !== 'false',
-            controls: controls as unknown as Array<
+            controls: controls as Array<
+                GroupParams|
                 SelectControlParams|
                 BooleanControlParams|
                 ColorControlParams|
@@ -939,6 +1067,7 @@ class HighchartsControlsElement extends HTMLElement {
     }
 }
 customElements.define('highcharts-control', HighchartsControlElement);
+customElements.define('highcharts-group', HighchartsGroupElement);
 customElements.define('highcharts-controls', HighchartsControlsElement);
 
 function parseValue(value: string | null): any {

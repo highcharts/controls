@@ -39,6 +39,12 @@ function isTextControlParams(params) {
     return params.type === 'text';
 }
 /**
+ * Type guard for GroupParams
+ */
+function isGroupParams(params) {
+    return 'group' in params && Array.isArray(params.controls);
+}
+/**
  * Get a nested value from an object given a dot-separated path.
  */
 function getNestedValue(obj, path) {
@@ -83,7 +89,12 @@ class Controls {
         }
         // Add the controls
         options.controls?.forEach((control) => {
-            this.addControl(control);
+            if (isGroupParams(control)) {
+                this.addGroup(control);
+            }
+            else {
+                this.addControl(control);
+            }
         });
         this.addPreview();
         // Keep the options preview updated
@@ -387,6 +398,47 @@ class Controls {
         });
     }
     /**
+     * Add a group of controls
+     */
+    addGroup(params) {
+        if (!this.container) {
+            throw new Error('Container for controls not found');
+        }
+        // Create group container
+        const groupDiv = this.container.appendChild(Object.assign(document.createElement('div'), {
+            className: `hcc-group${params.className ? ' ' + params.className : ''}${params.collapsed ? ' hcc-group-collapsed' : ''}`
+        }));
+        // Create group header
+        const headerDiv = groupDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-group-header' }));
+        // Add collapse button if collapsible
+        if (params.collapsible === true) {
+            const collapseButton = headerDiv.appendChild(Object.assign(document.createElement('button'), {
+                className: 'hcc-group-toggle',
+                innerHTML: '❯',
+                'aria-label': 'Toggle group'
+            }));
+            collapseButton.addEventListener('click', () => {
+                groupDiv.classList.toggle('hcc-group-collapsed');
+            });
+        }
+        // Add group title
+        headerDiv.appendChild(Object.assign(document.createElement('h3'), {
+            className: 'hcc-group-title',
+            textContent: params.group
+        }));
+        // Create controls container within group
+        const groupControlsDiv = groupDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-group-controls' }));
+        // Temporarily swap container to add controls to group
+        const originalContainer = this.container;
+        this.container = groupControlsDiv;
+        // Add controls to the group
+        params.controls.forEach((control) => {
+            this.addControl(control);
+        });
+        // Restore original container
+        this.container = originalContainer;
+    }
+    /**
      * Deduce control type based on the params
      */
     deduceControlType(params) {
@@ -518,13 +570,38 @@ class HighchartsControlElement extends HTMLElement {
         return config;
     }
 }
-class HighchartsControlsElement extends HTMLElement {
-    connectedCallback() {
+class HighchartsGroupElement extends HTMLElement {
+    getConfig() {
         const controls = [];
-        this.querySelectorAll('highcharts-control').forEach((controlEl) => {
+        this.querySelectorAll(':scope > highcharts-control').forEach((controlEl) => {
             const control = controlEl.getConfig();
             if (control.path) {
                 controls.push(control);
+            }
+        });
+        return {
+            group: this.getAttribute('header') || 'Group',
+            collapsed: this.hasAttribute('collapsed'),
+            collapsible: this.getAttribute('collapsible') === 'true',
+            className: this.getAttribute('class') || undefined,
+            controls
+        };
+    }
+}
+class HighchartsControlsElement extends HTMLElement {
+    connectedCallback() {
+        const controls = [];
+        // Process direct children (both controls and groups)
+        Array.from(this.children).forEach((child) => {
+            if (child.tagName.toLowerCase() === 'highcharts-group') {
+                const groupConfig = child.getConfig();
+                controls.push(groupConfig);
+            }
+            else if (child.tagName.toLowerCase() === 'highcharts-control') {
+                const control = child.getConfig();
+                if (control.path) {
+                    controls.push(control);
+                }
             }
         });
         const injectCSS = this.getAttribute('inject-css');
@@ -547,6 +624,7 @@ class HighchartsControlsElement extends HTMLElement {
     }
 }
 customElements.define('highcharts-control', HighchartsControlElement);
+customElements.define('highcharts-group', HighchartsGroupElement);
 customElements.define('highcharts-controls', HighchartsControlsElement);
 function parseValue(value) {
     if (value === 'true') {

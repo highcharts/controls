@@ -33,29 +33,31 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
     </script>
 
     <highcharts-controls target="#container">
-        <highcharts-control
-            type="boolean"
-            path="legend.enabled"
-            value="true">
-        </highcharts-control>
+        <highcharts-group header="Legend Settings">
+            <highcharts-control
+                type="boolean"
+                path="legend.enabled"
+                value="true">
+            </highcharts-control>
 
-        <highcharts-control
-            type="select"
-            path="legend.align"
-            options="left,center,right"
-            value="center">
-        </highcharts-control>
+            <highcharts-control
+                type="select"
+                path="legend.align"
+                options="left,center,right"
+                value="center">
+            </highcharts-control>
 
-        <highcharts-control
-            type="number"
-            path="legend.x">
-        </highcharts-control>
+            <highcharts-control
+                type="number"
+                path="legend.x">
+            </highcharts-control>
 
-        <highcharts-control
-            type="color"
-            path="legend.backgroundColor"
-            value="#FFEEAA">
-        </highcharts-control>
+            <highcharts-control
+                type="color"
+                path="legend.backgroundColor"
+                value="#FFEEAA">
+            </highcharts-control>
+        </highcharts-group>
     </highcharts-controls>
 </body>
 </html>
@@ -88,25 +90,30 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
         HighchartsControls.controls('controls-container', {
             controls: [
                 {
-                    // Type is optional - automatically deduced from value
-                    path: 'legend.enabled',
-                    value: true
-                },
-                {
-                    path: 'legend.align',
-                    options: ['left', 'center', 'right'],
-                    value: 'center'
-                },
-                {
-                    path: 'legend.x',
-                    min: -100,
-                    max: 100,
-                    step: 10,
-                    value: 0
-                },
-                {
-                    path: 'legend.backgroundColor',
-                    value: '#FFEEAA'
+                    group: 'Legend Settings',
+                    controls: [
+                        {
+                            // Type is optional - automatically deduced from value
+                            path: 'legend.enabled',
+                            value: true
+                        },
+                        {
+                            path: 'legend.align',
+                            options: ['left', 'center', 'right'],
+                            value: 'center'
+                        },
+                        {
+                            path: 'legend.x',
+                            min: -100,
+                            max: 100,
+                            step: 10,
+                            value: 0
+                        },
+                        {
+                            path: 'legend.backgroundColor',
+                            value: '#FFEEAA'
+                        }
+                    ]
                 }
             ]
         });
@@ -136,8 +143,50 @@ Creates a controls instance.
 interface ControlsOptionsObject {
     target?: ControlTarget;      // Target chart/grid (defaults to first chart)
     injectCSS?: boolean;          // Auto-inject CSS (defaults to true)
-    controls: ControlParams[];    // Array of control configurations
+    controls: Array<ControlParams | GroupParams>;  // Array of control or group configurations
 }
+```
+
+#### GroupParams
+
+Controls can be organized into collapsible groups with headers:
+
+```typescript
+interface GroupParams {
+    group: string;              // Group header text
+    controls: ControlParams[];  // Controls within the group
+    collapsed?: boolean;        // Initial collapsed state (default: false)
+    collapsible?: boolean;      // Allow expand/collapse (default: false)
+    className?: string;         // Custom CSS class
+}
+```
+
+**Example:**
+
+```typescript
+HighchartsControls.controls('controls-container', {
+    controls: [
+        {
+            group: 'Legend Settings',
+            collapsible: true,     // Enable expand/collapse
+            collapsed: false,      // Start expanded
+            controls: [
+                { path: 'legend.enabled', value: true },
+                { path: 'legend.align', options: ['left', 'center', 'right'] }
+            ]
+        },
+        {
+            group: 'Chart Settings',
+            collapsible: true,     // Enable expand/collapse
+            collapsed: true,       // Start collapsed
+            controls: [
+                { path: 'chart.backgroundColor', value: '#FFFFFF' }
+            ]
+        },
+        // Ungrouped controls can be mixed with groups
+        { path: 'title.text', value: 'My Chart' }
+    ]
+});
 ```
 
 ### Control Types
@@ -262,6 +311,34 @@ Container element for controls.
 ```html
 <highcharts-controls target="#my-chart" inject-css="false">
     <!-- controls here -->
+</highcharts-controls>
+```
+
+#### `<highcharts-group>`
+
+Group controls under a collapsible header. Must be a child of `<highcharts-controls>`.
+
+**Attributes:**
+- `header` (required) - Header text for the group
+- `collapsed` (optional) - Set to `"true"` to start collapsed
+- `collapsible` (optional) - Set to `"true"` to enable expand/collapse (default: false)
+- `class` (optional) - Custom CSS class
+
+**Example:**
+
+```html
+<highcharts-controls target="#container">
+    <highcharts-group header="Legend Settings" collapsible="true">
+        <highcharts-control path="legend.enabled" value="true"></highcharts-control>
+        <highcharts-control path="legend.align" options="left,center,right"></highcharts-control>
+    </highcharts-group>
+
+    <highcharts-group header="Chart Settings" collapsible="true" collapsed="true">
+        <highcharts-control path="chart.backgroundColor" value="#FFFFFF"></highcharts-control>
+    </highcharts-group>
+
+    <!-- Ungrouped controls -->
+    <highcharts-control path="title.text" value="My Chart"></highcharts-control>
 </highcharts-controls>
 ```
 
