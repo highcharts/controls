@@ -63,6 +63,7 @@ interface TextControlParams extends ControlParams {
 
 interface GroupParams {
     group: string;
+    description?: string;
     collapsed?: boolean;
     collapsible?: boolean;
     className?: string;
@@ -256,6 +257,10 @@ class Controls {
         inlineStyle.id = 'highcharts-controls-inline';
         inlineStyle.nonce = 'highcharts';
         inlineStyle.textContent = `
+            highcharts-group-description {
+                display: none;
+            }
+
             .highcharts-controls {
                 opacity: 0;
                 transition: opacity 0.1s;
@@ -263,6 +268,7 @@ class Controls {
                 .hcc-control {
                     max-height: 3em;
                 }
+
                 .hidden {
                     max-height: 0;
                 }
@@ -803,6 +809,17 @@ class Controls {
             )
         );
 
+        // Add description if provided
+        if (params.description) {
+            const descriptionEl = groupDiv.appendChild(
+                Object.assign(
+                    document.createElement('p'),
+                    { className: 'hcc-group-description' }
+                )
+            );
+            descriptionEl.innerHTML = params.description;
+        }
+
         // Create controls container within group
         const groupControlsDiv = groupDiv.appendChild(
             Object.assign(
@@ -1003,6 +1020,14 @@ class HighchartsControlElement extends HTMLElement {
 class HighchartsGroupElement extends HTMLElement {
   getConfig(): GroupParams {
     const controls: ControlParams[] = [];
+    let description: string | undefined;
+
+    // Extract description from highcharts-group-description element
+    const descriptionEl = this.querySelector(':scope > highcharts-group-description');
+    if (descriptionEl) {
+      description = descriptionEl.innerHTML?.trim() || undefined;
+    }
+
     this.querySelectorAll(':scope > highcharts-control').forEach(
       (controlEl): void => {
         const control = (controlEl as HighchartsControlElement).getConfig();
@@ -1014,6 +1039,7 @@ class HighchartsGroupElement extends HTMLElement {
 
     return {
       group: this.getAttribute('header') || 'Group',
+      description,
       collapsed: this.hasAttribute('collapsed'),
       collapsible: this.getAttribute('collapsible') === 'true',
       className: this.getAttribute('class') || undefined,
@@ -1068,6 +1094,7 @@ class HighchartsControlsElement extends HTMLElement {
 }
 customElements.define('highcharts-control', HighchartsControlElement);
 customElements.define('highcharts-group', HighchartsGroupElement);
+customElements.define('highcharts-group-description', class extends HTMLElement {});
 customElements.define('highcharts-controls', HighchartsControlsElement);
 
 function parseValue(value: string | null): any {

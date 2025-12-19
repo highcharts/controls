@@ -56,6 +56,30 @@ test.describe('Highcharts Controls - Groups (JavaScript API)', () => {
     await expect(toggleButton).toHaveCount(0);
   });
 
+  test('renders group description', async ({ page }) => {
+    const firstGroup = page.locator('.hcc-group').first();
+    const description = firstGroup.locator('.hcc-group-description');
+
+    await expect(description).toHaveCount(1);
+    await expect(description).toHaveText('Control the appearance and behavior of the chart legend.');
+  });
+
+  test('hides description when group is collapsed', async ({ page }) => {
+    const firstGroup = page.locator('.hcc-group').first();
+    const description = firstGroup.locator('.hcc-group-description');
+    const toggleButton = firstGroup.locator('.hcc-group-toggle');
+
+    // Description should be visible when expanded
+    await expect(description).toBeVisible();
+
+    // Collapse the group
+    await toggleButton.click();
+    await expect(firstGroup).toHaveClass(/hcc-group-collapsed/);
+
+    // Description should be hidden
+    await expect(description).not.toBeVisible();
+  });
+
   test('controls in groups work correctly', async ({ page }) => {
     // Test boolean control in Legend group
     const toggle = page.locator('.hcc-toggle input[type="checkbox"]').first();
@@ -115,6 +139,14 @@ test.describe('Highcharts Controls - Groups (Web Components)', () => {
     const toggleButton = thirdGroup.locator('.hcc-group-toggle');
 
     await expect(toggleButton).toHaveCount(0);
+  });
+
+  test('renders description from web component', async ({ page }) => {
+    const firstGroup = page.locator('.hcc-group').first();
+    const description = firstGroup.locator('.hcc-group-description');
+
+    await expect(description).toHaveCount(1);
+    await expect(description).toHaveText('Control the appearance and behavior of the chart legend.');
   });
 
   test('controls in web component groups work correctly', async ({ page }) => {

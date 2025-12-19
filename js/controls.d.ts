@@ -46,6 +46,7 @@ interface TextControlParams extends ControlParams {
 }
 interface GroupParams {
     group: string;
+    description?: string;
     collapsed?: boolean;
     collapsible?: boolean;
     className?: string;

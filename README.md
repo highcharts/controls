@@ -154,6 +154,7 @@ Controls can be organized into collapsible groups with headers:
 ```typescript
 interface GroupParams {
     group: string;              // Group header text
+    description?: string;       // Optional description text
     controls: ControlParams[];  // Controls within the group
     collapsed?: boolean;        // Initial collapsed state (default: false)
     collapsible?: boolean;      // Allow expand/collapse (default: false)
@@ -168,6 +169,7 @@ HighchartsControls.controls('controls-container', {
     controls: [
         {
             group: 'Legend Settings',
+            description: 'Control the appearance and behavior of the chart legend.',
             collapsible: true,     // Enable expand/collapse
             collapsed: false,      // Start expanded
             controls: [
@@ -324,11 +326,26 @@ Group controls under a collapsible header. Must be a child of `<highcharts-contr
 - `collapsible` (optional) - Set to `"true"` to enable expand/collapse (default: false)
 - `class` (optional) - Custom CSS class
 
+**Child Elements:**
+- `<highcharts-group-description>` (optional) - Description text displayed below the header. Supports HTML markup.
+- `<highcharts-control>` - Individual controls within the group
+
+**Note:** When using `<highcharts-group-description>` and `injectCSS` is set to `true` (default), it's recommended to add this to your page CSS to avoid a flash of unstyled content (FOUC):
+
+```css
+highcharts-group-description {
+    display: none;
+}
+```
+
 **Example:**
 
 ```html
 <highcharts-controls target="#container">
     <highcharts-group header="Legend Settings" collapsible="true">
+        <highcharts-group-description>
+            Control the appearance and behavior of the chart legend.
+        </highcharts-group-description>
         <highcharts-control path="legend.enabled" value="true"></highcharts-control>
         <highcharts-control path="legend.align" options="left,center,right"></highcharts-control>
     </highcharts-group>

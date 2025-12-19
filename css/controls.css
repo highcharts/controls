@@ -8,6 +8,11 @@
     color-scheme: light;
 }
 
+/* Hide web component elements that are used only for configuration */
+highcharts-group-description {
+    display: none;
+}
+
 .highcharts-controls {
     padding: 1rem;
     border-radius: 7px;
@@ -118,6 +123,17 @@
         font-size: 1.2em;
         font-weight: 600;
         color: light-dark(#495057, #adb5bd);
+    }
+
+    .hcc-group-description {
+        margin: -0.25em 0 1em 0;
+        font-size: 0.9em;
+        color: light-dark(#6c757d, #868e96);
+        line-height: 1.5;
+    }
+
+    .hcc-group-collapsed .hcc-group-description {
+        display: none;
     }
 
     .hcc-group-controls {
