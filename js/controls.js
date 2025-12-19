@@ -70,7 +70,7 @@ class Controls {
             (typeof renderTo === 'object' && renderTo) ||
             document.body.appendChild(Object.assign(document.createElement('div')));
         const outerContainer = renderTo.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls' }));
-        this.container = outerContainer.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-container' }));
+        this.container = outerContainer.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-container' }));
         this.target = (options.target ||
             Product?.charts?.[0] ||
             Product?.grids?.[0]);
@@ -104,7 +104,7 @@ class Controls {
                 opacity: 0;
                 transition: opacity 0.1s;
 
-                .highcharts-controls-control {
+                .hcc-control {
                     max-height: 3em;
                 }
                 .hidden {
@@ -115,7 +115,7 @@ class Controls {
             .highcharts-controls.loaded {
                 opacity: 1;
 
-                .highcharts-controls-control {
+                .hcc-control {
                     max-height: none;
                 }
             }
@@ -136,19 +136,19 @@ class Controls {
     }
     addPreview() {
         const div = this.container.appendChild(Object.assign(document.createElement('div'), {
-            className: 'highcharts-controls-control button-control'
+            className: 'hcc-control hcc-button-control'
         }));
-        div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-key' }));
-        const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-value' }));
-        const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-value-inner' }));
+        div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
+        const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
+        const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
         // Add the button
         const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
-            className: 'highcharts-controls-button show-preview-button',
+            className: 'hcc-button hcc-show-preview-button',
             innerText: '{…}',
             title: 'Show / hide options preview'
         }));
         button.addEventListener('click', () => {
-            const previewSection = this.container.querySelector('.preview-section');
+            const previewSection = this.container.querySelector('.hcc-preview-section');
             if (previewSection) {
                 previewSection.classList.toggle('hidden');
                 button.classList.toggle('active');
@@ -156,9 +156,9 @@ class Controls {
         });
         // Add the preview element
         this.container.appendChild(Object.assign(document.createElement('div'), {
-            className: 'preview-section hidden',
+            className: 'hcc-preview-section hidden',
             innerHTML: '<h3>Current Options</h3>' +
-                '<pre class="options-preview"></pre>'
+                '<pre class="hcc-options-preview"></pre>'
         }));
     }
     /**
@@ -169,10 +169,10 @@ class Controls {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.path
         }));
-        valueDiv.classList.add('button-group');
+        valueDiv.classList.add('hcc-button-group');
         params.options.forEach((option) => {
             const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
-                className: 'highcharts-controls-button' +
+                className: 'hcc-button' +
                     (params.value === option ? ' active' : ''),
                 innerText: option
             }));
@@ -197,13 +197,13 @@ class Controls {
             htmlFor: `toggle-checkbox-${rid}`,
             innerText: params.path
         }));
-        const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hc-toggle' }));
+        const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
         const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
             type: 'checkbox',
             id: `toggle-checkbox-${rid}`
         }));
         labelToggle.appendChild(Object.assign(document.createElement('span'), {
-            className: 'hc-toggle-slider',
+            className: 'hcc-toggle-slider',
             'aria-hidden': 'true'
         }));
         // Use override value if provided, otherwise get current value from
@@ -232,18 +232,18 @@ class Controls {
         }));
         const valueEl = valueDiv.appendChild(Object.assign(document.createElement('label'), {
             id: `color-value-${rid}`,
-            className: 'hc-color-value',
+            className: 'hcc-color-value',
             htmlFor: `color-input-${rid}`
         }));
-        valueDiv.classList.add('color-control');
+        valueDiv.classList.add('hcc-color-control');
         const opacityInput = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'text',
             id: `opacity-input-${rid}`,
-            className: 'opacity-input'
+            className: 'hcc-opacity-input'
         }));
         valueDiv.appendChild(Object.assign(document.createElement('span'), {
             textContent: '%',
-            className: 'opacity-input-label'
+            className: 'hcc-opacity-input-label'
         }));
         const getHex = (color) => {
             const rgba = color.rgba;
@@ -321,7 +321,7 @@ class Controls {
         }));
         const valueEl = valueDiv.appendChild(Object.assign(document.createElement('span'), {
             id: `range-value-${rid}`,
-            className: 'hc-range-value'
+            className: 'hcc-range-value'
         }));
         const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'range',
@@ -355,7 +355,7 @@ class Controls {
         const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'text',
             id: `text-input-${rid}`,
-            className: 'hc-text-input'
+            className: 'hcc-text-input'
         }));
         // Use override value if provided, otherwise get current value from
         // chart
@@ -380,10 +380,10 @@ class Controls {
             const targetOptions = this.target.getOptions?.();
             params.value = (targetOptions && getNestedValue(targetOptions, params.path)) ?? getNestedValue(Product?.defaultOptions, params.path);
         }
-        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-control' }));
-        const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-key' }));
-        const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-value' }));
-        const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-value-inner' }));
+        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-control' }));
+        const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
+        const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
+        const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
         if (isSelectControlParams(params)) {
             this.addSelectControl(params, keyDiv, valueDivInner);
         }
@@ -405,7 +405,7 @@ class Controls {
      */
     updateOptionsPreview() {
         const previewEl = this.container.parentElement
-            ?.querySelector('.options-preview');
+            ?.querySelector('.hcc-options-preview');
         if (previewEl) {
             const options = this.target.getOptions() || {};
             // Empty xAxis and yAxis structures

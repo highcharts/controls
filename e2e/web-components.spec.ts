@@ -26,7 +26,7 @@ test.describe('Highcharts Controls - Web Components', () => {
     const checkbox = page.locator('input[type="checkbox"]');
     await expect(checkbox).not.toBeVisible();
 
-    const buttons = page.locator('button.highcharts-controls-button[data-path="legend.align"]');
+    const buttons = page.locator('button.hcc-button[data-path="legend.align"]');
     await expect(buttons).toHaveCount(3);
 
     const rangeInput = page.locator('input[type="range"]');
@@ -35,13 +35,13 @@ test.describe('Highcharts Controls - Web Components', () => {
     const colorInput = page.locator('input[type="color"]');
     await expect(colorInput).toBeVisible();
 
-    const textInput = page.locator('input.hc-text-input');
+    const textInput = page.locator('input.hcc-text-input');
     await expect(textInput).toBeVisible();
   });
 
   test('boolean web component control works', async ({ page }) => {
     const checkbox = page.locator('input[type="checkbox"]');
-    const shimSlider = page.locator('.hc-toggle .hc-toggle-slider');
+    const shimSlider = page.locator('.hcc-toggle .hcc-toggle-slider');
     await expect(checkbox).toBeChecked();
 
     // Toggle the checkbox
@@ -84,7 +84,7 @@ test.describe('Highcharts Controls - Web Components', () => {
 
   test('color web component control parses initial value', async ({ page }) => {
     const colorInput = page.locator('input[type="color"]');
-    const colorValue = page.locator('.hc-color-value');
+    const colorValue = page.locator('.hcc-color-value');
 
     // Check initial color is set (normalized to lowercase)
     const value = await colorInput.inputValue();
@@ -139,7 +139,7 @@ test.describe('Highcharts Controls - Web Components', () => {
   });
 
   test('text web component control works', async ({ page }) => {
-    const textInput = page.locator('input.hc-text-input');
+    const textInput = page.locator('input.hcc-text-input');
 
     // Verify initial value
     await expect(textInput).toHaveValue('Test Chart');

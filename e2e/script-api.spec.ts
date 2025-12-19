@@ -18,7 +18,7 @@ test.describe('Highcharts Controls - Script API', () => {
     await expect(checkbox).not.toBeVisible();
 
     // Check for select control (button group)
-    const buttons = page.locator('button.highcharts-controls-button[data-path="legend.align"]');
+    const buttons = page.locator('button.hcc-button[data-path="legend.align"]');
     await expect(buttons).toHaveCount(3);
 
     // Check for number control (range slider)
@@ -30,13 +30,13 @@ test.describe('Highcharts Controls - Script API', () => {
     await expect(colorInput).toBeVisible();
 
     // Check for text control
-    const textInput = page.locator('input.hc-text-input');
+    const textInput = page.locator('input.hcc-text-input');
     await expect(textInput).toBeVisible();
   });
 
   test('boolean control toggles legend', async ({ page }) => {
-    const checkbox = page.locator('.hc-toggle input[type="checkbox"]');
-    const shimSlider = page.locator('.hc-toggle .hc-toggle-slider');
+    const checkbox = page.locator('.hcc-toggle input[type="checkbox"]');
+    const shimSlider = page.locator('.hcc-toggle .hcc-toggle-slider');
     await expect(checkbox).toBeChecked();
 
     // Get chart legend before toggle
@@ -76,7 +76,7 @@ test.describe('Highcharts Controls - Script API', () => {
 
   test('number control adjusts legend x position', async ({ page }) => {
     const rangeInput = page.locator('input[type="range"]');
-    const valueDisplay = page.locator('.hc-range-value');
+    const valueDisplay = page.locator('.hcc-range-value');
 
     // Set slider to specific value
     await rangeInput.fill('50');
@@ -115,8 +115,8 @@ test.describe('Highcharts Controls - Script API', () => {
   });
 
   test('preview options button toggles preview section', async ({ page }) => {
-    const previewButton = page.locator('button.show-preview-button');
-    const previewSection = page.locator('.preview-section');
+    const previewButton = page.locator('button.hcc-show-preview-button');
+    const previewSection = page.locator('.hcc-preview-section');
 
     // Initially hidden
     await expect(previewSection).toHaveClass(/hidden/);
@@ -131,10 +131,10 @@ test.describe('Highcharts Controls - Script API', () => {
   });
 
   test('preview section shows chart options', async ({ page }) => {
-    const previewButton = page.locator('button.show-preview-button');
+    const previewButton = page.locator('button.hcc-show-preview-button');
     await previewButton.click();
 
-    const previewContent = page.locator('.options-preview');
+    const previewContent = page.locator('.hcc-options-preview');
     const content = await previewContent.textContent();
 
     // Should contain JSON representation of options
@@ -143,7 +143,7 @@ test.describe('Highcharts Controls - Script API', () => {
   });
 
   test('text control changes chart title', async ({ page }) => {
-    const textInput = page.locator('input.hc-text-input');
+    const textInput = page.locator('input.hcc-text-input');
 
     // Verify initial value
     await expect(textInput).toHaveValue('Test Chart');

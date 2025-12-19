@@ -20,7 +20,7 @@
         font-style: normal;
     }
 
-    .highcharts-controls-container {
+    .hcc-container {
         max-width: 400px;
         display: flex;
         flex-direction: column;
@@ -28,36 +28,35 @@
         width: 100%;
     }
 
-    .highcharts-controls-control {
+    .hcc-control {
         display: flex;
         align-items: center;
         gap: 1em;
     }
 
-    .highcharts-controls-key,
-    .highcharts-controls-value {
+    .hcc-key,
+    .hcc-value {
         line-height: 2em;
         padding: 0.3em 0;
     }
 
-    .control-section td:first-child,
-    .highcharts-controls-key {
+    .hcc-key {
         text-align: left;
         flex: 0 1 auto;
     }
 
-    .highcharts-controls-key {
+    .hcc-key {
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    .highcharts-controls-value {
+    .hcc-value {
         text-align: right;
         flex: 1 1 auto;
         min-width: 0;
     }
 
-    .highcharts-controls-value-inner {
+    .hcc-value-inner {
         border: 1px solid light-dark(#dddddd, #555555);
         border-radius: 7px;
         background: light-dark(#f8f9fa, #212529);
@@ -67,31 +66,22 @@
         text-align: center;
     }
 
-    .highcharts-controls-value-inner:has(.hc-toggle) {
+    .hcc-value-inner:has(.hcc-toggle) {
         border: none;
         background: none;
     }
 
-    .button-control .highcharts-controls-value-inner {
+    .hcc-button-control .hcc-value-inner {
         border: none;
         background: none;
         text-align: right;
     }
 
-    .highcharts-controls-value-inner.color-control {
+    .hcc-value-inner.hcc-color-control {
         white-space: nowrap;
     }
 
-    .control-section tr:not(:last-child) td {
-        border-bottom: 1px solid light-dark(#aaaaaa88, #66666688);
-    }
-
-    .control-section label:not(.hc-toggle, .opacity-label) {
-        font-family: "Courier New", Courier, monospace;
-        text-align: right;
-    }
-
-    .preview-section {
+    .hcc-preview-section {
         margin-top: 1em;
         max-height: 600px;
         overflow: auto;
@@ -102,19 +92,19 @@
             opacity 250ms ease-in-out;
     }
 
-    .preview-section.hidden {
+    .hcc-preview-section.hidden {
         max-height: 0;
         margin-top: 0;
         opacity: 0;
     }
 
-    .preview-section h3 {
+    .hcc-preview-section h3 {
         margin: 0 0 1rem;
         color: light-dark(#495057, #adb5bd);
         font-size: 1.1rem;
     }
 
-    .options-preview {
+    .hcc-options-preview {
         background: light-dark(#ffffff, #1a1d20);
         border: 1px solid light-dark(#dee2e6, #495057);
         border-radius: 7px;
@@ -130,7 +120,7 @@
     }
 
     /* Toggle (checkbox) styles */
-    .hc-toggle {
+    .hcc-toggle {
         position: relative;
         display: inline-block;
         width: 46px;
@@ -139,14 +129,14 @@
         margin-left: 10px;
     }
 
-    .hc-toggle input {
+    .hcc-toggle input {
         opacity: 0;
         width: 0;
         height: 0;
         position: absolute;
     }
 
-    .hc-toggle-slider {
+    .hcc-toggle-slider {
         position: absolute;
         cursor: pointer;
         top: 0;
@@ -158,7 +148,7 @@
         transition: background 200ms, box-shadow 200ms;
     }
 
-    .hc-toggle-slider::before {
+    .hcc-toggle-slider::before {
         content: "";
         position: absolute;
         height: 20px;
@@ -171,19 +161,19 @@
         transition: transform 200ms;
     }
 
-    .hc-toggle input:checked + .hc-toggle-slider {
+    .hcc-toggle input:checked + .hcc-toggle-slider {
         background: light-dark(#141414, #ffffff);
     }
 
-    .hc-toggle input:checked + .hc-toggle-slider::before {
+    .hcc-toggle input:checked + .hcc-toggle-slider::before {
         transform: translateX(20px);
     }
 
-    .hc-toggle input:focus + .hc-toggle-slider {
+    .hcc-toggle input:focus + .hcc-toggle-slider {
         box-shadow: 0 0 0 3px light-dark(rgba(76, 175, 80, 0.35), rgba(76, 175, 80, 0.5));
     }
 
-    .hc-color-value {
+    .hcc-color-value {
         display: inline-block;
         min-width: 6ch;
         margin: 0 10px;
@@ -191,7 +181,7 @@
     }
 
     /* Button styles */
-    .highcharts-controls-button {
+    .hcc-button {
         background: light-dark(#ffffff, #141414);
         border: 1px solid light-dark(#cccccc, #555555);
         border-radius: 7px;
@@ -204,60 +194,60 @@
         transition: background 250ms;
     }
 
-    .highcharts-controls-button:hover {
+    .hcc-button:hover {
         background: light-dark(#e1e3ff, #3f4699);
     }
 
-    .highcharts-controls-button.active {
+    .hcc-button.active {
         background: light-dark(#e1e3ff, #3f4699);
     }
 
-    .button-group {
+    .hcc-button-group {
         white-space: nowrap;
         border: none;
         background: none;
     }
 
-    .button-group .highcharts-controls-button {
+    .hcc-button-group .hcc-button {
         border-radius: 0;
         height: 2.5em;
         margin: 0 0 0 -1px;
         padding: 0.3em 1.2em;
     }
 
-    .button-group .highcharts-controls-button:first-child {
+    .hcc-button-group .hcc-button:first-child {
         border-top-left-radius: 7px;
         border-bottom-left-radius: 7px;
     }
 
-    .button-group .highcharts-controls-button:last-child {
+    .hcc-button-group .hcc-button:last-child {
         border-top-right-radius: 7px;
         border-bottom-right-radius: 7px;
     }
 
-    .show-preview-button {
+    .hcc-show-preview-button {
         margin-top: 1.5em;
         padding: 0.3rem 0.5rem;
         font-weight: 600;
     }
 
-    .show-preview-button .toggle-icon {
+    .hcc-show-preview-button .toggle-icon {
         display: inline-block;
         transform: rotate(90deg);
         transition: transform 250ms;
     }
 
-    .show-preview-button .toggle-icon-expanded {
+    .hcc-show-preview-button .toggle-icon-expanded {
         transform: rotate(270deg);
     }
 
     /* Color input styles */
-    .hc-row label.opacity-label {
+    .hcc-row label.opacity-label {
         display: inline;
         font-family: inherit;
     }
 
-    .hc-row .value {
+    .hcc-row .value {
         opacity: 0.5;
     }
 
@@ -289,7 +279,7 @@
         border-width: 2px;
     }
 
-    input.opacity-input {
+    input.hcc-opacity-input {
         text-align: right;
         background: none;
         width: 3ch;
@@ -301,13 +291,13 @@
         padding-left: 8px;
     }
 
-    .opacity-input-label {
+    .hcc-opacity-input-label {
         opacity: 0.5;
         margin-right: 0.5em;
     }
 
     /* Range (number) styles */
-    .hc-range-value {
+    .hcc-range-value {
         display: inline-block;
         min-width: 3ch;
         text-align: left;
@@ -320,7 +310,7 @@
     }
 
     /* Text input styles */
-    .hc-text-input {
+    .hcc-text-input {
         width: 100%;
         padding: 0.5em 0.8em;
         border-radius: 7px;
@@ -331,7 +321,7 @@
         box-sizing: border-box;
     }
 
-    .hc-text-input:focus {
+    .hcc-text-input:focus {
         outline: 2px solid light-dark(#6366f1, #818cf8);
         outline-offset: 1px;
     }

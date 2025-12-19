@@ -189,7 +189,7 @@ class Controls {
         this.container = outerContainer.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-container' }
+                { className: 'hcc-container' }
             )
         );
 
@@ -238,7 +238,7 @@ class Controls {
                 opacity: 0;
                 transition: opacity 0.1s;
 
-                .highcharts-controls-control {
+                .hcc-control {
                     max-height: 3em;
                 }
                 .hidden {
@@ -249,7 +249,7 @@ class Controls {
             .highcharts-controls.loaded {
                 opacity: 1;
 
-                .highcharts-controls-control {
+                .hcc-control {
                     max-height: none;
                 }
             }
@@ -284,26 +284,26 @@ class Controls {
             Object.assign(
                 document.createElement('div'),
                 {
-                    className: 'highcharts-controls-control button-control'
+                    className: 'hcc-control hcc-button-control'
                 }
             )
         );
         div.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-key' }
+                { className: 'hcc-key' }
             )
         );
         const valueDiv = div.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-value' }
+                { className: 'hcc-value' }
             )
         );
         const valueDivInner = valueDiv.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-value-inner' }
+                { className: 'hcc-value-inner' }
             )
         );
 
@@ -312,7 +312,7 @@ class Controls {
             Object.assign(
                 document.createElement('button'),
                 {
-                    className: 'highcharts-controls-button show-preview-button',
+                    className: 'hcc-button hcc-show-preview-button',
                     innerText: '{…}',
                     title: 'Show / hide options preview'
                 }
@@ -321,7 +321,7 @@ class Controls {
 
         button.addEventListener('click', (): void => {
             const previewSection = this.container.querySelector(
-                '.preview-section'
+                '.hcc-preview-section'
             ) as HTMLElement;
             if (previewSection) {
                 previewSection.classList.toggle('hidden');
@@ -334,10 +334,10 @@ class Controls {
             Object.assign(
                 document.createElement('div'),
                 {
-                    className: 'preview-section hidden',
+                    className: 'hcc-preview-section hidden',
                     innerHTML:
                         '<h3>Current Options</h3>' +
-                        '<pre class="options-preview"></pre>'
+                        '<pre class="hcc-options-preview"></pre>'
                 }
             )
         );
@@ -361,14 +361,14 @@ class Controls {
             )
         );
 
-        valueDiv.classList.add('button-group');
+        valueDiv.classList.add('hcc-button-group');
 
         params.options.forEach((option): void => {
             const button = valueDiv.appendChild(
                 Object.assign(
                     document.createElement('button'),
                     {
-                        className: 'highcharts-controls-button' +
+                        className: 'hcc-button' +
                             (params.value === option ? ' active' : ''),
                         innerText: option
                     }
@@ -419,7 +419,7 @@ class Controls {
         const labelToggle = valueDiv.appendChild(
             Object.assign(
                 document.createElement('label'),
-                { className: 'hc-toggle' }
+                { className: 'hcc-toggle' }
             )
         );
 
@@ -437,7 +437,7 @@ class Controls {
             Object.assign(
                 document.createElement('span'),
                 {
-                    className: 'hc-toggle-slider',
+                    className: 'hcc-toggle-slider',
                     'aria-hidden': 'true'
                 }
             )
@@ -491,13 +491,13 @@ class Controls {
                 document.createElement('label'),
                 {
                     id: `color-value-${rid}`,
-                    className: 'hc-color-value',
+                    className: 'hcc-color-value',
                     htmlFor: `color-input-${rid}`
                 }
             )
         );
 
-        valueDiv.classList.add('color-control');
+        valueDiv.classList.add('hcc-color-control');
 
         const opacityInput = valueDiv.appendChild(
             Object.assign(
@@ -505,7 +505,7 @@ class Controls {
                 {
                     type: 'text',
                     id: `opacity-input-${rid}`,
-                    className: 'opacity-input'
+                    className: 'hcc-opacity-input'
                 }
             )
         );
@@ -515,7 +515,7 @@ class Controls {
                 document.createElement('span'),
                 {
                     textContent: '%',
-                    className: 'opacity-input-label'
+                    className: 'hcc-opacity-input-label'
                 }
             )
         );
@@ -626,7 +626,7 @@ class Controls {
                 document.createElement('span'),
                 {
                     id: `range-value-${rid}`,
-                    className: 'hc-range-value'
+                    className: 'hcc-range-value'
                 }
             )
         );
@@ -686,7 +686,7 @@ class Controls {
                 {
                     type: 'text',
                     id: `text-input-${rid}`,
-                    className: 'hc-text-input'
+                    className: 'hcc-text-input'
                 }
             )
         );
@@ -727,26 +727,26 @@ class Controls {
         const div = this.container.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-control' }
+                { className: 'hcc-control' }
             )
         );
         const keyDiv = div.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-key' }
+                { className: 'hcc-key' }
             )
         );
         const valueDiv = div.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-value' }
+                { className: 'hcc-value' }
             )
         );
 
         const valueDivInner = valueDiv.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls-value-inner' }
+                { className: 'hcc-value-inner' }
             )
         );
 
@@ -769,7 +769,7 @@ class Controls {
      */
     private updateOptionsPreview(): void {
         const previewEl = this.container.parentElement
-            ?.querySelector('.options-preview');
+            ?.querySelector('.hcc-options-preview');
         if (previewEl) {
             const options = this.target.getOptions() || {};
             // Empty xAxis and yAxis structures
