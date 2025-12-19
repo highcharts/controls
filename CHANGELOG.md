@@ -1,0 +1,48 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Changed
+- **BREAKING**: Number control now uses `min` and `max` properties instead of `range` tuple
+  - JavaScript API: Use `min: -100, max: 100` instead of `range: [-100, 100]`
+  - Web Components: Use `min="-100" max="100"` attributes
+
+## [0.2.0] - 2025-12-19
+
+### Added
+- Text control type for editing text values
+- Web Components API (`<highcharts-controls>` and `<highcharts-control>`)
+- `injectCSS` option to automatically inject CSS (defaults to `true`)
+- Preview options button with expandable JSON view
+- Comprehensive Playwright test suite for both JavaScript and Web Component APIs
+- Pre-commit hooks with Husky to ensure tests pass before commits
+- Support for `min`, `max`, and `step` attributes in Web Components
+
+### Changed
+- Preview button now shows toggle icon (› when closed, ‹ when open)
+- Preview section with smooth animation
+
+### Fixed
+- Color control fallback for undefined values
+- Improved value deduction from chart options
+
+## [0.1.0] - 2025-12-18
+
+### Added
+- Initial release
+- Boolean control with styled toggle switch
+- Array-of-strings control with button group
+- Number control with range slider
+- Color control with color picker and opacity control
+- TypeScript support with full type definitions
+- CSS styling with light/dark mode support
+- Basic documentation and examples
+
+[Unreleased]: https://github.com/highcharts/controls/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/highcharts/controls/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/highcharts/controls/releases/tag/v0.1.0
