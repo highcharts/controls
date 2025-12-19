@@ -56,7 +56,7 @@ test.describe('Highcharts Controls - Web Components', () => {
     expect(legendHidden).toBe(true);
   });
 
-  test('array-of-strings web component control works', async ({ page }) => {
+  test('select web component control works', async ({ page }) => {
     const rightButton = page.locator('button[data-value="right"]');
     await rightButton.click();
 

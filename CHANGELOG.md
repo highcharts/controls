@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **BREAKING**: Renamed control type from `array-of-strings` to `select`
+  - Update `type: 'array-of-strings'` to `type: 'select'` in JavaScript API
+  - Update `type="array-of-strings"` to `type="select"` in Web Components
+  - Interface name changed from `ArrayControlParams` to `SelectControlParams`
 - **BREAKING**: Number control now uses `min` and `max` properties instead of `range` tuple
   - JavaScript API: Use `min: -100, max: 100` instead of `range: [-100, 100]`
   - Web Components: Use `min="-100" max="100"` attributes
@@ -36,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 - Boolean control with styled toggle switch
-- Array-of-strings control with button group
+- Select control with button group
 - Number control with range slider
 - Color control with color picker and opacity control
 - TypeScript support with full type definitions

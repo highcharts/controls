@@ -24,7 +24,7 @@ interface ControlTarget {
     ): void;
 }
 
-type ControlTypes = 'boolean'|'color'|'number'|'array-of-strings'|'text';
+type ControlTypes = 'boolean'|'color'|'number'|'select'|'text';
 
 interface ControlParams {
     type: ControlTypes;
@@ -32,8 +32,8 @@ interface ControlParams {
     value?: any;
 }
 
-interface ArrayControlParams extends ControlParams {
-    type: 'array-of-strings';
+interface SelectControlParams extends ControlParams {
+    type: 'select';
     options: string[];
     value?: string;
 }
@@ -65,7 +65,7 @@ interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
     controls: Array<
-        ArrayControlParams|
+        SelectControlParams|
         BooleanControlParams|
         ColorControlParams|
         NumberControlParams|
@@ -74,12 +74,12 @@ interface ControlsOptionsObject {
 }
 
 /**
- * Type guard for ArrayControlParams
+ * Type guard for SelectControlParams
  */
-function isArrayControlParams(
+function isSelectControlParams(
     params: ControlParams
-): params is ArrayControlParams {
-    return params.type === 'array-of-strings';
+): params is SelectControlParams {
+    return params.type === 'select';
 }
 
 /**
@@ -344,10 +344,10 @@ class Controls {
     }
 
     /**
-     * Add an array of strings control
+     * Add a select control
      */
-    private addArrayControl(
-        params: ArrayControlParams,
+    private addSelectControl(
+        params: SelectControlParams,
         keyDiv: HTMLElement,
         valueDiv: HTMLElement
     ): void {
@@ -750,8 +750,8 @@ class Controls {
             )
         );
 
-        if (isArrayControlParams(params)) {
-            this.addArrayControl(params, keyDiv, valueDivInner);
+        if (isSelectControlParams(params)) {
+            this.addSelectControl(params, keyDiv, valueDivInner);
         } else if (isBooleanControlParams(params)) {
             this.addBooleanControl(params, keyDiv, valueDivInner);
         } else if (isColorControlParams(params)) {
@@ -799,7 +799,7 @@ class Controls {
 //         value="true"
 //     ></highcharts-control>
 //     <highcharts-control
-//         type="array-of-strings"
+//         type="select"
 //         path="legend.align"
 //         options="left,center,right"
 //         value="right"
@@ -817,7 +817,7 @@ class HighchartsControlElement extends HTMLElement {
     }
 
     if (this.hasAttribute('options')) {
-        (config as ArrayControlParams).options = parseOptions(
+        (config as SelectControlParams).options = parseOptions(
             this.getAttribute('options')
         );
     }
@@ -859,7 +859,7 @@ class HighchartsControlsElement extends HTMLElement {
             target: this.getTarget(),
             injectCSS: injectCSS !== 'false',
             controls: controls as unknown as Array<
-                ArrayControlParams|
+                SelectControlParams|
                 BooleanControlParams|
                 ColorControlParams|
                 NumberControlParams|

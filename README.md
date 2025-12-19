@@ -40,7 +40,7 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
         </highcharts-control>
 
         <highcharts-control
-            type="array-of-strings"
+            type="select"
             path="legend.align"
             options="left,center,right"
             value="center">
@@ -93,7 +93,7 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
                     value: true
                 },
                 {
-                    type: 'array-of-strings',
+                    type: 'select',
                     path: 'legend.align',
                     options: ['left', 'center', 'right'],
                     value: 'center'
@@ -156,13 +156,13 @@ Toggle chart options on/off with a styled checkbox.
 }
 ```
 
-#### Array of Strings Control
+#### Select Control
 
 Select from predefined options with button group.
 
 ```typescript
 {
-    type: 'array-of-strings',
+    type: 'select',
     path: 'legend.align',
     options: ['left', 'center', 'right'],  // Available options
     value: 'center'                         // Initial selection (optional)
@@ -235,10 +235,10 @@ Container element for controls.
 Individual control element. Must be a child of `<highcharts-controls>`.
 
 **Attributes:**
-- `type` (required) - Control type: `"boolean"`, `"array-of-strings"`, `"number"`, `"color"`, or `"text"`
+- `type` (required) - Control type: `"boolean"`, `"select"`, `"number"`, `"color"`, or `"text"`
 - `path` (required) - Dot-separated path to chart option (e.g., `"legend.enabled"`)
 - `value` (optional) - Initial value
-- `options` (required for array-of-strings) - Comma-separated list of options
+- `options` (required for select) - Comma-separated list of options
 - `min` (optional for number) - Minimum value for range slider
 - `max` (optional for number) - Maximum value for range slider
 - `step` (optional for number) - Step increment for range slider
@@ -253,9 +253,9 @@ Individual control element. Must be a child of `<highcharts-controls>`.
     value="true">
 </highcharts-control>
 
-<!-- Array of strings -->
+<!-- Select -->
 <highcharts-control
-    type="array-of-strings"
+    type="select"
     path="legend.align"
     options="left,center,right"
     value="center">

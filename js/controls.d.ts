@@ -14,14 +14,14 @@ interface ControlTarget {
     getOptions(): GenericOptionsObject | void;
     update(options: GenericOptionsObject, redraw?: boolean, oneToOne?: boolean, animation?: boolean): void;
 }
-type ControlTypes = 'boolean' | 'color' | 'number' | 'array-of-strings' | 'text';
+type ControlTypes = 'boolean' | 'color' | 'number' | 'select' | 'text';
 interface ControlParams {
     type: ControlTypes;
     path: string;
     value?: any;
 }
-interface ArrayControlParams extends ControlParams {
-    type: 'array-of-strings';
+interface SelectControlParams extends ControlParams {
+    type: 'select';
     options: string[];
     value?: string;
 }
@@ -47,7 +47,7 @@ interface TextControlParams extends ControlParams {
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
-    controls: Array<ArrayControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
+    controls: Array<SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
 }
 declare class Controls {
     /**
@@ -63,9 +63,9 @@ declare class Controls {
     private injectCSS;
     private addPreview;
     /**
-     * Add an array of strings control
+     * Add a select control
      */
-    private addArrayControl;
+    private addSelectControl;
     /**
      * Add a boolean control
      */

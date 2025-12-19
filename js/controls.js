@@ -9,10 +9,10 @@
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = window.Highcharts || window.Grid;
 /**
- * Type guard for ArrayControlParams
+ * Type guard for SelectControlParams
  */
-function isArrayControlParams(params) {
-    return params.type === 'array-of-strings';
+function isSelectControlParams(params) {
+    return params.type === 'select';
 }
 /**
  * Type guard for BooleanControlParams
@@ -162,9 +162,9 @@ class Controls {
         }));
     }
     /**
-     * Add an array of strings control
+     * Add a select control
      */
-    addArrayControl(params, keyDiv, valueDiv) {
+    addSelectControl(params, keyDiv, valueDiv) {
         const { target } = this;
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.path
@@ -384,8 +384,8 @@ class Controls {
         const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-key' }));
         const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-value' }));
         const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls-value-inner' }));
-        if (isArrayControlParams(params)) {
-            this.addArrayControl(params, keyDiv, valueDivInner);
+        if (isSelectControlParams(params)) {
+            this.addSelectControl(params, keyDiv, valueDivInner);
         }
         else if (isBooleanControlParams(params)) {
             this.addBooleanControl(params, keyDiv, valueDivInner);
@@ -442,7 +442,7 @@ window.HighchartsControls = Controls;
 //         value="true"
 //     ></highcharts-control>
 //     <highcharts-control
-//         type="array-of-strings"
+//         type="select"
 //         path="legend.align"
 //         options="left,center,right"
 //         value="right"

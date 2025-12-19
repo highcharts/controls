@@ -92,7 +92,7 @@
     }
 
     .preview-section {
-        margin-top: 2rem;
+        margin-top: 1em;
         max-height: 600px;
         overflow: auto;
         opacity: 1;

@@ -17,7 +17,7 @@ test.describe('Highcharts Controls - Script API', () => {
     const checkbox = page.locator('input[type="checkbox"]');
     await expect(checkbox).not.toBeVisible();
 
-    // Check for array-of-strings control (button group)
+    // Check for select control (button group)
     const buttons = page.locator('button.highcharts-controls-button[data-path="legend.align"]');
     await expect(buttons).toHaveCount(3);
 
@@ -58,7 +58,7 @@ test.describe('Highcharts Controls - Script API', () => {
     expect(legendHidden).toBe(true);
   });
 
-  test('array-of-strings control changes legend alignment', async ({ page }) => {
+  test('select control changes legend alignment', async ({ page }) => {
     // Click the 'left' button
     const leftButton = page.locator('button[data-value="left"]');
     await leftButton.click();
