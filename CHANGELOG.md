@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2025-12-19
 
 ### Added
 - **Groups/sections with collapsible headers** - Organize controls into groups
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - JavaScript API: Use `min: -100, max: 100` instead of `range: [-100, 100]`
   - Web Components: Use `min="-100" max="100"` attributes
 
-## [0.2.0] - 2025-12-19
+## [0.2.0] - 2025-12-18
 
 ### Added
 - Text control type for editing text values
