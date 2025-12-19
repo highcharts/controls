@@ -4,11 +4,62 @@ GUI controls for manipulating Highcharts charts, Grid, and Dashboards options on
 
 ## Installation
 
-```bash
-npm install @highcharts/controls
+Load the [module file](https://github.com/highcharts/controls/blob/main/js/controls.js) from a CDN or your own server
+```html
+<script type="module" src="https://cdn.jsdelivr.net/gh/highcharts/controls@main/js/controls.js"></script>
 ```
 
 ## Usage
+
+### Web Components
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/gh/highcharts/controls@main/js/controls.js"></script>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        Highcharts.chart('container', {
+            title: { text: 'My Chart' },
+            series: [{
+                data: [1, 2, 3, 4, 5]
+            }]
+        });
+    </script>
+
+    <highcharts-controls target="#container">
+        <highcharts-control
+            type="boolean"
+            path="legend.enabled"
+            value="true">
+        </highcharts-control>
+
+        <highcharts-control
+            type="array-of-strings"
+            path="legend.align"
+            options="left,center,right"
+            value="center">
+        </highcharts-control>
+
+        <highcharts-control
+            type="number"
+            path="legend.x">
+        </highcharts-control>
+
+        <highcharts-control
+            type="color"
+            path="legend.backgroundColor"
+            value="#FFEEAA">
+        </highcharts-control>
+    </highcharts-controls>
+</body>
+</html>
+```
 
 ### JavaScript/TypeScript API
 
@@ -17,15 +68,13 @@ npm install @highcharts/controls
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="node_modules/@highcharts/controls/js/controls.js"></script>
-    <link rel="stylesheet" href="node_modules/@highcharts/controls/css/controls.css">
+    <script type="module" src="https://cdn.jsdelivr.net/gh/highcharts/controls@main/js/controls.js"></script>
 </head>
 <body>
     <div id="container"></div>
     <div id="controls-container"></div>
 
     <script type="module">
-        import HighchartsControls from '@highcharts/controls';
 
         // Create a chart
         Highcharts.chart('container', {
@@ -62,57 +111,6 @@ npm install @highcharts/controls
                     value: '#FFEEAA'
                 }
             ]
-        });
-    </script>
-</body>
-</html>
-```
-
-### Web Components
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="node_modules/@highcharts/controls/js/controls.js"></script>
-    <link rel="stylesheet" href="node_modules/@highcharts/controls/css/controls.css">
-</head>
-<body>
-    <div id="container"></div>
-
-    <highcharts-controls target="#container">
-        <highcharts-control
-            type="boolean"
-            path="legend.enabled"
-            value="true">
-        </highcharts-control>
-
-        <highcharts-control
-            type="array-of-strings"
-            path="legend.align"
-            options="left,center,right"
-            value="center">
-        </highcharts-control>
-
-        <highcharts-control
-            type="number"
-            path="legend.x">
-        </highcharts-control>
-
-        <highcharts-control
-            type="color"
-            path="legend.backgroundColor"
-            value="#FFEEAA">
-        </highcharts-control>
-    </highcharts-controls>
-
-    <script type="module">
-        Highcharts.chart('container', {
-            title: { text: 'My Chart' },
-            series: [{
-                data: [1, 2, 3, 4, 5]
-            }]
         });
     </script>
 </body>
