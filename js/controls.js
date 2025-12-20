@@ -466,7 +466,7 @@ class Controls {
         // influence type deduction.
         params.value ?? (params.value = getNestedValue(this.target.options, params.path));
         params.type || (params.type = this.deduceControlType(params));
-        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-control' }));
+        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: `hcc-control hcc-control-${params.type}` }));
         const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
         const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
         const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));

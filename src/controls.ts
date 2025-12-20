@@ -867,7 +867,7 @@ class Controls {
         const div = this.container.appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'hcc-control' }
+                { className: `hcc-control hcc-control-${params.type}` }
             )
         );
         const keyDiv = div.appendChild(
