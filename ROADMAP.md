@@ -4,13 +4,14 @@ This document outlines planned features and improvements for Highcharts Controls
 
 ## Planned Features
 
-- [ ] More compact view with one or two controls, which is probably the most
+- More compact view with one or two controls, which is probably the most
   common use case.
-- [ ] Wider Current Options view, don't limit to the width of the controls.
-- [ ] Undefined state for the controls if a value is not defined or deducted.
-- [ ] A `label` attribute for the control items, to override what is rendered in
+- Wider Current Options view, don't limit to the width of the controls.
+- Undefined state for the controls if a value is not defined or deducted.
+- A `label` attribute for the control items, to override what is rendered in
   the `<label>` tag.
-- [ ] Smart rendering of `select` control: buttons for 2-3 options, dropdown for 4+ options
+- Support array notation for paths, like `series[0].someProperty`.
+- Smart rendering of `select` control: buttons for 2-3 options, dropdown for 4+ options
 
 ---
 
