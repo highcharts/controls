@@ -50,25 +50,6 @@ function isGroupParams(params) {
 function getNestedValue(obj, path) {
     return path.split('.').reduce((current, key) => current?.[key], obj);
 }
-/**
- * Set a nested value on the chart given a dot-separated path.
- */
-function setNestedValue(chart, path, value, animation) {
-    const keys = path.split('.');
-    const updateObj = {};
-    let cur = updateObj;
-    for (let i = 0; i < keys.length; i++) {
-        const k = keys[i];
-        if (i === keys.length - 1) {
-            cur[k] = value;
-        }
-        else {
-            cur[k] = {};
-            cur = cur[k];
-        }
-    }
-    chart.update(updateObj, true, true, animation);
-}
 class Controls {
     constructor(renderTo, options) {
         renderTo = (typeof renderTo === 'string' &&
@@ -99,7 +80,26 @@ class Controls {
         this.addPreview();
         // Keep the options preview updated
         this.updateOptionsPreview();
-        Product.addEvent?.(this.target, 'render', this.updateOptionsPreview.bind(this));
+    }
+    /**
+     * Set a nested value on the target given a dot-separated path.
+     */
+    setNestedValue(path, value, animation) {
+        const keys = path.split('.');
+        const updateObj = {};
+        let cur = updateObj;
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            if (i === keys.length - 1) {
+                cur[k] = value;
+            }
+            else {
+                cur[k] = {};
+                cur = cur[k];
+            }
+        }
+        this.target.update(updateObj, true, true, animation);
+        this.updateOptionsPreview();
     }
     injectCSS() {
         // Check if CSS is already injected
@@ -181,7 +181,6 @@ class Controls {
      * Add a select control
      */
     addSelectControl(params, keyDiv, valueDiv) {
-        const { target } = this;
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.path
         }));
@@ -194,13 +193,13 @@ class Controls {
             }));
             button.dataset.path = params.path;
             button.dataset.value = option;
-            button.addEventListener('click', function () {
-                const value = this.getAttribute('data-value');
-                setNestedValue(target, params.path, value);
+            button.addEventListener('click', () => {
+                const value = button.getAttribute('data-value');
+                this.setNestedValue(params.path, value);
                 // Update active state for all buttons in this group
                 const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
                 allButtons.forEach((b) => b.classList.remove('active'));
-                this.classList.add('active');
+                button.classList.add('active');
             });
         });
     }
@@ -225,7 +224,7 @@ class Controls {
         input.checked = Boolean(params.value);
         input.addEventListener('change', () => {
             const value = input.checked;
-            setNestedValue(this.target, params.path, value);
+            this.setNestedValue(params.path, value);
         });
     }
     /**
@@ -295,7 +294,7 @@ class Controls {
             // Use Highcharts.color to apply opacity and produce rgba()/hex
             const hcColor = Product.color(rgba)
                 .setOpacity(opacity);
-            setNestedValue(this.target, params.path, hcColor.get(), false);
+            this.setNestedValue(params.path, hcColor.get(), false);
             valueEl.textContent = getHex(hcColor);
         };
         colorInput.addEventListener('input', update);
@@ -360,7 +359,7 @@ class Controls {
             const displayValue = unit ? `${numValue}${unit}` : String(numValue);
             const chartValue = unit ? `${numValue}${unit}` : numValue;
             valueEl.textContent = displayValue;
-            setNestedValue(this.target, params.path, chartValue, false);
+            this.setNestedValue(params.path, chartValue, false);
         });
     }
     /**
@@ -380,7 +379,7 @@ class Controls {
         input.value = String(params.value || '');
         input.addEventListener('input', () => {
             const value = input.value;
-            setNestedValue(this.target, params.path, value, false);
+            this.setNestedValue(params.path, value, false);
         });
     }
     /**

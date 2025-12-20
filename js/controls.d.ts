@@ -68,6 +68,10 @@ declare class Controls {
     container: HTMLElement;
     target: ControlTarget;
     constructor(renderTo: string | HTMLElement, options: ControlsOptionsObject);
+    /**
+     * Set a nested value on the target given a dot-separated path.
+     */
+    private setNestedValue;
     private injectCSS;
     private addPreview;
     /**
