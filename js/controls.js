@@ -539,6 +539,9 @@ class HighchartsControlElement extends HTMLElement {
         const config = {
             path: this.getAttribute('path') || ''
         };
+        if (this.hasAttribute('type')) {
+            config.type = this.getAttribute('type');
+        }
         if (this.hasAttribute('value')) {
             config.value = parseValue(this.getAttribute('value'));
         }
