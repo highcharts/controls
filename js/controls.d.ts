@@ -16,7 +16,7 @@ interface ControlTarget {
 }
 type ControlTypes = 'boolean' | 'color' | 'number' | 'select' | 'text';
 interface ControlParams {
-    type: ControlTypes;
+    type?: ControlTypes;
     path: string;
     value?: any;
 }

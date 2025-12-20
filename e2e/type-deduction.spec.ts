@@ -179,4 +179,11 @@ test.describe('Highcharts Controls - Type Deduction', () => {
     });
     expect(titleText).toBe('Updated Title');
   });
+
+  test('deduced number control from series options works correctly', async ({ page }) => {
+    const valueDisplays = page.locator('.hcc-range-value');
+
+    // Read the borderRadius initial value
+    await expect(valueDisplays.nth(4)).toHaveText('3');
+  });
 });

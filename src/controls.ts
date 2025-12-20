@@ -27,7 +27,7 @@ interface ControlTarget {
 type ControlTypes = 'boolean'|'color'|'number'|'select'|'text';
 
 interface ControlParams {
-    type: ControlTypes;
+    type?: ControlTypes;
     path: string;
     value?: any;
 }
@@ -471,12 +471,7 @@ class Controls {
             )
         );
 
-        // Use override value if provided, otherwise get current value from
-        // chart
-        const currentValue = params.value !== void 0 ?
-            params.value :
-            getNestedValue(this.target.options, params.path);
-        input.checked = currentValue;
+        input.checked = Boolean(params.value);
 
         input.addEventListener('change', (): void => {
             const value = input.checked;
@@ -576,19 +571,12 @@ class Controls {
             opacityInput.value = String(value);
         });
 
-        // Use override value if provided, otherwise get current value from
-        // chart
-        const currentValue = params.value !== void 0 ?
-            params.value :
-            (getNestedValue(this.target.options, params.path)
-        );
-
-        let hcColor = Product.color(currentValue);
+        let hcColor = Product.color(params.value);
 
         if (hcColor.rgba.toString().indexOf('NaN') !== -1) {
             hcColor = Product.color('rgba(128, 128, 128, 0.5)'); // Fallback to gray
             console.warn(
-                `Highcharts Controls: Invalid color value for path "${params.path}": ${currentValue}`
+                `Highcharts Controls: Invalid color value for path "${params.path}": ${params.value}`
             );
         }
 
@@ -621,25 +609,21 @@ class Controls {
         valueDiv: HTMLElement
     ): void {
 
-        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'),
+            value = params.value;
 
         // Extract unit from current value if it's a string
         let unit = '';
-        let numericValue = 0;
+        let numericValue: number|undefined;
 
-        // Use override value if provided, otherwise get current value from chart
-        const currentValue = params.value !== void 0 ?
-            params.value :
-            (getNestedValue(this.target.options, params.path) ?? 0);
-
-        if (typeof currentValue === 'string') {
-            const match = currentValue.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
+        if (typeof value === 'string') {
+            const match = value.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
             if (match) {
                 numericValue = parseFloat(match[1]);
                 unit = match[2] || unit;
             }
         } else {
-            numericValue = currentValue;
+            numericValue = value;
         }
 
         // Set default min/max if not provided
@@ -741,12 +725,7 @@ class Controls {
             )
         );
 
-        // Use override value if provided, otherwise get current value from
-        // chart
-        const currentValue = params.value !== void 0 ?
-            params.value :
-            (getNestedValue(this.target.options, params.path) || '');
-        input.value = String(currentValue);
+        input.value = String(params.value || '');
 
         input.addEventListener('input', (): void => {
             const value = input.value;
@@ -884,17 +863,9 @@ class Controls {
             throw new Error('Container for controls not found');
         }
 
-        if (!('value' in params)) {
-            // Set default value from chart options
-            const targetOptions = this.target.getOptions?.();
-            params.value = (
-                targetOptions && getNestedValue(
-                    targetOptions,
-                    params.path
-                )
-            ) ?? getNestedValue(Product?.defaultOptions, params.path)
-        }
-
+        // Infer value and type if not provided. Value comes first as it may
+        // influence type deduction.
+        params.value ??= getNestedValue(this.target.options, params.path)
         params.type ||= this.deduceControlType(params);
 
         const div = this.container.appendChild(
@@ -981,7 +952,6 @@ class Controls {
 class HighchartsControlElement extends HTMLElement {
   getConfig() {
     const config: ControlParams = {
-      type: this.getAttribute('type') as ControlTypes,
       path: this.getAttribute('path') || ''
     };
 
@@ -1012,7 +982,6 @@ class HighchartsControlElement extends HTMLElement {
             this.getAttribute('step') || '1'
         );
     }
-
     return config;
   }
 }

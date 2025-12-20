@@ -33,7 +33,8 @@
             },
             series: [{
                 name: 'Series 1',
-                data: [1, 2, 3, 4, 5]
+                data: [1, 2, 3, 4, 5],
+                type: 'column'
             }]
         });
 
@@ -98,6 +99,10 @@
                 {
                     path: 'subtitle.text',
                     value: 'Not a color'
+                },
+                // Number type - on series object with no value
+                {
+                    path: 'series.0.borderRadius'
                 }
             ]
         });
