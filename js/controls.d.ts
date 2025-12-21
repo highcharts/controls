@@ -70,6 +70,7 @@ declare class Controls {
     constructor(renderTo: string | HTMLElement, options: ControlsOptionsObject);
     /**
      * Set a nested value on the target given a dot-separated path.
+     * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
     private setNestedValue;
     private injectCSS;

@@ -139,9 +139,13 @@ function isGroupParams(
 
 /**
  * Get a nested value from an object given a dot-separated path.
+ * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
  */
 function getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key): any => current?.[key], obj);
+    // Split path into segments, handling array notation
+    // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
+    const segments = path.split(/\.|\[|\]/).filter(s => s !== '');
+    return segments.reduce((current, key): any => current?.[key], obj);
 }
 
 class Controls {
@@ -221,13 +225,16 @@ class Controls {
 
     /**
      * Set a nested value on the target given a dot-separated path.
+     * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
     private setNestedValue(
         path: string,
         value: any,
         animation?: boolean
     ): void {
-        const keys = path.split('.');
+        // Split path into segments, handling array notation
+        // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
+        const keys = path.split(/\.|\[|\]/).filter(s => s !== '');
         const updateObj: any = {};
         let cur = updateObj;
         for (let i = 0; i < keys.length; i++) {
@@ -235,7 +242,10 @@ class Controls {
             if (i === keys.length - 1) {
                 cur[k] = value;
             } else {
-                cur[k] = {};
+                // Check if next key is a number (array index)
+                const nextKey = keys[i + 1];
+                const isNextArray = !isNaN(Number(nextKey));
+                cur[k] = isNextArray ? [] : {};
                 cur = cur[k];
             }
         }

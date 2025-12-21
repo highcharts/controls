@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Notation Test</title>
+    <link rel="stylesheet" href="../../css/controls.css">
+    <script src="../../node_modules/highcharts/highcharts.js"></script>
+</head>
+<body style="margin: 40px; background: #f0f0f0;">
+    <h1>Array Notation Test</h1>
+    <div id="container" style="width: 600px; height: 400px;"></div>
+    <div id="controls-container"></div>
+
+    <script type="module">
+        import HighchartsControls from '../../js/Controls.js';
+
+        // Create chart with multiple series
+        const chart = Highcharts.chart('container', {
+            title: { text: 'Array Notation Test' },
+            xAxis: [{
+                title: { text: 'X Axis 0' }
+            }, {
+                title: { text: 'X Axis 1' }
+            }],
+            series: [{
+                name: 'Series 0',
+                data: [1, 2, 3, 4, 5],
+                colorByPoint: false
+            }, {
+                name: 'Series 1',
+                data: [5, 4, 3, 2, 1],
+                colorByPoint: true
+            }]
+        });
+
+        // Add controls using array notation
+        HighchartsControls.controls('controls-container', {
+            controls: [
+                {
+                    path: 'series[0].name',
+                    type: 'text',
+                    value: 'Series 0'
+                },
+                {
+                    path: 'series[0].colorByPoint',
+                    type: 'boolean',
+                    value: false
+                },
+                {
+                    path: 'series[1].name',
+                    type: 'text',
+                    value: 'Series 1'
+                },
+                {
+                    path: 'series[1].colorByPoint',
+                    type: 'boolean',
+                    value: true
+                },
+                {
+                    path: 'xAxis[0].title.text',
+                    type: 'text',
+                    value: 'X Axis 0'
+                },
+                {
+                    path: 'xAxis[1].title.text',
+                    type: 'text',
+                    value: 'X Axis 1'
+                }
+            ]
+        });
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Array notation support** - Paths can now use array notation like `series[0].colorByPoint` or `xAxis[1].title.text` to access nested arrays in chart options
 - **Nullish state support** - Controls now visually indicate when values are `null` or `undefined`
   - Boolean controls: Unchecked toggle with diagonal striped pattern
   - Color controls: Em-dash (—) placeholder instead of gray fallback, striped pattern in color picker swatch
