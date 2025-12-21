@@ -249,7 +249,6 @@ class Controls {
             className: 'hcc-color-value',
             htmlFor: `color-input-${rid}`
         }));
-        valueDiv.classList.add('hcc-color-control');
         const opacityInput = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'text',
             id: `opacity-input-${rid}`,
@@ -288,6 +287,7 @@ class Controls {
         if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
             console.warn(`Highcharts Controls: Invalid color value for path "${params.path}": ${params.value}`);
             // Treat invalid color as nullish
+            controlDiv.classList.add('hcc-control-nullish');
             valueEl.textContent = '—';
             colorInput.value = '#808080';
             opacityInput.value = '100';
@@ -471,9 +471,11 @@ class Controls {
         if (Array.isArray(params.options)) {
             return 'select';
         }
+        if (params.path.toLowerCase().indexOf('color') !== -1) {
+            return 'color';
+        }
         if (typeof value === 'string') {
-            if (params.path.toLowerCase().indexOf('color') !== -1 ||
-                Product.color(value).rgba.toString().indexOf('NaN') === -1) {
+            if (Product.color(value).rgba.toString().indexOf('NaN') === -1) {
                 return 'color';
             }
             return 'text';
