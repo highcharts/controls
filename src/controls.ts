@@ -249,7 +249,7 @@ class Controls {
                 cur = cur[k];
             }
         }
-        this.target.update(updateObj, true, true, animation);
+        this.target.update(updateObj, true, false, animation);
         this.updateOptionsPreview();
     }
 
