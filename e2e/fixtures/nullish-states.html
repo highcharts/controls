@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nullish States Test</title>
+    <link rel="stylesheet" href="../../css/controls.css">
+    <script src="../../node_modules/highcharts/highcharts.js"></script>
+</head>
+<body style="margin: 40px; background: #f0f0f0;">
+    <h1>Nullish States Demo</h1>
+    <div id="container" style="width: 600px; height: 400px;"></div>
+    <div id="controls-container"></div>
+
+    <script type="module">
+        import HighchartsControls from '../../js/Controls.js';
+
+        // Create chart
+        const chart = Highcharts.chart('container', {
+            title: { text: 'Nullish States Test' },
+            series: [{
+                data: [1, 2, 3, 4, 5]
+            }]
+        });
+
+        // Add controls with nullish values
+        HighchartsControls.controls('controls-container', {
+            controls: [
+                {
+                    path: 'dummy.text',
+                    type: 'text',
+                    value: null // Nullish text control
+                },
+                {
+                    path: 'dummy.enabled',
+                    type: 'boolean',
+                    value: null // Nullish boolean control (striped toggle)
+                },
+                {
+                    path: 'dummy.backgroundColor',
+                    type: 'color',
+                    value: null // Nullish color control (shows em-dash)
+                },
+                {
+                    path: 'dummy.marginTop',
+                    type: 'number',
+                    min: 0,
+                    max: 200,
+                    value: null // Nullish number control (no label shown)
+                },
+                {
+                    path: 'dummy.type',
+                    type: 'select',
+                    options: ['line', 'column', 'bar'],
+                    value: null // Nullish select control (no button active)
+                }
+            ]
+        });
+    </script>
+</body>
+</html>

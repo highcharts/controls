@@ -299,6 +299,37 @@ Edit text values with a text input field.
 }
 ```
 
+### Nullish State Handling
+
+When a control's value is `null` or `undefined`, each control type displays a distinct visual state to clearly indicate that no value has been set:
+
+#### Visual Indicators
+
+- **Boolean controls**: Display as unchecked with a diagonal striped pattern on the toggle slider
+- **Color controls**: Show an em-dash (—) placeholder instead of a color value, with a striped pattern in the color picker swatch
+- **Number controls**: Display the range slider but hide the numeric label
+- **Select controls**: No button is marked as active
+- **Text controls**: Show an empty input field
+
+#### Behavior
+
+This typically happens if the `value` is not set, and the Controls are unable to
+read the value from the target chart or grid. In some cases, chart or grid
+defaults are null or undefined, indicating the behavior depends on other states.
+
+```html
+<highcharts-controls>
+    <highcharts-control path="chart.inverted" type="boolean"></highcharts-control>
+    <highcharts-control path="legend.backgroundColor" type="color"></highcharts-control>
+</highcharts-control>
+```
+
+When a user interacts with a control in nullish state (types text, clicks toggle, changes color, moves slider, or selects option), the visual nullish indicators are automatically removed and the control behaves normally.
+
+**CSS Classes:**
+- All controls in nullish state receive the `hcc-control-nullish` class
+- Each control type also receives a type-specific class (`hcc-control-boolean`, `hcc-control-color`, `hcc-control-number`, `hcc-control-select`, `hcc-control-text`) for targeted styling
+
 ### Web Component API
 
 #### `<highcharts-controls>`

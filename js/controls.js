@@ -180,20 +180,22 @@ class Controls {
     /**
      * Add a select control
      */
-    addSelectControl(params, keyDiv, valueDiv) {
+    addSelectControl(params, keyDiv, valueDiv, controlDiv) {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.path
         }));
         valueDiv.classList.add('hcc-button-group');
         params.options.forEach((option) => {
+            const isActive = params.value !== null && params.value !== undefined && params.value === option;
             const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
                 className: 'hcc-button' +
-                    (params.value === option ? ' active' : ''),
+                    (isActive ? ' active' : ''),
                 innerText: option
             }));
             button.dataset.path = params.path;
             button.dataset.value = option;
             button.addEventListener('click', () => {
+                controlDiv.classList.remove('hcc-control-nullish');
                 const value = button.getAttribute('data-value');
                 this.setNestedValue(params.path, value);
                 // Update active state for all buttons in this group
@@ -206,12 +208,13 @@ class Controls {
     /**
      * Add a boolean control
      */
-    addBooleanControl(params, keyDiv, valueDiv) {
+    addBooleanControl(params, keyDiv, valueDiv, controlDiv) {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `toggle-checkbox-${rid}`,
             innerText: params.path
         }));
+        const isNullish = params.value === null || params.value === undefined;
         const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
         const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
             type: 'checkbox',
@@ -223,6 +226,7 @@ class Controls {
         }));
         input.checked = Boolean(params.value);
         input.addEventListener('change', () => {
+            controlDiv.classList.remove('hcc-control-nullish');
             const value = input.checked;
             this.setNestedValue(params.path, value);
         });
@@ -230,7 +234,7 @@ class Controls {
     /**
      * Add a color control
      */
-    addColorControl(params, keyDiv, valueDiv) {
+    addColorControl(params, keyDiv, valueDiv, controlDiv) {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `color-input-${rid}`,
@@ -279,16 +283,28 @@ class Controls {
             }
             opacityInput.value = String(value);
         });
-        let hcColor = Product.color(params.value);
-        if (hcColor.rgba.toString().indexOf('NaN') !== -1) {
-            hcColor = Product.color('rgba(128, 128, 128, 0.5)'); // Fallback to gray
+        const isNullish = params.value === null || params.value === undefined;
+        let hcColor = isNullish ? Product.color('#808080') : Product.color(params.value);
+        if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
             console.warn(`Highcharts Controls: Invalid color value for path "${params.path}": ${params.value}`);
+            // Treat invalid color as nullish
+            valueEl.textContent = '—';
+            colorInput.value = '#808080';
+            opacityInput.value = '100';
         }
-        const hex = getHex(hcColor), opacity = (hcColor.rgba[3] || 1) * 100;
-        colorInput.value = hex;
-        valueEl.textContent = hex;
-        opacityInput.value = String(opacity);
+        else if (isNullish) {
+            valueEl.textContent = '—';
+            colorInput.value = '#808080';
+            opacityInput.value = '100';
+        }
+        else {
+            const hex = getHex(hcColor), opacity = (hcColor.rgba[3] || 1) * 100;
+            colorInput.value = hex;
+            valueEl.textContent = hex;
+            opacityInput.value = String(opacity);
+        }
         const update = () => {
+            controlDiv.classList.remove('hcc-control-nullish');
             const rgba = colorInput.value; // E.g. #RRGGBB
             const opacity = parseFloat(opacityInput.value) / 100;
             // Use Highcharts.color to apply opacity and produce rgba()/hex
@@ -303,7 +319,7 @@ class Controls {
     /**
      * Add a number control
      */
-    addNumberControl(params, keyDiv, valueDiv) {
+    addNumberControl(params, keyDiv, valueDiv, controlDiv) {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'), value = params.value;
         // Extract unit from current value if it's a string
         let unit = '';
@@ -341,6 +357,7 @@ class Controls {
             htmlFor: `range-input-${rid}`,
             innerText: params.path
         }));
+        const isNullish = numericValue === null || numericValue === undefined;
         const valueEl = valueDiv.appendChild(Object.assign(document.createElement('span'), {
             id: `range-value-${rid}`,
             className: 'hcc-range-value'
@@ -352,9 +369,17 @@ class Controls {
             max: String(params.max),
             step: String(params.step || 1)
         }));
-        input.value = String(numericValue);
-        valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
+        if (isNullish) {
+            // Set to middle of range for nullish state
+            input.value = String((params.min + params.max) / 2);
+            valueEl.textContent = '';
+        }
+        else {
+            input.value = String(numericValue);
+            valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
+        }
         input.addEventListener('input', () => {
+            controlDiv.classList.remove('hcc-control-nullish');
             const numValue = parseFloat(input.value);
             const displayValue = unit ? `${numValue}${unit}` : String(numValue);
             const chartValue = unit ? `${numValue}${unit}` : numValue;
@@ -365,7 +390,7 @@ class Controls {
     /**
      * Add a text control
      */
-    addTextControl(params, keyDiv, valueDiv) {
+    addTextControl(params, keyDiv, valueDiv, controlDiv) {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `text-input-${rid}`,
@@ -378,6 +403,7 @@ class Controls {
         }));
         input.value = String(params.value || '');
         input.addEventListener('input', () => {
+            controlDiv.classList.remove('hcc-control-nullish');
             const value = input.value;
             this.setNestedValue(params.path, value, false);
         });
@@ -466,24 +492,25 @@ class Controls {
         // influence type deduction.
         params.value ?? (params.value = getNestedValue(this.target.options, params.path));
         params.type || (params.type = this.deduceControlType(params));
-        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: `hcc-control hcc-control-${params.type}` }));
+        const isNullish = params.value === null || params.value === undefined;
+        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: `hcc-control hcc-control-${params.type}${isNullish ? ' hcc-control-nullish' : ''}` }));
         const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
         const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
         const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
         if (isSelectControlParams(params)) {
-            this.addSelectControl(params, keyDiv, valueDivInner);
+            this.addSelectControl(params, keyDiv, valueDivInner, div);
         }
         else if (isBooleanControlParams(params)) {
-            this.addBooleanControl(params, keyDiv, valueDivInner);
+            this.addBooleanControl(params, keyDiv, valueDivInner, div);
         }
         else if (isColorControlParams(params)) {
-            this.addColorControl(params, keyDiv, valueDivInner);
+            this.addColorControl(params, keyDiv, valueDivInner, div);
         }
         else if (isNumberControlParams(params)) {
-            this.addNumberControl(params, keyDiv, valueDivInner);
+            this.addNumberControl(params, keyDiv, valueDivInner, div);
         }
         else if (isTextControlParams(params)) {
-            this.addTextControl(params, keyDiv, valueDivInner);
+            this.addTextControl(params, keyDiv, valueDivInner, div);
         }
     }
     /**

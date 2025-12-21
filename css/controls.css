@@ -240,6 +240,27 @@ highcharts-group-description {
         box-shadow: 0 0 0 3px light-dark(rgba(76, 175, 80, 0.35), rgba(76, 175, 80, 0.5));
     }
 
+    /* Nullish state styles */
+    .hcc-control-nullish .hcc-toggle-slider {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#e0e0e0, #444444),
+            light-dark(#e0e0e0, #444444) 3px,
+            light-dark(#cfcfcf, #555555) 3px,
+            light-dark(#cfcfcf, #555555) 6px
+        );
+    }
+
+    .hcc-control-nullish .hcc-toggle-slider::before {
+        opacity: 0.6;
+    }
+
+    .hcc-control-nullish .hcc-color-value,
+    .hcc-control-nullish .hcc-opacity-input,
+    .hcc-control-nullish .hcc-range-value {
+        opacity: 0.4;
+    }
+
     .hcc-color-value {
         display: inline-block;
         min-width: 6ch;
@@ -344,6 +365,26 @@ highcharts-group-description {
     input[type="color"]::-moz-color-swatch {
         border-radius: 50%;
         border-width: 2px;
+    }
+
+    .hcc-control-nullish input[type="color"]::-webkit-color-swatch {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#e0e0e0, #444444),
+            light-dark(#e0e0e0, #444444) 3px,
+            light-dark(#cfcfcf, #555555) 3px,
+            light-dark(#cfcfcf, #555555) 6px
+        ) !important;
+    }
+
+    .hcc-control-nullish input[type="color"]::-moz-color-swatch {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#e0e0e0, #444444),
+            light-dark(#e0e0e0, #444444) 3px,
+            light-dark(#cfcfcf, #555555) 3px,
+            light-dark(#cfcfcf, #555555) 6px
+        ) !important;
     }
 
     input.hcc-opacity-input {
