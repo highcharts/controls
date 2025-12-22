@@ -1127,7 +1127,25 @@ class HighchartsGroupElement extends HTMLElement {
 
 class HighchartsControlsElement extends HTMLElement {
     connectedCallback() {
-        const controls: (ControlParams | GroupParams)[] = [];
+        const controls: (ControlParams | GroupParams)[] = [],
+            injectCSS = this.getAttribute('inject-css') !== 'false';
+
+        let target = this.getTarget();
+
+        const init = (target: ControlTarget): void => {
+            Controls.controls(this, {
+                target,
+                injectCSS,
+                controls: controls as Array<
+                    GroupParams|
+                    SelectControlParams|
+                    BooleanControlParams|
+                    ColorControlParams|
+                    NumberControlParams|
+                    TextControlParams
+                >
+            });
+        };
 
         // Process direct children (both controls and groups)
         Array.from(this.children).forEach((child): void => {
@@ -1142,19 +1160,20 @@ class HighchartsControlsElement extends HTMLElement {
             }
         });
 
-        const injectCSS = this.getAttribute('inject-css');
-        Controls.controls(this, {
-            target: this.getTarget(),
-            injectCSS: injectCSS !== 'false',
-            controls: controls as Array<
-                GroupParams|
-                SelectControlParams|
-                BooleanControlParams|
-                ColorControlParams|
-                NumberControlParams|
-                TextControlParams
-            >
-        });
+        // Initialize if target is found
+        if (target) {
+            init(target);
+        } else {
+            // Listen for DOM update to retry initialization
+            const observer = new MutationObserver((): void => {
+                target = this.getTarget();
+                if (target) {
+                    observer.disconnect();
+                    init(target);
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
 
     private getTarget(): ControlTarget | undefined {

@@ -685,7 +685,15 @@ class HighchartsGroupElement extends HTMLElement {
 }
 class HighchartsControlsElement extends HTMLElement {
     connectedCallback() {
-        const controls = [];
+        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false';
+        let target = this.getTarget();
+        const init = (target) => {
+            Controls.controls(this, {
+                target,
+                injectCSS,
+                controls: controls
+            });
+        };
         // Process direct children (both controls and groups)
         Array.from(this.children).forEach((child) => {
             if (child.tagName.toLowerCase() === 'highcharts-group') {
@@ -699,12 +707,21 @@ class HighchartsControlsElement extends HTMLElement {
                 }
             }
         });
-        const injectCSS = this.getAttribute('inject-css');
-        Controls.controls(this, {
-            target: this.getTarget(),
-            injectCSS: injectCSS !== 'false',
-            controls: controls
-        });
+        // Initialize if target is found
+        if (target) {
+            init(target);
+        }
+        else {
+            // Listen for DOM update to retry initialization
+            const observer = new MutationObserver(() => {
+                target = this.getTarget();
+                if (target) {
+                    observer.disconnect();
+                    init(target);
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
     getTarget() {
         const targetAttr = this.getAttribute('target');
