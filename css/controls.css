@@ -145,13 +145,36 @@ highcharts-group-description {
         padding-top: 1em;
         max-height: 600px;
         opacity: 1;
-        overflow: auto;
-        transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out
+        overflow: visible;
+        transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out;
     }
 
     .hcc-preview-wrapper {
         max-height: 600px;
+        overflow: visible;
+        position: relative;
+        width: 100%;
+        transition: all 250ms ease-in-out;
+    }
+
+    .hcc-preview-content {
+        max-height: 600px;
         overflow: auto;
+        width: 100%;
+        padding: 0;
+        box-sizing: border-box;
+        transition:
+            padding 250ms ease-in-out,
+            width 250ms ease-in-out;
+    }
+
+    .hcc-preview-section.expanded .hcc-preview-content {
+        width: min(600px, 100vw);
+        margin-right: calc(min(600px, 100vw) * -1);
+        padding: 0.5em;
+        background-color: light-dark(#ffffff, #141414);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 7px;
     }
 
     .hcc-preview-section.hidden {
@@ -164,6 +187,26 @@ highcharts-group-description {
         margin: 0 0 1rem;
         color: light-dark(#495057, #adb5bd);
         font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .hcc-expand-icon {
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background: light-dark(#f8f9fa, #2d2d2d);
+        border: 1px solid light-dark(#dee2e6, #495057);
+        font-size: 0.9rem;
+        opacity: 0.7;
+        transition: opacity 200ms, background 200ms;
+        user-select: none;
+    }
+
+    .hcc-expand-icon:hover {
+        opacity: 1;
+        background: light-dark(#e9ecef, #3a3a3a);
     }
 
     .hcc-options-preview {

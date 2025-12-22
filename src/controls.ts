@@ -369,11 +369,25 @@ class Controls {
         previewSection.className = 'hcc-preview-section hidden';
         previewSection.innerHTML =
             '<div class="hcc-preview-wrapper">' +
-            '<h3>Current Options</h3>' +
+            '<div class="hcc-preview-content">' +
+            '<h3>Current Options<span class="hcc-expand-icon" title="Expand preview">⇲</span></h3>' +
             '<pre class="hcc-options-preview"></pre>' +
+            '</div>' +
             '</div>';
 
         this.container.appendChild(previewSection);
+
+        // Add expand functionality
+        const expandIcon = previewSection.querySelector('.hcc-expand-icon') as HTMLElement;
+        if (expandIcon) {
+            expandIcon.addEventListener('click', (): void => {
+                previewSection.classList.toggle('expanded');
+                expandIcon.innerText = previewSection.classList.contains('expanded') ? '⇱' : '⇲';
+                expandIcon.title = previewSection.classList.contains('expanded')
+                    ? 'Collapse preview'
+                    : 'Expand preview';
+            });
+        }
     }
 
     /**
