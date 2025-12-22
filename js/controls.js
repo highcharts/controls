@@ -284,14 +284,19 @@ class Controls {
             textContent: '%',
             className: 'hcc-opacity-input-label'
         }));
-        const getHex = (color) => {
+        const getHex = (color, includeAlpha) => {
             const rgba = color.rgba;
-            return (`#${(((1 << 24) +
+            let hex = `#${(((1 << 24) +
                 (rgba[0] << 16) +
                 (rgba[1] << 8) +
                 rgba[2])
                 .toString(16)
-                .slice(1)).toLowerCase()}`);
+                .slice(1)).toLowerCase()}`;
+            if (includeAlpha && rgba[3] !== undefined && rgba[3] !== 1) {
+                const alpha = Math.round(rgba[3] * 255);
+                hex += ((1 << 8) + alpha).toString(16).slice(1).toLowerCase();
+            }
+            return hex;
         };
         // Add a validator for the opacity input. It should be a number between
         // 0 and 100.
@@ -336,7 +341,7 @@ class Controls {
             // Use Highcharts.color to apply opacity and produce rgba()/hex
             const hcColor = Product.color(rgba)
                 .setOpacity(opacity);
-            this.setNestedValue(params.path, hcColor.get(), false);
+            this.setNestedValue(params.path, getHex(hcColor, true), false);
             valueEl.textContent = getHex(hcColor);
         };
         colorInput.addEventListener('input', update);

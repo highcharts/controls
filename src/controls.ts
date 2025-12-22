@@ -566,9 +566,12 @@ class Controls {
             )
         );
 
-        const getHex = (color: { rgba: number[] }): string => {
+        const getHex = (
+            color: { rgba: number[] },
+            includeAlpha?: boolean
+        ): string => {
             const rgba = color.rgba;
-            return (`#${(
+            let hex = `#${(
                 ((1 << 24) +
                 (rgba[0] << 16) +
                 (rgba[1] << 8) +
@@ -576,7 +579,14 @@ class Controls {
                 )
                     .toString(16)
                     .slice(1)
-            ).toLowerCase()}`);
+            ).toLowerCase()}`;
+
+            if (includeAlpha && rgba[3] !== undefined && rgba[3] !== 1) {
+                const alpha = Math.round(rgba[3] * 255);
+                hex += ((1 << 8) + alpha).toString(16).slice(1).toLowerCase();
+            }
+
+            return hex;
         };
 
         // Add a validator for the opacity input. It should be a number between
@@ -625,7 +635,11 @@ class Controls {
             // Use Highcharts.color to apply opacity and produce rgba()/hex
             const hcColor = Product.color(rgba)
                 .setOpacity(opacity);
-            this.setNestedValue(params.path, hcColor.get(), false);
+            this.setNestedValue(
+                params.path,
+                getHex(hcColor, true),
+                false
+            );
             valueEl.textContent = getHex(hcColor);
         };
 

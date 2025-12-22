@@ -345,7 +345,7 @@ highcharts-group-description {
         display: inline-block;
         min-width: 6ch;
         margin: 0 10px;
-        text-transform: uppercase;
+        text-transform: lowercase;
     }
 
     /* Button styles */
