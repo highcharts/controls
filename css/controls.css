@@ -513,4 +513,28 @@ highcharts-group-description {
         outline: 2px solid light-dark(#6366f1, #818cf8);
         outline-offset: 1px;
     }
+
+    /* Select dropdown styles */
+    .hcc-select-control {
+        border: none;
+        background: none;
+    }
+
+    .hcc-select-dropdown {
+        width: 100%;
+        padding: 0.5em 0.8em;
+        border-radius: 7px;
+        border: 1px solid light-dark(#dddddd, #555555);
+        background: light-dark(#f8f9fa, #212529);
+        color: light-dark(#141414, #ffffff);
+        font-family: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+
+    .hcc-select-dropdown:focus {
+        outline: 2px solid light-dark(#6366f1, #818cf8);
+        outline-offset: 1px;
+    }
 }

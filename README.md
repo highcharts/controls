@@ -321,8 +321,10 @@ When a control's value is `null` or `undefined`, each control type displays a di
 - **Boolean controls**: Display as unchecked with a diagonal striped pattern on the toggle slider
 - **Color controls**: Show an em-dash (—) placeholder instead of a color value, with a striped pattern in the color picker swatch
 - **Number controls**: Display the range slider but hide the numeric label
-- **Select controls**: No button is marked as active
+- **Select controls**: No button is marked as active (or no option selected in dropdown)
 - **Text controls**: Show an empty input field
+
+**Note:** Select controls automatically render as a dropdown when there are more than 3 options or the total string length of all options exceeds 24 characters. Otherwise, they display as a button group.
 
 #### Behavior
 

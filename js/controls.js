@@ -210,26 +210,52 @@ class Controls {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.path
         }));
-        valueDiv.classList.add('hcc-button-group');
-        params.options.forEach((option) => {
-            const isActive = params.value !== null && params.value !== undefined && params.value === option;
-            const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
-                className: 'hcc-button' +
-                    (isActive ? ' active' : ''),
-                innerText: option
+        // Determine whether to use select dropdown or button group
+        const totalLength = params.options.reduce((sum, opt) => sum + opt.length, 0);
+        const useDropdown = params.options.length > 3 || totalLength > 24;
+        if (useDropdown) {
+            // Render as select dropdown
+            valueDiv.classList.add('hcc-select-control');
+            const select = valueDiv.appendChild(Object.assign(document.createElement('select'), {
+                className: 'hcc-select-dropdown'
             }));
-            button.dataset.path = params.path;
-            button.dataset.value = option;
-            button.addEventListener('click', () => {
-                controlDiv.classList.remove('hcc-control-nullish');
-                const value = button.getAttribute('data-value');
-                this.setNestedValue(params.path, value);
-                // Update active state for all buttons in this group
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                allButtons.forEach((b) => b.classList.remove('active'));
-                button.classList.add('active');
+            params.options.forEach((option) => {
+                const isSelected = params.value !== null && params.value !== undefined && params.value === option;
+                const optionEl = select.appendChild(Object.assign(document.createElement('option'), {
+                    value: option,
+                    innerText: option,
+                    selected: isSelected
+                }));
             });
-        });
+            select.addEventListener('change', () => {
+                controlDiv.classList.remove('hcc-control-nullish');
+                const value = select.value;
+                this.setNestedValue(params.path, value);
+            });
+        }
+        else {
+            // Render as button group
+            valueDiv.classList.add('hcc-button-group');
+            params.options.forEach((option) => {
+                const isActive = params.value !== null && params.value !== undefined && params.value === option;
+                const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
+                    className: 'hcc-button' +
+                        (isActive ? ' active' : ''),
+                    innerText: option
+                }));
+                button.dataset.path = params.path;
+                button.dataset.value = option;
+                button.addEventListener('click', () => {
+                    controlDiv.classList.remove('hcc-control-nullish');
+                    const value = button.getAttribute('data-value');
+                    this.setNestedValue(params.path, value);
+                    // Update active state for all buttons in this group
+                    const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
+                    allButtons.forEach((b) => b.classList.remove('active'));
+                    button.classList.add('active');
+                });
+            });
+        }
     }
     /**
      * Add a boolean control

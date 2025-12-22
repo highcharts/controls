@@ -8,7 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Options Preview** - Added syntax highlighting and JS formatting for better code readability
+- **Options Preview** - Added expandable preview with syntax highlighting and JavaScript-like formatting
+  - Property names displayed without quotes
+  - String values use single quotes instead of double quotes
+  - Syntax highlighting with color-coded keys, strings, numbers, booleans, and null values
+  - HTML markup in values is properly escaped for safe display
+  - Expandable icon allows preview to extend beyond narrow table width (max 600px)
+  - Expand icon automatically hidden when preview has sufficient width (container queries)
+- **Select control smart rendering** - Select controls now automatically render as dropdown when:
+  - There are more than 3 options, OR
+  - Total string length of all options exceeds 24 characters
+  - Smaller option sets continue to use the button group interface
 - **Better layout** - The Controls can now be laid out as a block to fit the
 parent's width, or `inline-block` to shrink to its content (better for small,
 single toggles)
