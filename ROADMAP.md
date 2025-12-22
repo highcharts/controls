@@ -6,8 +6,6 @@ This document outlines planned features and improvements for Highcharts Controls
 
 - A `label` attribute for the control items, to override what is rendered in
   the `<label>` tag.
-- Smart rendering of `select` control: buttons for 2-3 options, dropdown for 4+
-  options
 - Consider the JS API. Does it make sense that the `controls` option includes
   groups and nested controls?
 - npm package.
