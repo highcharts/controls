@@ -161,6 +161,8 @@ highcharts-group-description {
         position: relative;
         width: 100%;
         transition: all 250ms ease-in-out;
+        container-type: inline-size;
+        container-name: preview;
     }
 
     .hcc-preview-content {
@@ -214,6 +216,12 @@ highcharts-group-description {
     .hcc-expand-icon:hover {
         opacity: 1;
         background: light-dark(#e9ecef, #3a3a3a);
+    }
+
+    @container preview (min-width: 600px) {
+        .hcc-expand-icon {
+            display: none;
+        }
     }
 
     .hcc-options-preview {
