@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Better layout** - The Controls can now be laid out as a block to fit the
+parent's width, or `inline-block` to shrink to its content (better for small,
+single toggles)
 - **Array notation support** - Paths can now use array notation like `series[0].colorByPoint` or `xAxis[1].title.text` to access nested arrays in chart options
 - **Nullish state support** - Controls now visually indicate when values are `null` or `undefined`
   - Boolean controls: Unchecked toggle with diagonal striped pattern

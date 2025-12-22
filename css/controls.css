@@ -14,6 +14,8 @@ highcharts-group-description {
 }
 
 .highcharts-controls {
+    /* Set inline-block to fit to content, block to fit to container */
+    display: block;
     padding: 1rem;
     border-radius: 7px;
     border: 1px solid light-dark(#e9ecef, #495057);
@@ -27,6 +29,7 @@ highcharts-group-description {
 
     .hcc-container {
         display: inline-table;
+        width: 100%;
     }
 
     .hcc-control {
@@ -146,7 +149,10 @@ highcharts-group-description {
         max-height: 600px;
         opacity: 1;
         overflow: visible;
-        transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out;
+        transition:
+            max-height 250ms ease-in-out,
+            opacity 250ms ease-in-out,
+            padding-top 250ms ease-in-out;
     }
 
     .hcc-preview-wrapper {
@@ -181,6 +187,7 @@ highcharts-group-description {
         max-height: 0;
         opacity: 0;
         overflow: hidden;
+        padding-top: 0;
     }
 
     .hcc-preview-section h3 {

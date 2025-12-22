@@ -122,6 +122,19 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
 </html>
 ```
 
+## Layout control
+By default, the Highcharts Controls renders in a block element, taking 100% of
+its parent's width. In some cases, particularly when rendering juse one or a
+handful controls, it looks better to keep the controls close to the labels. In
+that case, apply `inline-block` display to the top container in order to make
+the layout shrink to fit its content.
+
+```css
+.highcharts-controls {
+    display: inline-block;
+}
+```
+
 ## API Documentation
 
 ### JavaScript/TypeScript API

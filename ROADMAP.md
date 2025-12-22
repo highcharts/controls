@@ -4,8 +4,6 @@ This document outlines planned features and improvements for Highcharts Controls
 
 ## Planned Features
 
-- More compact view with one or two controls, which is probably the most
-  common use case. See "Table layout" stash.
 - Wider Current Options view, don't limit to the width of the controls.
 - A `label` attribute for the control items, to override what is rendered in
   the `<label>` tag.
@@ -13,6 +11,7 @@ This document outlines planned features and improvements for Highcharts Controls
   options
 - Consider the JS API. Does it make sense that the `controls` option includes
   groups and nested controls?
+- npm package.
 
 ---
 
