@@ -8,7 +8,6 @@ This document outlines planned features and improvements for Highcharts Controls
   the `<label>` tag.
 - Consider the JS API. Does it make sense that the `controls` option includes
   groups and nested controls?
-- npm package.
 
 ---
 

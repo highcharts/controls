@@ -6,7 +6,7 @@ GUI controls for manipulating Highcharts charts, Grid, and Dashboards options on
 
 Load the [module file](https://github.com/highcharts/controls/blob/main/js/controls.js) from a CDN or your own server
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.3.0"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.4.0"></script>
 ```
 
 ## Usage
@@ -18,7 +18,7 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.3.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.4.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -70,7 +70,7 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.3.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.4.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -357,7 +357,7 @@ Container element for controls.
 
 **Example:**
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.3.0/css/controls.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.4.0/css/controls.css" />
 <highcharts-controls target="#my-chart" inject-css="false">
     <!-- controls here -->
 </highcharts-controls>
