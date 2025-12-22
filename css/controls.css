@@ -26,39 +26,29 @@ highcharts-group-description {
     }
 
     .hcc-container {
-        max-width: 400px;
-        display: flex;
-        flex-direction: column;
-        margin: 0 auto;
-        width: 100%;
+        display: inline-table;
     }
 
     .hcc-control {
-        display: flex;
+        display: table-row;
         align-items: center;
-        gap: 1em;
     }
 
     .hcc-key,
     .hcc-value {
+        display: table-cell;
         line-height: 2em;
         padding: 0.3em 0;
     }
 
     .hcc-key {
         text-align: left;
-        flex: 0 1 auto;
-    }
-
-    .hcc-key {
-        overflow: hidden;
-        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-right: 1em;
     }
 
     .hcc-value {
         text-align: right;
-        flex: 1 1 auto;
-        min-width: 0;
     }
 
     .hcc-value-inner {
@@ -69,6 +59,7 @@ highcharts-group-description {
         min-height: 2.2em;
         display: inline-block;
         text-align: center;
+        white-space: nowrap;
     }
 
     .hcc-value-inner:has(.hcc-toggle) {
@@ -151,16 +142,19 @@ highcharts-group-description {
     .hcc-preview-section {
         margin-top: 1em;
         max-height: 600px;
+        max-width: 600px;
         overflow: auto;
         opacity: 1;
         transition:
             max-height 250ms ease-in-out,
             margin-top 250ms ease-in-out,
+            max-width 250ms ease-in-out,
             opacity 250ms ease-in-out;
     }
 
     .hcc-preview-section.hidden {
         max-height: 0;
+        max-width: 0;
         margin-top: 0;
         opacity: 0;
     }
