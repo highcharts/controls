@@ -140,23 +140,24 @@ highcharts-group-description {
     }
 
     .hcc-preview-section {
-        margin-top: 1em;
+        display: table-caption;
+        caption-side: bottom;
+        padding-top: 1em;
         max-height: 600px;
-        max-width: 600px;
-        overflow: auto;
         opacity: 1;
-        transition:
-            max-height 250ms ease-in-out,
-            margin-top 250ms ease-in-out,
-            max-width 250ms ease-in-out,
-            opacity 250ms ease-in-out;
+        overflow: auto;
+        transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out
+    }
+
+    .hcc-preview-wrapper {
+        max-height: 600px;
+        overflow: auto;
     }
 
     .hcc-preview-section.hidden {
         max-height: 0;
-        max-width: 0;
-        margin-top: 0;
         opacity: 0;
+        overflow: hidden;
     }
 
     .hcc-preview-section h3 {

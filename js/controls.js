@@ -181,11 +181,14 @@ class Controls {
             }
         });
         // Add the preview element
-        this.container.appendChild(Object.assign(document.createElement('div'), {
-            className: 'hcc-preview-section hidden',
-            innerHTML: '<h3>Current Options</h3>' +
-                '<pre class="hcc-options-preview"></pre>'
-        }));
+        const previewSection = document.createElement('div');
+        previewSection.className = 'hcc-preview-section hidden';
+        previewSection.innerHTML =
+            '<div class="hcc-preview-wrapper">' +
+                '<h3>Current Options</h3>' +
+                '<pre class="hcc-options-preview"></pre>' +
+                '</div>';
+        this.container.appendChild(previewSection);
     }
     /**
      * Add a select control
