@@ -149,7 +149,12 @@ class Controls {
         `;
         document.head.appendChild(inlineStyle);
         // Get the CSS URL from the module URL
-        const cssUrl = import.meta.url.replace(/\/js\/[^/]+$/, '/css/controls.css');
+        const cssUrl = import.meta.url
+            .replace(/\/js\/[^/]+$/, '/css/controls.css')
+            // Match jsDelivr/npm CDN. Patterns:
+            // - https://cdn.jsdelivr.net/npm/@highcharts/controls@0.3.0
+            // - https://cdn.jsdelivr.net/npm/@highcharts/controls
+            .replace(/(https?:\/\/cdn\.jsdelivr\.net\/npm\/@highcharts\/controls)(@[\d.]+)?$/, '$1$2/css/controls.css');
         const link = document.createElement('link');
         link.id = 'highcharts-controls-css';
         link.rel = 'stylesheet';
