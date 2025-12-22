@@ -4,7 +4,6 @@ This document outlines planned features and improvements for Highcharts Controls
 
 ## Planned Features
 
-- Wider Current Options view, don't limit to the width of the controls.
 - A `label` attribute for the control items, to override what is rendered in
   the `<label>` tag.
 - Smart rendering of `select` control: buttons for 2-3 options, dropdown for 4+
