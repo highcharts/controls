@@ -542,6 +542,44 @@ class Controls {
         }
     }
     /**
+     * Escape HTML entities in a string.
+     */
+    escapeHTML(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    /**
+     * Format JSON with syntax highlighting and JavaScript-like formatting.
+     */
+    formatJSONWithHighlighting(obj) {
+        const json = JSON.stringify(obj, null, 2);
+        // Escape HTML in the entire JSON string first
+        let formatted = this.escapeHTML(json);
+        // Convert to JavaScript-like syntax: remove quotes from keys, use single quotes
+        formatted = formatted
+            // Remove quotes from property names
+            .replace(/&quot;([^&]+)&quot;:/g, '$1:')
+            // Convert double quotes to single quotes for string values (allowing escaped entities)
+            .replace(/: &quot;((?:[^&]|&[a-z]+;)*?)&quot;/g, ": &#39;$1&#39;");
+        // Apply syntax highlighting with HTML spans
+        formatted = formatted
+            // Highlight property names
+            .replace(/^(\s*)([a-zA-Z_$][a-zA-Z0-9_$]*):/gm, '$1<span class="hcc-syntax-key">$2</span>:')
+            // Highlight string values (single quotes, allowing escaped entities)
+            .replace(/: &#39;((?:[^&]|&[a-z]+;)*?)&#39;/g, ': <span class="hcc-syntax-string">&#39;$1&#39;</span>')
+            // Highlight numbers
+            .replace(/: (-?\d+\.?\d*)/g, ': <span class="hcc-syntax-number">$1</span>')
+            // Highlight booleans
+            .replace(/: (true|false)/g, ': <span class="hcc-syntax-boolean">$1</span>')
+            // Highlight null
+            .replace(/: (null)/g, ': <span class="hcc-syntax-null">$1</span>');
+        return formatted;
+    }
+    /**
      * Update the options preview element with the current chart options.
      */
     updateOptionsPreview() {
@@ -555,7 +593,7 @@ class Controls {
                     delete options[key];
                 }
             });
-            previewEl.textContent = JSON.stringify(options, null, 2);
+            previewEl.innerHTML = this.formatJSONWithHighlighting(options);
         }
     }
 }

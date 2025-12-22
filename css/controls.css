@@ -231,6 +231,33 @@ highcharts-group-description {
         word-wrap: break-word;
     }
 
+    .hcc-options-preview span {
+        font-family: "Courier New", Courier, monospace;
+    }
+
+    .hcc-options-preview .hcc-syntax-key {
+        color: light-dark(#0055aa, #66b3ff);
+        font-weight: 500;
+    }
+
+    .hcc-options-preview .hcc-syntax-string {
+        color: light-dark(#008800, #88cc88);
+    }
+
+    .hcc-options-preview .hcc-syntax-number {
+        color: light-dark(#aa5500, #ffaa55);
+    }
+
+    .hcc-options-preview .hcc-syntax-boolean {
+        color: light-dark(#8800aa, #cc88ff);
+        font-weight: 600;
+    }
+
+    .hcc-options-preview .hcc-syntax-null {
+        color: light-dark(#888888, #888888);
+        font-style: italic;
+    }
+
     /* Toggle (checkbox) styles */
     .hcc-toggle {
         position: relative;

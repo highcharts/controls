@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Options Preview** - Added syntax highlighting and JS formatting for better code readability
 - **Better layout** - The Controls can now be laid out as a block to fit the
 parent's width, or `inline-block` to shrink to its content (better for small,
 single toggles)

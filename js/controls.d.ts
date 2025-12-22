@@ -108,6 +108,14 @@ declare class Controls {
      */
     addControl(params: ControlParams): void;
     /**
+     * Escape HTML entities in a string.
+     */
+    private escapeHTML;
+    /**
+     * Format JSON with syntax highlighting and JavaScript-like formatting.
+     */
+    private formatJSONWithHighlighting;
+    /**
      * Update the options preview element with the current chart options.
      */
     private updateOptionsPreview;
