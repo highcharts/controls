@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Collapsible preview sections** - Large data structures in options preview are now collapsed by default
+  - `data` arrays and `dataTable` objects show as `[N items]` or `{N keys}` when collapsed
+  - Click the arrow icon to expand and view full content with proper indentation
+  - Keeps preview compact and readable for charts with large datasets
+
 ## [0.4.0] - 2025-12-22
 
 ### Added

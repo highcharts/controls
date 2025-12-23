@@ -268,6 +268,34 @@ highcharts-group-description {
         font-style: italic;
     }
 
+    .hcc-collapsible {
+        display: inline;
+    }
+
+    .hcc-toggle-json {
+        cursor: pointer;
+        user-select: none;
+        color: light-dark(#666666, #999999);
+        font-size: 0.85em;
+        display: inline-block;
+        width: 1em;
+        text-align: center;
+    }
+
+    .hcc-toggle-json:hover {
+        color: light-dark(#333333, #cccccc);
+    }
+
+    .hcc-collapsed-text {
+        color: light-dark(#888888, #888888);
+        font-style: italic;
+    }
+
+    .hcc-expanded-content {
+        display: inline;
+        white-space: pre;
+    }
+
     /* Toggle (checkbox) styles */
     .hcc-toggle {
         position: relative;

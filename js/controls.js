@@ -592,19 +592,50 @@ class Controls {
      * Format JSON with syntax highlighting and JavaScript-like formatting.
      */
     formatJSONWithHighlighting(obj) {
+        // First, create a normal JSON string
         const json = JSON.stringify(obj, null, 2);
         // Escape HTML in the entire JSON string first
         let formatted = this.escapeHTML(json);
+        // Find and replace data arrays and dataTable objects with collapsed versions
+        // Match "data": [ ... ] or "dataTable": { ... }
+        formatted = formatted.replace(/^(\s*)&quot;(data|dataTable)&quot;:\s*(\[[\s\S]*?\n\s*\]|\{[\s\S]*?\n\s*\})/gm, (match, indent, key, value) => {
+            // Unescape to parse
+            const unescaped = value
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&');
+            let parsed;
+            try {
+                parsed = JSON.parse(unescaped);
+            }
+            catch (e) {
+                return match; // If parsing fails, keep original
+            }
+            const isArray = Array.isArray(parsed);
+            const count = isArray ? parsed.length : Object.keys(parsed).length;
+            const collapsedText = isArray ? `[${count} items]` : `{${count} keys}`;
+            // Re-escape the value for storage
+            const escapedValue = this.escapeHTML(JSON.stringify(parsed, null, 2))
+                .replace(/&quot;/g, '"') // Keep quotes for the data attribute
+                .replace(/&#39;/g, "'");
+            return `${indent}&quot;${key}&quot;: <span class="hcc-collapsible" data-collapsed="true" data-value="${escapedValue.replace(/"/g, '&quot;')}" data-indent="${indent}"><span class="hcc-toggle-json">\u25B6</span> <span class="hcc-collapsed-text">${collapsedText}</span><span class="hcc-expanded-content" style="display: none;"></span></span>`;
+        });
         // Convert to JavaScript-like syntax: remove quotes from keys, use single quotes
         formatted = formatted
-            // Remove quotes from property names
-            .replace(/&quot;([^&]+)&quot;:/g, '$1:')
+            // Remove quotes from property names (but not in data attributes)
+            .replace(/&quot;([^&]+)&quot;:(?![^<]*>)/g, '$1:')
             // Convert double quotes to single quotes for string values (allowing escaped entities)
             .replace(/: &quot;((?:[^&]|&[a-z]+;)*?)&quot;/g, ": &#39;$1&#39;");
         // Apply syntax highlighting with HTML spans
         formatted = formatted
-            // Highlight property names
-            .replace(/^(\s*)([a-zA-Z_$][a-zA-Z0-9_$]*):/gm, '$1<span class="hcc-syntax-key">$2</span>:')
+            // Highlight property names (skip already in span tags)
+            .replace(/^(\s*)([a-zA-Z_$][a-zA-Z0-9_$]*):/gm, (match, indent, key) => {
+            if (match.includes('<span'))
+                return match;
+            return `${indent}<span class="hcc-syntax-key">${key}</span>:`;
+        })
             // Highlight string values (single quotes, allowing escaped entities)
             .replace(/: &#39;((?:[^&]|&[a-z]+;)*?)&#39;/g, ': <span class="hcc-syntax-string">&#39;$1&#39;</span>')
             // Highlight numbers
@@ -630,6 +661,58 @@ class Controls {
                 }
             });
             previewEl.innerHTML = this.formatJSONWithHighlighting(options);
+            // Add click handlers for collapsible elements
+            previewEl.querySelectorAll('.hcc-collapsible').forEach((el) => {
+                const toggle = el.querySelector('.hcc-toggle-json');
+                if (toggle) {
+                    toggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const collapsed = el.getAttribute('data-collapsed') === 'true';
+                        const expandedContent = el.querySelector('.hcc-expanded-content');
+                        if (!collapsed) {
+                            // Collapse
+                            el.setAttribute('data-collapsed', 'true');
+                            toggle.textContent = '\u25B6';
+                            el.querySelector('.hcc-collapsed-text').style.display = 'inline';
+                            expandedContent.style.display = 'none';
+                            expandedContent.innerHTML = '';
+                        }
+                        else {
+                            // Expand
+                            el.setAttribute('data-collapsed', 'false');
+                            toggle.textContent = '\u25BC';
+                            el.querySelector('.hcc-collapsed-text').style.display = 'none';
+                            // Get the base indentation
+                            const baseIndent = el.getAttribute('data-indent') || '';
+                            // Format and display the expanded content
+                            const rawValue = el.getAttribute('data-value') || '[]';
+                            const unescaped = rawValue
+                                .replace(/&quot;/g, '"')
+                                .replace(/&#39;/g, "'")
+                                .replace(/&lt;/g, '<')
+                                .replace(/&gt;/g, '>')
+                                .replace(/&amp;/g, '&');
+                            let formatted = this.escapeHTML(unescaped);
+                            // Add base indentation to each line
+                            formatted = formatted
+                                .split('\n')
+                                .map((line, i) => i === 0 ? line : baseIndent + line)
+                                .join('\n');
+                            // Apply JS-like formatting and syntax highlighting
+                            formatted = formatted
+                                .replace(/&quot;([^&]+)&quot;:/g, '$1:')
+                                .replace(/: &quot;((?:[^&]|&[a-z]+;)*?)&quot;/g, ": &#39;$1&#39;")
+                                .replace(/^(\s*)([a-zA-Z_$][a-zA-Z0-9_$]*):/gm, '$1<span class="hcc-syntax-key">$2</span>:')
+                                .replace(/: &#39;((?:[^&]|&[a-z]+;)*?)&#39;/g, ': <span class="hcc-syntax-string">&#39;$1&#39;</span>')
+                                .replace(/: (-?\d+\.?\d*)/g, ': <span class="hcc-syntax-number">$1</span>')
+                                .replace(/: (true|false)/g, ': <span class="hcc-syntax-boolean">$1</span>')
+                                .replace(/: (null)/g, ': <span class="hcc-syntax-null">$1</span>');
+                            expandedContent.innerHTML = formatted;
+                            expandedContent.style.display = 'inline';
+                        }
+                    });
+                }
+            });
         }
     }
 }
