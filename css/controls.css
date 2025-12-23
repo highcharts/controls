@@ -519,13 +519,15 @@ highcharts-group-description {
     /* Range (number) styles */
     .hcc-range-value {
         display: inline-block;
-        min-width: 3ch;
-        text-align: left;
+        min-width: 4ch;
+        margin-left: 0.5em;
+        text-align: center;
     }
 
     input[id^="range-input-"] {
         vertical-align: middle;
-        width: calc(100% - 60px);
+        width: 15ch;
+        margin-right: 0.5em;
         accent-color: light-dark(#141414, #ffffff);
     }
 
