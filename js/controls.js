@@ -342,7 +342,7 @@ class Controls {
             else if (value > 100) {
                 value = 100;
             }
-            opacityInput.value = String(value);
+            opacityInput.value = String(Math.round(value));
         });
         const isNullish = params.value === null || params.value === undefined;
         let hcColor = isNullish ? Product.color('#808080') : Product.color(params.value);
@@ -363,7 +363,7 @@ class Controls {
             const hex = getHex(hcColor), opacity = (hcColor.rgba[3] || 1) * 100;
             colorInput.value = hex;
             valueEl.textContent = hex;
-            opacityInput.value = String(opacity);
+            opacityInput.value = String(Math.round(opacity));
         }
         const update = () => {
             controlDiv.classList.remove('hcc-control-nullish');
@@ -401,6 +401,10 @@ class Controls {
             if (/(lineWidth|borderWidth)$/i.test(params.path)) {
                 params.min = params.min ?? 0;
                 params.max = params.max ?? 5;
+            }
+            else if (/(borderRadius)$/i.test(params.path)) {
+                params.min = params.min ?? 0;
+                params.max = params.max ?? 10;
             }
             else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(params.path)) {
                 params.min = params.min ?? -100;
