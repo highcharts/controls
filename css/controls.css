@@ -82,6 +82,7 @@ highcharts-group-description {
 
     /* Group styles */
     .hcc-group {
+        display: table-caption;
         margin-bottom: 2em;
     }
 
@@ -228,14 +229,15 @@ highcharts-group-description {
         background: light-dark(#ffffff, #1a1d20);
         border: 1px solid light-dark(#dee2e6, #495057);
         border-radius: 7px;
-        padding: 1rem;
+        padding: 0.3rem;
         margin: 0;
         font-family: "Courier New", Courier, monospace;
         font-size: 0.85rem;
         line-height: 1.4;
         color: light-dark(#495057, #adb5bd);
         overflow-x: auto;
-        white-space: pre-wrap;
+        max-height: 500px;
+        white-space: pre;
         word-wrap: break-word;
     }
 
