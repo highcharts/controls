@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-12-23
+
 ### Added
 - **Label attribute** - Control items now support an optional `label` attribute/option to override the displayed label text
   - JavaScript API: Use `label` property in control configuration
