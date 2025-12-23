@@ -4,8 +4,6 @@ This document outlines planned features and improvements for Highcharts Controls
 
 ## Planned Features
 
-- A `label` attribute for the control items, to override what is rendered in
-  the `<label>` tag.
 - Consider the JS API. Does it make sense that the `controls` option includes
   groups and nested controls?
 

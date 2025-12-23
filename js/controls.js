@@ -213,7 +213,7 @@ class Controls {
      */
     addSelectControl(params, keyDiv, valueDiv, controlDiv) {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
-            innerText: params.path
+            innerText: params.label || params.label || params.path
         }));
         // Determine whether to use select dropdown or button group
         const totalLength = params.options.reduce((sum, opt) => sum + opt.length, 0);
@@ -269,7 +269,7 @@ class Controls {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `toggle-checkbox-${rid}`,
-            innerText: params.path
+            innerText: params.label || params.path
         }));
         const isNullish = params.value === null || params.value === undefined;
         const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
@@ -417,7 +417,7 @@ class Controls {
         }
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `range-input-${rid}`,
-            innerText: params.path
+            innerText: params.label || params.path
         }));
         const isNullish = numericValue === null || numericValue === undefined;
         const valueEl = valueDiv.appendChild(Object.assign(document.createElement('span'), {
@@ -456,7 +456,7 @@ class Controls {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `text-input-${rid}`,
-            innerText: params.path
+            innerText: params.label || params.path
         }));
         const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'text',
@@ -751,6 +751,9 @@ class HighchartsControlElement extends HTMLElement {
         const config = {
             path: this.getAttribute('path') || ''
         };
+        if (this.hasAttribute('label')) {
+            config.label = this.getAttribute('label') || undefined;
+        }
         if (this.hasAttribute('type')) {
             config.type = this.getAttribute('type');
         }

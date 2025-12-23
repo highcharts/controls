@@ -158,4 +158,14 @@ test.describe('Highcharts Controls - Script API', () => {
     });
     expect(titleText).toBe('New Title');
   });
+
+  test('label option overrides path in display', async ({ page }) => {
+    // Check that custom label is used instead of path
+    const customLabel = page.locator('label:has-text("Show Legend")');
+    await expect(customLabel).toBeVisible();
+
+    // Check that path-based label is still used when no custom label
+    const pathLabel = page.locator('label:has-text("legend.align")');
+    await expect(pathLabel).toBeVisible();
+  });
 });

@@ -154,4 +154,14 @@ test.describe('Highcharts Controls - Web Components', () => {
     });
     expect(titleText).toBe('Updated Chart Title');
   });
+
+  test('label attribute overrides path in display', async ({ page }) => {
+    // Check that custom label is used instead of path
+    const customLabel = page.locator('label:has-text("Custom Legend Label")');
+    await expect(customLabel).toBeVisible();
+
+    // Check that path-based label is still used when no custom label
+    const pathLabel = page.locator('label:has-text("legend.align")');
+    await expect(pathLabel).toBeVisible();
+  });
 });

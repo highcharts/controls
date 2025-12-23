@@ -18,6 +18,7 @@ type ControlTypes = 'boolean' | 'color' | 'number' | 'select' | 'text';
 interface ControlParams {
     type?: ControlTypes;
     path: string;
+    label?: string;
     value?: any;
 }
 interface SelectControlParams extends ControlParams {

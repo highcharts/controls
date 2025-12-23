@@ -29,6 +29,7 @@ type ControlTypes = 'boolean'|'color'|'number'|'select'|'text';
 interface ControlParams {
     type?: ControlTypes;
     path: string;
+    label?: string;
     value?: any;
 }
 
@@ -411,7 +412,7 @@ class Controls {
             Object.assign(
                 document.createElement('label'),
                 {
-                    innerText: params.path
+                    innerText: params.label || params.label || params.path
                 }
             )
         );
@@ -508,7 +509,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `toggle-checkbox-${rid}`,
-                    innerText: params.path
+                    innerText: params.label || params.path
                 }
             )
         );
@@ -747,7 +748,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `range-input-${rid}`,
-                    innerText: params.path
+                    innerText: params.label || params.path
                 }
             )
         );
@@ -813,7 +814,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `text-input-${rid}`,
-                    innerText: params.path
+                    innerText: params.label || params.path
                 }
             )
         );
@@ -1201,6 +1202,10 @@ class HighchartsControlElement extends HTMLElement {
     const config: ControlParams = {
       path: this.getAttribute('path') || ''
     };
+
+    if (this.hasAttribute('label')) {
+        config.label = this.getAttribute('label') || undefined;
+    }
 
     if (this.hasAttribute('type')) {
         config.type = this.getAttribute('type') as ControlTypes;

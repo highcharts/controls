@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Label attribute** - Control items now support an optional `label` attribute/option to override the displayed label text
+  - JavaScript API: Use `label` property in control configuration
+  - Web Components: Use `label` attribute on `<highcharts-control>` elements
+  - Falls back to displaying the `path` if `label` is not provided
 - **Collapsible preview sections** - Large data structures in options preview are now collapsed by default
   - `data` arrays and `dataTable` objects show as `[N items]` or `{N keys}` when collapsed
   - Click the arrow icon to expand and view full content with proper indentation
