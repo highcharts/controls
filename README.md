@@ -9,6 +9,12 @@ Load the [module file](https://github.com/highcharts/controls/blob/main/js/contr
 <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.5.0"></script>
 ```
 
+Or
+
+```js
+import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.5.0';
+```
+
 ## Usage
 
 ### Web Components
