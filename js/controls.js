@@ -444,13 +444,41 @@ class Controls {
             input.value = String(numericValue);
             valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
         }
+        // Track if user is actively dragging vs clicking to jump
+        let isDragging = false;
+        let mouseIsDown = false;
+        input.addEventListener('mousedown', () => {
+            mouseIsDown = true;
+            isDragging = false;
+        });
+        // Detect actual dragging by tracking mouse movement
+        const onMouseMove = () => {
+            if (mouseIsDown) {
+                isDragging = true;
+            }
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        const onMouseUp = () => {
+            mouseIsDown = false;
+        };
+        document.addEventListener('mouseup', onMouseUp);
+        const setNestedValue = (animation) => {
+            const numValue = parseFloat(input.value), displayValue = unit ? `${numValue}${unit}` : String(numValue), chartValue = unit ? `${numValue}${unit}` : numValue;
+            valueEl.textContent = displayValue;
+            this.setNestedValue(params.path, chartValue, animation);
+        };
         input.addEventListener('input', () => {
             controlDiv.classList.remove('hcc-control-nullish');
-            const numValue = parseFloat(input.value);
-            const displayValue = unit ? `${numValue}${unit}` : String(numValue);
-            const chartValue = unit ? `${numValue}${unit}` : numValue;
-            valueEl.textContent = displayValue;
-            this.setNestedValue(params.path, chartValue, false);
+            if (isDragging) {
+                setNestedValue(false);
+            }
+        });
+        input.addEventListener('change', () => {
+            // Only animate if user clicked to jump, not after dragging
+            if (!isDragging) {
+                setNestedValue(true);
+            }
+            isDragging = false;
         });
     }
     /**
