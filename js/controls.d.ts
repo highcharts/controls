@@ -23,7 +23,7 @@ interface ControlParams {
 }
 interface SelectControlParams extends ControlParams {
     type: 'select';
-    options: string[];
+    options?: string[];
     value?: string;
 }
 interface BooleanControlParams extends ControlParams {

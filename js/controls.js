@@ -215,18 +215,27 @@ class Controls {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.label || params.label || params.path
         }));
+        // Ensure current value is in options
+        const options = params.options || [];
+        if (params.value !== null &&
+            params.value !== undefined &&
+            !options.includes(params.value)) {
+            options.unshift(params.value);
+        }
         // Determine whether to use select dropdown or button group
-        const totalLength = params.options.reduce((sum, opt) => sum + opt.length, 0);
-        const useDropdown = params.options.length > 3 || totalLength > 24;
+        const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
+        const useDropdown = options.length > 3 || totalLength > 24;
         if (useDropdown) {
             // Render as select dropdown
             valueDiv.classList.add('hcc-select-control');
             const select = valueDiv.appendChild(Object.assign(document.createElement('select'), {
                 className: 'hcc-select-dropdown'
             }));
-            params.options.forEach((option) => {
-                const isSelected = params.value !== null && params.value !== undefined && params.value === option;
-                const optionEl = select.appendChild(Object.assign(document.createElement('option'), {
+            options.forEach((option) => {
+                const isSelected = params.value !== null &&
+                    params.value !== undefined &&
+                    params.value === option;
+                select.appendChild(Object.assign(document.createElement('option'), {
                     value: option,
                     innerText: option,
                     selected: isSelected
@@ -241,8 +250,10 @@ class Controls {
         else {
             // Render as button group
             valueDiv.classList.add('hcc-button-group');
-            params.options.forEach((option) => {
-                const isActive = params.value !== null && params.value !== undefined && params.value === option;
+            options.forEach((option) => {
+                const isActive = params.value !== null &&
+                    params.value !== undefined &&
+                    params.value === option;
                 const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
                     className: 'hcc-button' +
                         (isActive ? ' active' : ''),

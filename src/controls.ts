@@ -35,7 +35,7 @@ interface ControlParams {
 
 interface SelectControlParams extends ControlParams {
     type: 'select';
-    options: string[];
+    options?: string[];
     value?: string;
 }
 
@@ -417,9 +417,19 @@ class Controls {
             )
         );
 
+        // Ensure current value is in options
+        const options = params.options || [];
+        if (
+            params.value !== null &&
+            params.value !== undefined &&
+            !options.includes(params.value)
+        ) {
+            options.unshift(params.value);
+        }
+
         // Determine whether to use select dropdown or button group
-        const totalLength = params.options.reduce((sum, opt) => sum + opt.length, 0);
-        const useDropdown = params.options.length > 3 || totalLength > 24;
+        const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
+        const useDropdown = options.length > 3 || totalLength > 24;
 
         if (useDropdown) {
             // Render as select dropdown
@@ -434,9 +444,11 @@ class Controls {
                 )
             );
 
-            params.options.forEach((option): void => {
-                const isSelected = params.value !== null && params.value !== undefined && params.value === option;
-                const optionEl = select.appendChild(
+            options.forEach((option): void => {
+                const isSelected = params.value !== null &&
+                    params.value !== undefined &&
+                    params.value === option;
+                select.appendChild(
                     Object.assign(
                         document.createElement('option'),
                         {
@@ -457,8 +469,10 @@ class Controls {
             // Render as button group
             valueDiv.classList.add('hcc-button-group');
 
-            params.options.forEach((option): void => {
-                const isActive = params.value !== null && params.value !== undefined && params.value === option;
+            options.forEach((option): void => {
+                const isActive = params.value !== null &&
+                    params.value !== undefined &&
+                    params.value === option;
                 const button = valueDiv.appendChild(
                     Object.assign(
                         document.createElement('button'),
