@@ -556,7 +556,7 @@ highcharts-group-description {
     }
 
     .hcc-select-dropdown {
-        width: 100%;
+        min-width: 12.25em;
         padding: 0.5em 0.8em;
         border-radius: 7px;
         border: 1px solid light-dark(#dddddd, #555555);
