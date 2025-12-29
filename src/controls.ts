@@ -417,6 +417,15 @@ class Controls {
             )
         );
 
+        // Deduce options
+        if (params.path.endsWith('.dashStyle')) {
+            params.options ||= [
+                'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
+                'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
+                'DashDot', 'LongDashDot', 'LongDashDotDot'
+            ];
+        }
+
         // Ensure current value is in options
         const options = params.options || [];
         if (

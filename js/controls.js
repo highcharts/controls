@@ -215,6 +215,14 @@ class Controls {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             innerText: params.label || params.label || params.path
         }));
+        // Deduce options
+        if (params.path.endsWith('.dashStyle')) {
+            params.options || (params.options = [
+                'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
+                'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
+                'DashDot', 'LongDashDot', 'LongDashDotDot'
+            ]);
+        }
         // Ensure current value is in options
         const options = params.options || [];
         if (params.value !== null &&
