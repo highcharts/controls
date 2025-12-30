@@ -49,6 +49,7 @@ function isGroupParams(params) {
  * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
  */
 function getNestedValue(obj, path) {
+    path = path.replace(/^(xAxis|yAxis)\./, '$1[0].');
     // Split path into segments, handling array notation
     // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
     const segments = path.split(/\.|\[|\]/).filter(s => s !== '');
