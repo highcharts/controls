@@ -672,7 +672,7 @@ class Controls {
             const escapedValue = this.escapeHTML(JSON.stringify(parsed, null, 2))
                 .replace(/&quot;/g, '"') // Keep quotes for the data attribute
                 .replace(/&#39;/g, "'");
-            return `${indent}&quot;${key}&quot;: <span class="hcc-collapsible" data-collapsed="true" data-value="${escapedValue.replace(/"/g, '&quot;')}" data-indent="${indent}"><span class="hcc-toggle-json">\u25B6</span> <span class="hcc-collapsed-text">${collapsedText}</span><span class="hcc-expanded-content" style="display: none;"></span></span>`;
+            return `${indent}&quot;${key}&quot;: <span class="hcc-collapsible" data-collapsed="true" data-value="${escapedValue.replace(/"/g, '&quot;')}" data-indent="${indent}"><span class="hcc-toggle-json">\u25B6</span> <span class="hcc-collapsed-text">${collapsedText}</span><span class="hcc-expanded-content hcc-hidden"></span></span>`;
         });
         // Convert to JavaScript-like syntax: remove quotes from keys, use single quotes
         formatted = formatted
@@ -725,15 +725,15 @@ class Controls {
                             // Collapse
                             el.setAttribute('data-collapsed', 'true');
                             toggle.textContent = '\u25B6';
-                            el.querySelector('.hcc-collapsed-text').style.display = 'inline';
-                            expandedContent.style.display = 'none';
+                            el.querySelector('.hcc-collapsed-text').classList.remove('hcc-hidden');
+                            expandedContent.classList.add('hcc-hidden');
                             expandedContent.innerHTML = '';
                         }
                         else {
                             // Expand
                             el.setAttribute('data-collapsed', 'false');
                             toggle.textContent = '\u25BC';
-                            el.querySelector('.hcc-collapsed-text').style.display = 'none';
+                            el.querySelector('.hcc-collapsed-text').classList.add('hcc-hidden');
                             // Get the base indentation
                             const baseIndent = el.getAttribute('data-indent') || '';
                             // Format and display the expanded content
@@ -760,7 +760,7 @@ class Controls {
                                 .replace(/: (true|false)/g, ': <span class="hcc-syntax-boolean">$1</span>')
                                 .replace(/: (null)/g, ': <span class="hcc-syntax-null">$1</span>');
                             expandedContent.innerHTML = formatted;
-                            expandedContent.style.display = 'inline';
+                            expandedContent.classList.remove('hcc-hidden');
                         }
                     });
                 }

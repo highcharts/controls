@@ -13,6 +13,11 @@ highcharts-group-description {
     display: none;
 }
 
+/* Utility class for hiding elements (CSP-compliant alternative to inline styles) */
+.hcc-hidden {
+    display: none !important;
+}
+
 .highcharts-controls {
     /* Set inline-block to fit to content, block to fit to container */
     display: block;
