@@ -214,7 +214,7 @@ class Controls {
      */
     addSelectControl(params, keyDiv, valueDiv, controlDiv) {
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
-            innerText: params.label || params.label || params.path
+            innerHTML: params.label || `<code>${params.path}</code>`
         }));
         // Deduce options
         if (params.path.endsWith('.dashStyle')) {
@@ -289,7 +289,7 @@ class Controls {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `toggle-checkbox-${rid}`,
-            innerText: params.label || params.path
+            innerHTML: params.label || `<code>${params.path}</code>`
         }));
         const isNullish = params.value === null || params.value === undefined;
         const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
@@ -315,7 +315,7 @@ class Controls {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `color-input-${rid}`,
-            innerText: params.path
+            innerHTML: params.label || `<code>${params.path}</code>`
         }));
         const colorInput = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'color',
@@ -441,7 +441,7 @@ class Controls {
         }
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `range-input-${rid}`,
-            innerText: params.label || params.path
+            innerHTML: params.label || `<code>${params.path}</code>`
         }));
         const isNullish = numericValue === null || numericValue === undefined;
         const valueEl = valueDiv.appendChild(Object.assign(document.createElement('span'), {
@@ -508,7 +508,7 @@ class Controls {
         const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: `text-input-${rid}`,
-            innerText: params.label || params.path
+            innerHTML: params.label || `<code>${params.path}</code>`
         }));
         const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
             type: 'text',

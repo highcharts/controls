@@ -413,7 +413,7 @@ class Controls {
             Object.assign(
                 document.createElement('label'),
                 {
-                    innerText: params.label || params.label || params.path
+                    innerHTML: params.label || `<code>${params.path}</code>`
                 }
             )
         );
@@ -533,7 +533,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `toggle-checkbox-${rid}`,
-                    innerText: params.label || params.path
+                    innerHTML: params.label || `<code>${params.path}</code>`
                 }
             )
         );
@@ -591,7 +591,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `color-input-${rid}`,
-                    innerText: params.path
+                    innerHTML: params.label || `<code>${params.path}</code>`
                 }
             )
         );
@@ -776,7 +776,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `range-input-${rid}`,
-                    innerText: params.label || params.path
+                    innerHTML: params.label || `<code>${params.path}</code>`
                 }
             )
         );
@@ -877,7 +877,7 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `text-input-${rid}`,
-                    innerText: params.label || params.path
+                    innerHTML: params.label || `<code>${params.path}</code>`
                 }
             )
         );
