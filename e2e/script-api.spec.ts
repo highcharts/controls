@@ -22,7 +22,7 @@ test.describe('Highcharts Controls - Script API', () => {
     await expect(buttons).toHaveCount(3);
 
     // Check for number control (range slider)
-    const rangeInput = page.locator('input[type="range"]');
+    const rangeInput = page.locator('#range-input-legend-x');
     await expect(rangeInput).toBeVisible();
 
     // Check for color control
@@ -75,7 +75,7 @@ test.describe('Highcharts Controls - Script API', () => {
   });
 
   test('number control adjusts legend x position', async ({ page }) => {
-    const rangeInput = page.locator('input[type="range"]');
+    const rangeInput = page.locator('#range-input-legend-x');
     const valueDisplay = page.locator('.hcc-range-value');
 
     // Set slider to specific value

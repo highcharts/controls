@@ -63,7 +63,7 @@ test.describe('Highcharts Controls - Nullish States', () => {
 
   test('nullish class removed after range slider change', async ({ page }) => {
     const numberControl = page.locator('.hcc-control-number').first();
-    const rangeInput = page.locator('input[type="range"]').first();
+    const rangeInput = numberControl.locator('input[type="range"]');
 
     await expect(numberControl).toHaveClass(/hcc-control-nullish/);
     await rangeInput.fill('50');

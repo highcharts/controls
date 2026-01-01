@@ -617,13 +617,12 @@ class Controls {
             )
         );
 
-        const opacityInput = valueDiv.appendChild(
+        const opacityDisplay = valueDiv.appendChild(
             Object.assign(
-                document.createElement('input'),
+                document.createElement('span'),
                 {
-                    type: 'text',
-                    id: `opacity-input-${rid}`,
-                    className: 'hcc-opacity-input'
+                    id: `opacity-display-${rid}`,
+                    className: 'hcc-opacity-display'
                 }
             )
         );
@@ -634,6 +633,30 @@ class Controls {
                 {
                     textContent: '%',
                     className: 'hcc-opacity-input-label'
+                }
+            )
+        );
+
+        // Container for the range slider popup
+        const opacityRangeContainer = valueDiv.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                {
+                    className: 'hcc-opacity-range-container hcc-hidden'
+                }
+            )
+        );
+
+        const opacityInput = opacityRangeContainer.appendChild(
+            Object.assign(
+                document.createElement('input'),
+                {
+                    type: 'range',
+                    id: `opacity-input-${rid}`,
+                    className: 'hcc-opacity-input',
+                    min: '0',
+                    max: '100',
+                    step: '1'
                 }
             )
         );
@@ -661,20 +684,28 @@ class Controls {
             return hex;
         };
 
-        // Add a validator for the opacity input. It should be a number between
-        // 0 and 100.
-        opacityInput.addEventListener('input', (): void => {
-            let value = parseFloat(opacityInput.value);
-            if (isNaN(value)) {
-                value = 100;
-            }
-            if (value < 0) {
-                value = 0;
-            } else if (value > 100) {
-                value = 100;
-            }
-            opacityInput.value = String(Math.round(value));
+        // Show/hide range slider on opacity display click
+        opacityDisplay.addEventListener('click', (e): void => {
+            e.stopPropagation();
+            opacityRangeContainer.classList.remove('hcc-hidden');
+            opacityInput.focus();
         });
+
+        // Hide range slider on Enter key
+        opacityInput.addEventListener('keydown', (e): void => {
+            if (e.key === 'Enter') {
+                opacityRangeContainer.classList.add('hcc-hidden');
+            }
+        });
+
+        // Hide range slider when clicking outside
+        const hideRangeOnClickOutside = (e: MouseEvent): void => {
+            if (!opacityRangeContainer.contains(e.target as Node) &&
+                !opacityDisplay.contains(e.target as Node)) {
+                opacityRangeContainer.classList.add('hcc-hidden');
+            }
+        };
+        document.addEventListener('click', hideRangeOnClickOutside);
 
         const isNullish = params.value === null || params.value === undefined;
         let hcColor = isNullish ? Product.color('#808080') : Product.color(params.value);
@@ -688,16 +719,19 @@ class Controls {
             valueEl.textContent = '—';
             colorInput.value = '#808080';
             opacityInput.value = '100';
+            opacityDisplay.textContent = '100';
         } else if (isNullish) {
             valueEl.textContent = '—';
             colorInput.value = '#808080';
             opacityInput.value = '100';
+            opacityDisplay.textContent = '100';
         } else {
             const hex = getHex(hcColor),
                 opacity = (hcColor.rgba[3] || 1) * 100;
             colorInput.value = hex;
             valueEl.textContent = hex;
             opacityInput.value = String(Math.round(opacity));
+            opacityDisplay.textContent = String(Math.round(opacity));
         }
 
         const update = (): void => {
@@ -713,6 +747,7 @@ class Controls {
                 false
             );
             valueEl.textContent = getHex(hcColor);
+            opacityDisplay.textContent = opacityInput.value;
         };
 
         colorInput.addEventListener('input', update);

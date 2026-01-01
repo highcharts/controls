@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Range input for color opacity
+
 ### Fixed
 - **Number control animation** - Range sliders now animate chart updates when
   clicking to jump to a new value, but not while dragging

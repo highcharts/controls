@@ -377,7 +377,7 @@ highcharts-group-description {
     }
 
     .hcc-control-nullish .hcc-color-value,
-    .hcc-control-nullish .hcc-opacity-input,
+    .hcc-control-nullish .hcc-opacity-display,
     .hcc-control-nullish .hcc-range-value {
         opacity: 0.4;
     }
@@ -508,16 +508,43 @@ highcharts-group-description {
         ) !important;
     }
 
-    input.hcc-opacity-input {
+    .hcc-opacity-display {
+        display: inline-block;
         text-align: right;
-        background: none;
-        width: 2em;
-        height: 2em;
-        border-radius: 0;
-        border-color: light-dark(#dddddd, #555555);
-        border-style: solid;
-        border-width: 0 0 0 1px;
-        padding-left: 0.5em;
+        min-width: 2em;
+        cursor: pointer;
+        font-weight: 600;
+        padding: 0.3em 0.5em;
+        border-left: 1px solid light-dark(#dddddd, #555555);
+        transition: background 150ms;
+    }
+
+    .hcc-opacity-display:hover {
+        background: light-dark(#f0f0f0, #2a2a2a);
+    }
+
+    .hcc-opacity-range-container {
+        position: absolute;
+        margin-left: 1em;
+        background: light-dark(#ffffff, #1a1a1a);
+        border: 1px solid light-dark(#cccccc, #555555);
+        border-radius: 7px;
+        padding: 0.3em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+    }
+
+    input.hcc-opacity-input {
+        width: 10.5em;
+        height: 1em;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+
+    input.hcc-opacity-input:focus {
+        outline: none;
     }
 
     .hcc-opacity-input-label {

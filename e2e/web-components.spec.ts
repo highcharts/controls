@@ -29,7 +29,7 @@ test.describe('Highcharts Controls - Web Components', () => {
     const buttons = page.locator('button.hcc-button[data-path="legend.align"]');
     await expect(buttons).toHaveCount(3);
 
-    const rangeInput = page.locator('input[type="range"]');
+    const rangeInput = page.locator('#range-input-legend-x');
     await expect(rangeInput).toBeVisible();
 
     const colorInput = page.locator('input[type="color"]');
@@ -70,7 +70,7 @@ test.describe('Highcharts Controls - Web Components', () => {
   });
 
   test('number web component control works', async ({ page }) => {
-    const rangeInput = page.locator('input[type="range"]');
+    const rangeInput = page.locator('#range-input-legend-x');
 
     // Set slider value
     await rangeInput.fill('-50');
