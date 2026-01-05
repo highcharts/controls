@@ -217,12 +217,22 @@ class Controls {
             innerHTML: params.label || `<code>${params.path}</code>`
         }));
         // Deduce options
-        if (params.path.endsWith('.dashStyle')) {
+        if (params.path.endsWith('.align') ||
+            params.path.endsWith('.textAlign')) {
+            params.options || (params.options = ['left', 'center', 'right']);
+        }
+        if (params.path.toLowerCase().endsWith('dashstyle')) {
             params.options || (params.options = [
                 'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
                 'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
                 'DashDot', 'LongDashDot', 'LongDashDotDot'
             ]);
+        }
+        if (params.path.endsWith('.fontWeight')) {
+            params.options || (params.options = ['normal', 'bold', 'lighter']);
+        }
+        if (params.path.endsWith('.verticalAlign')) {
+            params.options || (params.options = ['top', 'middle', 'bottom']);
         }
         // Ensure current value is in options
         const options = params.options || [];
@@ -592,7 +602,7 @@ class Controls {
      * Deduce control type based on the params
      */
     deduceControlType(params) {
-        const value = params.value;
+        const { path, value } = params;
         if (typeof value === 'boolean') {
             return 'boolean';
         }
@@ -605,8 +615,15 @@ class Controls {
         if (Array.isArray(params.options)) {
             return 'select';
         }
-        if (params.path.toLowerCase().indexOf('color') !== -1) {
+        if (path.toLowerCase().indexOf('color') !== -1) {
             return 'color';
+        }
+        if (path.endsWith('.align') ||
+            path.toLowerCase().endsWith('dashstyle') ||
+            path.endsWith('.fontWeight') ||
+            path.endsWith('.textAlign') ||
+            path.endsWith('.verticalAlign')) {
+            return 'select';
         }
         if (typeof value === 'string') {
             if (Product.color(value).rgba.toString().indexOf('NaN') === -1) {
