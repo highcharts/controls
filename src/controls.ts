@@ -817,6 +817,15 @@ class Controls {
             }
         }
 
+        if (typeof numericValue === 'number') {
+            if (params.min > numericValue) {
+                params.min = numericValue;
+            }
+            if (params.max < numericValue) {
+                params.max = numericValue;
+            }
+        }
+
         // Set default step for em/rem units
         if (!params.step && (unit === 'em' || unit === 'rem')) {
             params.step = 0.1;
