@@ -313,12 +313,14 @@ class Controls {
         link.rel = 'stylesheet';
         link.href = cssUrl;
 
-        // Show controls when CSS is loaded
-        link.onload = () => {
+        // Show controls when CSS is loaded or failed
+        const showControls = () => {
             document.querySelectorAll('.highcharts-controls').forEach(
                 (el) => el.classList.add('loaded')
             );
         };
+        link.onload = showControls;
+        link.onerror = showControls;
 
         document.head.appendChild(link);
     }
@@ -806,6 +808,9 @@ class Controls {
             } else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(params.path)) {
                 params.min = params.min ?? -100;
                 params.max = params.max ?? 100;
+            } else if (/rotation$/i.test(params.path)) {
+                params.min = params.min ?? -90;
+                params.max = params.max ?? 90;
             } else {
                 params.min = params.min ?? 0;
                 params.max = params.max ?? 100;
