@@ -1,6 +1,6 @@
 {
   "name": "@highcharts/controls",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "GUI controls for Highcharts charts, Grid and Dashboards options",
   "license": "ISC",
   "author": "Torstein Honsi",
