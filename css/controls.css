@@ -383,8 +383,8 @@ highcharts-group-description {
 
     .hcc-color-value {
         display: inline-block;
-        min-width: 4.3em;
-        margin: 0 0.5em;
+        min-width: 4.7em;
+        margin: 0 0.2em;
         text-transform: lowercase;
     }
 
@@ -554,7 +554,7 @@ highcharts-group-description {
     /* Range (number) styles */
     .hcc-range-value {
         display: inline-block;
-        min-width: 2em;
+        min-width: 3em;
         margin-left: 0.5em;
         text-align: center;
     }
@@ -568,10 +568,10 @@ highcharts-group-description {
 
     /* Text input styles */
     .hcc-text-input {
-        width: 12.25em;
+        width: calc(13.25em - 1px);
         padding: 0.5em 0.8em;
         border-radius: 7px;
-        border: 1px solid light-dark(#dddddd, #555555);
+        border: none;
         background: light-dark(#ffffff, #2d2d2d);
         color: light-dark(#141414, #ffffff);
         font-family: inherit;
@@ -590,7 +590,6 @@ highcharts-group-description {
     }
 
     .hcc-select-dropdown {
-        min-width: 12.25em;
         padding: 0.5em 0.8em;
         border-radius: 7px;
         border: 1px solid light-dark(#dddddd, #555555);
