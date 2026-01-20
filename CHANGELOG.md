@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- **Jumping input widthn** - Issue #1, number controls jumped as text width changed
+- **Jumping input widthn** - Issue #1, number controls jumped as text width
+  changed
+- **Setting array items** - Setting array items, like `colors[0]` caused the
+  existing other items to get lost
 
 ## [0.6.0] - 2026-01-12
 

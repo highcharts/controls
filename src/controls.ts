@@ -247,7 +247,22 @@ class Controls {
                 // Check if next key is a number (array index)
                 const nextKey = keys[i + 1];
                 const isNextArray = !isNaN(Number(nextKey));
-                cur[k] = isNextArray ? [] : {};
+                if (isNextArray) {
+                    // Make sure to retain existing array items, for example
+                    // when setting `palette.light.colors[0]`, we want to retain
+                    // the other colors in the array.
+                    const existingArray = getNestedValue(
+                        this.target.options,
+                        keys.slice(0, i + 1).join('.')
+                    );
+                    if (Array.isArray(existingArray)) {
+                        cur[k] = existingArray.slice();
+                    } else {
+                        cur[k] = [];
+                    }
+                } else {
+                    cur[k] = {};
+                }
                 cur = cur[k];
             }
         }
