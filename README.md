@@ -1,6 +1,10 @@
 # Highcharts Controls
 
-GUI controls for manipulating Highcharts charts, Grid, and Dashboards options on the fly.
+GUI controls for manipulating Highcharts charts, Grid, and Dashboards options on
+the fly.
+
+## Example
+* See [live demo with web component on jsFiddle](https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/legend/align)
 
 ## Installation
 
