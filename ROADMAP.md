@@ -10,7 +10,6 @@ This document outlines planned features and improvements for Highcharts Controls
 - Extendible architecture, opening up for registering custom control types
 - Separators. Useful for many controls with related functionality, but in the
   same group
-- Block or inline-block as a top-level attribute rather than CSS
 
 ---
 

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Display option** - Added `display` option/attribute with values `'block'` or `'inline-block'` (default: `'inline-block'`)
+  - JavaScript API: Use `display` property in ControlsOptionsObject
+  - Web Components: Use `display` attribute on `<highcharts-controls>` element
+  - Controls now default to `inline-block` layout, shrinking to fit content
+  - Set to `block` for full-width layout
+
 ### Fixed
 - **Jumping input widthn** - Issue #1, number controls jumped as text width
   changed

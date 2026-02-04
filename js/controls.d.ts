@@ -56,6 +56,7 @@ interface GroupParams {
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
+    display?: 'block' | 'inline-block';
     controls: Array<GroupParams | SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
 }
 declare class Controls {

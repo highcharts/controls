@@ -61,7 +61,10 @@ class Controls {
             document.getElementById(renderTo)) ||
             (typeof renderTo === 'object' && renderTo) ||
             document.body.appendChild(Object.assign(document.createElement('div')));
-        const outerContainer = renderTo.appendChild(Object.assign(document.createElement('div'), { className: 'highcharts-controls' }));
+        const displayClass = options.display === 'block'
+            ? 'hcc-display-block'
+            : 'hcc-display-inline-block';
+        const outerContainer = renderTo.appendChild(Object.assign(document.createElement('div'), { className: `highcharts-controls ${displayClass}` }));
         this.container = outerContainer.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-container' }));
         this.target = (options.target ||
             Product?.charts?.[0] ||
@@ -919,12 +922,15 @@ class HighchartsGroupElement extends HTMLElement {
 }
 class HighchartsControlsElement extends HTMLElement {
     connectedCallback() {
-        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false';
+        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false', displayAttr = this.getAttribute('display'), display = (displayAttr === 'block' || displayAttr === 'inline-block')
+            ? displayAttr
+            : 'inline-block';
         let target = this.getTarget();
         const init = (target) => {
             Controls.controls(this, {
                 target,
                 injectCSS,
+                display: display,
                 controls: controls
             });
         };

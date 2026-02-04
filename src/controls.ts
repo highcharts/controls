@@ -74,6 +74,7 @@ interface GroupParams {
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
+    display?: 'block' | 'inline-block';
     controls: Array<
         GroupParams|
         SelectControlParams|
@@ -180,10 +181,14 @@ class Controls {
                 document.createElement('div')
             ));
 
+        const displayClass = options.display === 'block'
+            ? 'hcc-display-block'
+            : 'hcc-display-inline-block';
+
         const outerContainer = (renderTo as HTMLElement).appendChild(
             Object.assign(
                 document.createElement('div'),
-                { className: 'highcharts-controls' }
+                { className: `highcharts-controls ${displayClass}` }
             )
         );
 
@@ -1424,7 +1429,11 @@ class HighchartsGroupElement extends HTMLElement {
 class HighchartsControlsElement extends HTMLElement {
     connectedCallback() {
         const controls: (ControlParams | GroupParams)[] = [],
-            injectCSS = this.getAttribute('inject-css') !== 'false';
+            injectCSS = this.getAttribute('inject-css') !== 'false',
+            displayAttr = this.getAttribute('display'),
+            display = (displayAttr === 'block' || displayAttr === 'inline-block')
+                ? displayAttr
+                : 'inline-block';
 
         let target = this.getTarget();
 
@@ -1432,6 +1441,7 @@ class HighchartsControlsElement extends HTMLElement {
             Controls.controls(this, {
                 target,
                 injectCSS,
+                display: display as 'block' | 'inline-block',
                 controls: controls as Array<
                     GroupParams|
                     SelectControlParams|

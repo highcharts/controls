@@ -133,16 +133,25 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0';
 ```
 
 ## Layout control
-By default, the Highcharts Controls renders in a block element, taking 100% of
-its parent's width. In some cases, particularly when rendering juse one or a
-handful controls, it looks better to keep the controls close to the labels. In
-that case, apply `inline-block` display to the top container in order to make
-the layout shrink to fit its content.
+By default, the Highcharts Controls renders in an inline-block element, shrinking
+to fit its content. This works well for compact controls. For wider layouts that
+should take 100% of the parent's width, set the `display` option to `'block'`.
 
-```css
-.highcharts-controls {
-    display: inline-block;
-}
+**Web Components:**
+```html
+<highcharts-controls display="block">
+    <!-- controls here -->
+</highcharts-controls>
+```
+
+**JavaScript API:**
+```javascript
+HighchartsControls.controls('controls-container', {
+    display: 'block',  // or 'inline-block' (default)
+    controls: [
+        // ...
+    ]
+});
 ```
 
 ## API Documentation
@@ -166,6 +175,7 @@ Creates a controls instance.
 interface ControlsOptionsObject {
     target?: ControlTarget;      // Target chart/grid (defaults to first chart)
     injectCSS?: boolean;          // Auto-inject CSS (defaults to true)
+    display?: 'block' | 'inline-block';  // Display mode (defaults to 'inline-block')
     controls: Array<ControlParams | GroupParams>;  // Array of control or group configurations
 }
 ```
@@ -364,6 +374,7 @@ Container element for controls.
 **Attributes:**
 - `target` (optional) - CSS selector for target chart container (e.g., `"#container"`)
 - `inject-css` (optional) - Set to `"false"` to disable automatic CSS injection
+- `display` (optional) - Display mode: `"block"` or `"inline-block"` (default: `"inline-block"`)
 
 **Example:**
 ```html
