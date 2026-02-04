@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script type="module" src="../../js/controls.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container-wrapper {
+            border: 2px solid #ccc;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Display Option Test</h1>
+
+    <h2>Default (inline-block)</h2>
+    <div class="container-wrapper">
+        <highcharts-controls target="#chart1">
+            <highcharts-control type="boolean" path="legend.enabled" value="true"></highcharts-control>
+        </highcharts-controls>
+    </div>
+
+    <h2>Explicit inline-block</h2>
+    <div class="container-wrapper">
+        <highcharts-controls target="#chart1" display="inline-block">
+            <highcharts-control type="boolean" path="chart.inverted" value="false"></highcharts-control>
+        </highcharts-controls>
+    </div>
+
+    <h2>Block display</h2>
+    <div class="container-wrapper">
+        <highcharts-controls target="#chart1" display="block">
+            <highcharts-control type="select" path="legend.align" options="left,center,right" value="center"></highcharts-control>
+        </highcharts-controls>
+    </div>
+
+    <h2>Chart</h2>
+    <div id="chart1"></div>
+
+    <script>
+        Highcharts.chart('chart1', {
+            title: { text: 'Display Option Demo' },
+            series: [{
+                data: [1, 2, 3, 4, 5]
+            }]
+        });
+    </script>
+</body>
+</html>

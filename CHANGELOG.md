@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Separator** - Added separator control to visually separate groups of related controls
+  - JavaScript API: Use `{ type: 'separator' }` in controls array
+  - Web Components: Use `<highcharts-separator>` element
+  - Can be used both at the top level and within groups
+  - Renders as a horizontal rule with appropriate styling
 - **Display option** - Added `display` option/attribute with values `'block'` or `'inline-block'` (default: `'inline-block'`)
   - JavaScript API: Use `display` property in ControlsOptionsObject
   - Web Components: Use `display` attribute on `<highcharts-controls>` element

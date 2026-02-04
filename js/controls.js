@@ -39,6 +39,12 @@ function isTextControlParams(params) {
     return params.type === 'text';
 }
 /**
+ * Type guard for SeparatorParams
+ */
+function isSeparatorParams(params) {
+    return params.type === 'separator';
+}
+/**
  * Type guard for GroupParams
  */
 function isGroupParams(params) {
@@ -80,6 +86,9 @@ class Controls {
         options.controls?.forEach((control) => {
             if (isGroupParams(control)) {
                 this.addGroup(control);
+            }
+            else if (isSeparatorParams(control)) {
+                this.addSeparator();
             }
             else {
                 this.addControl(control);
@@ -624,7 +633,12 @@ class Controls {
         this.container = groupControlsDiv;
         // Add controls to the group
         params.controls.forEach((control) => {
-            this.addControl(control);
+            if (isSeparatorParams(control)) {
+                this.addSeparator();
+            }
+            else {
+                this.addControl(control);
+            }
         });
         // Restore original container
         this.container = originalContainer;
@@ -664,6 +678,19 @@ class Controls {
         }
         // Default to text
         return 'text';
+    }
+    /**
+     * Add a separator
+     */
+    addSeparator() {
+        if (!this.container) {
+            throw new Error('Container for controls not found');
+        }
+        const row = this.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
+        const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+        // Add second cell to match the two-column layout
+        row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+        cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
     }
     /**
      * Add a control
@@ -904,10 +931,15 @@ class HighchartsGroupElement extends HTMLElement {
         if (descriptionEl) {
             description = descriptionEl.innerHTML?.trim() || undefined;
         }
-        this.querySelectorAll(':scope > highcharts-control').forEach((controlEl) => {
-            const control = controlEl.getConfig();
-            if (control.path) {
-                controls.push(control);
+        this.querySelectorAll(':scope > highcharts-control, :scope > highcharts-separator').forEach((controlEl) => {
+            if (controlEl.tagName.toLowerCase() === 'highcharts-separator') {
+                controls.push({ type: 'separator' });
+            }
+            else if (controlEl.tagName.toLowerCase() === 'highcharts-control') {
+                const control = controlEl.getConfig();
+                if (control.path) {
+                    controls.push(control);
+                }
             }
         });
         return {
@@ -939,6 +971,9 @@ class HighchartsControlsElement extends HTMLElement {
             if (child.tagName.toLowerCase() === 'highcharts-group') {
                 const groupConfig = child.getConfig();
                 controls.push(groupConfig);
+            }
+            else if (child.tagName.toLowerCase() === 'highcharts-separator') {
+                controls.push({ type: 'separator' });
             }
             else if (child.tagName.toLowerCase() === 'highcharts-control') {
                 const control = child.getConfig();
@@ -978,6 +1013,8 @@ class HighchartsControlsElement extends HTMLElement {
 customElements.define('highcharts-control', HighchartsControlElement);
 customElements.define('highcharts-group', HighchartsGroupElement);
 customElements.define('highcharts-group-description', class extends HTMLElement {
+});
+customElements.define('highcharts-separator', class extends HTMLElement {
 });
 customElements.define('highcharts-controls', HighchartsControlsElement);
 function parseValue(value) {

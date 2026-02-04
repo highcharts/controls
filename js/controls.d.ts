@@ -14,12 +14,15 @@ interface ControlTarget {
     getOptions(): GenericOptionsObject | void;
     update(options: GenericOptionsObject, redraw?: boolean, oneToOne?: boolean, animation?: boolean): void;
 }
-type ControlTypes = 'boolean' | 'color' | 'number' | 'select' | 'text';
+type ControlTypes = 'boolean' | 'color' | 'number' | 'select' | 'text' | 'separator';
 interface ControlParams {
     type?: ControlTypes;
     path: string;
     label?: string;
     value?: any;
+}
+interface SeparatorParams {
+    type: 'separator';
 }
 interface SelectControlParams extends ControlParams {
     type: 'select';
@@ -51,13 +54,13 @@ interface GroupParams {
     collapsed?: boolean;
     collapsible?: boolean;
     className?: string;
-    controls: ControlParams[];
+    controls: Array<ControlParams | SeparatorParams>;
 }
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
     display?: 'block' | 'inline-block';
-    controls: Array<GroupParams | SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams>;
+    controls: Array<GroupParams | SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams | SeparatorParams>;
 }
 declare class Controls {
     /**
@@ -105,6 +108,10 @@ declare class Controls {
      * Deduce control type based on the params
      */
     private deduceControlType;
+    /**
+     * Add a separator
+     */
+    addSeparator(): void;
     /**
      * Add a control
      */

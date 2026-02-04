@@ -332,6 +332,44 @@ Edit text values with a text input field.
 }
 ```
 
+#### Separator
+
+Add a visual separator (horizontal rule) between controls to group related functionality.
+
+**JavaScript API:**
+```typescript
+HighchartsControls.controls('controls-container', {
+    controls: [
+        { path: 'legend.enabled', value: true },
+        { path: 'legend.align', options: ['left', 'center', 'right'] },
+        { type: 'separator' },  // Add separator
+        { path: 'chart.backgroundColor', value: '#FFFFFF' }
+    ]
+});
+```
+
+**Web Components:**
+```html
+<highcharts-controls>
+    <highcharts-control path="legend.enabled" value="true"></highcharts-control>
+    <highcharts-control path="legend.align" options="left,center,right"></highcharts-control>
+    <highcharts-separator></highcharts-separator>
+    <highcharts-control path="chart.backgroundColor" value="#FFFFFF"></highcharts-control>
+</highcharts-controls>
+```
+
+**Within groups:**
+```typescript
+{
+    group: 'Settings',
+    controls: [
+        { path: 'legend.enabled', value: true },
+        { type: 'separator' },
+        { path: 'chart.backgroundColor', value: '#FFFFFF' }
+    ]
+}
+```
+
 ### Nullish State Handling
 
 When a control's value is `null` or `undefined`, each control type displays a distinct visual state to clearly indicate that no value has been set:
@@ -397,11 +435,13 @@ Group controls under a collapsible header. Must be a child of `<highcharts-contr
 **Child Elements:**
 - `<highcharts-group-description>` (optional) - Description text displayed below the header. Supports HTML markup.
 - `<highcharts-control>` - Individual controls within the group
+- `<highcharts-separator>` - Visual separator between controls
 
 **Note:** When using `<highcharts-group-description>` and `injectCSS` is set to `true` (default), it's recommended to add this to your page CSS to avoid a flash of unstyled content (FOUC):
 
 ```css
-highcharts-group-description {
+highcharts-group-description,
+highcharts-separator {
     display: none;
 }
 ```
@@ -423,6 +463,26 @@ highcharts-group-description {
     </highcharts-group>
 
     <!-- Ungrouped controls -->
+    <highcharts-control path="title.text" value="My Chart"></highcharts-control>
+</highcharts-controls>
+```
+
+#### `<highcharts-separator>`
+
+Insert a horizontal separator line between controls. Must be a child of `<highcharts-controls>` or `<highcharts-group>`.
+
+**Attributes:** None
+
+**Example:**
+
+```html
+<highcharts-controls target="#container">
+    <highcharts-control path="legend.enabled" value="true"></highcharts-control>
+    <highcharts-control path="legend.align" options="left,center,right"></highcharts-control>
+
+    <highcharts-separator></highcharts-separator>
+
+    <highcharts-control path="chart.backgroundColor" value="#FFFFFF"></highcharts-control>
     <highcharts-control path="title.text" value="My Chart"></highcharts-control>
 </highcharts-controls>
 ```
