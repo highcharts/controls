@@ -451,7 +451,8 @@ class Controls {
             Object.assign(
                 document.createElement('label'),
                 {
-                    innerHTML: params.label || `<code>${params.path}</code>`
+                    innerHTML: params.label || `<code>${params.path}</code>`,
+                    title: params.label || params.path
                 }
             )
         );
@@ -583,7 +584,8 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `toggle-checkbox-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`
+                    innerHTML: params.label || `<code>${params.path}</code>`,
+                    title: params.label || params.path
                 }
             )
         );
@@ -641,7 +643,8 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `color-input-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`
+                    innerHTML: params.label || `<code>${params.path}</code>`,
+                    title: params.label || params.path
                 }
             )
         );
@@ -662,7 +665,8 @@ class Controls {
                 {
                     id: `color-value-${rid}`,
                     className: 'hcc-color-value',
-                    htmlFor: `color-input-${rid}`
+                    htmlFor: `color-input-${rid}`,
+                    title: params.label || params.path
                 }
             )
         );
@@ -672,7 +676,8 @@ class Controls {
                 document.createElement('span'),
                 {
                     id: `opacity-display-${rid}`,
-                    className: 'hcc-opacity-display'
+                    className: 'hcc-opacity-display',
+                    title: params.label || params.path
                 }
             )
         );
@@ -873,7 +878,8 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `range-input-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`
+                    innerHTML: params.label || `<code>${params.path}</code>`,
+                    title: params.label || params.path
                 }
             )
         );
@@ -884,7 +890,8 @@ class Controls {
                 document.createElement('span'),
                 {
                     id: `range-value-${rid}`,
-                    className: 'hcc-range-value'
+                    className: 'hcc-range-value',
+                    title: params.label || params.path
                 }
             )
         );
@@ -897,7 +904,8 @@ class Controls {
                     id: `range-input-${rid}`,
                     min: String(params.min),
                     max: String(params.max),
-                    step: String(params.step || 1)
+                    step: String(params.step || 1),
+                    title: params.label || params.path
                 }
             )
         );
@@ -974,7 +982,8 @@ class Controls {
                 document.createElement('label'),
                 {
                     htmlFor: `text-input-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`
+                    innerHTML: params.label || `<code>${params.path}</code>`,
+                    title: params.label || params.path
                 }
             )
         );
@@ -985,7 +994,8 @@ class Controls {
                 {
                     type: 'text',
                     id: `text-input-${rid}`,
-                    className: 'hcc-text-input'
+                    className: 'hcc-text-input',
+                    title: params.label || params.path
                 }
             )
         );

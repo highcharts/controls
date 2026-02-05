@@ -54,15 +54,17 @@ highcharts-separator {
 }
 
 .highcharts-controls {
-    padding: 1rem;
+    padding: 10px;
     border-radius: 7px;
     border: 1px solid light-dark(#e9ecef, #495057);
+    background: light-dark(#ffffff, #141414);
     box-sizing: border-box;
 
     div,
     input,
     label,
     select {
+        color: light-dark(#000000, #ffffff);
         font-family: "IBM Plex Sans Var", sans-serif;
         font-size: 13px;
         font-style: normal;
@@ -121,6 +123,48 @@ highcharts-separator {
 
     .hcc-value-inner.hcc-color-control {
         white-space: nowrap;
+    }
+
+    /* Display mode adjustments, when the width should fit into a container */
+    &.hcc-display-block {
+
+        .hcc-container {
+            display: block;
+        }
+
+        .hcc-group {
+            display: block;
+        }
+
+        .hcc-control {
+            display: block;
+            height: 3.2em;
+            position: relative;
+        }
+
+        .hcc-key,
+        .hcc-value {
+            display: block;
+            position: absolute;
+        }
+
+        .hcc-key {
+            top: 0.3em;
+        }
+
+        .hcc-value {
+            right: 0;
+            padding-left: 1em;
+            background: linear-gradient(
+                to right,
+                light-dark(#ffffff00, #14141400) 0,
+                light-dark(#ffffff, #141414) 1em
+            );
+        }
+
+        .hcc-preview-section {
+            display: block;
+        }
     }
 
     /* Group styles */
@@ -468,7 +512,6 @@ highcharts-separator {
     }
 
     .hcc-show-preview-button {
-        margin-top: 1.5em;
         padding: 0.3rem 0.5rem;
         font-weight: 600;
     }
