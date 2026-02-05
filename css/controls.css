@@ -164,6 +164,7 @@ highcharts-separator {
 
         .hcc-separator-cell {
             display: block;
+            padding: 0.3em 0;
         }
 
         .hcc-preview-section {
