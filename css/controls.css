@@ -154,12 +154,16 @@ highcharts-separator {
 
         .hcc-value {
             right: 0;
-            padding-left: 1em;
+            padding-left: 1.5em;
             background: linear-gradient(
                 to right,
                 light-dark(#ffffff00, #14141400) 0,
-                light-dark(#ffffff, #141414) 1em
+                light-dark(#ffffff, #141414) 1.4em
             );
+        }
+
+        .hcc-separator-cell {
+            display: block;
         }
 
         .hcc-preview-section {
