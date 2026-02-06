@@ -568,30 +568,10 @@ Individual control element. Must be a child of `<highcharts-controls>`.
 - **Flexible Targeting** - Target specific charts or use defaults
 - **Modern UI** - Clean, styled controls with smooth animations
 
-## CSS Customization
-
-The controls use CSS custom properties for easy theming:
-
-```css
-.highcharts-controls {
-    --hc-controls-bg: #ffffff;
-    --hc-controls-border: #e0e0e0;
-    --hc-controls-text: #333333;
-    /* Add more custom properties as needed */
-}
-```
-
-## Browser Support
-
-Modern browsers with support for:
-- ES2020 modules
-- Web Components (Custom Elements)
-- CSS Grid and Flexbox
-
 ## License
 
 ISC
 
 ## Author
 
-Torstein Honsi
+Torstein Hønsi
