@@ -10,13 +10,13 @@ the fly.
 
 Load the [module file](https://github.com/highcharts/controls/blob/main/js/controls.js) from a CDN or your own server
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0"></script>
 ```
 
 Or
 
 ```js
-import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0';
+import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0';
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0';
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -80,7 +80,7 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0';
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -416,7 +416,7 @@ Container element for controls.
 
 **Example:**
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.6.0/css/controls.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0/css/controls.css" />
 <highcharts-controls target="#my-chart" inject-css="false">
     <!-- controls here -->
 </highcharts-controls>
