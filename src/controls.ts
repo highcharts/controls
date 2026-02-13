@@ -902,6 +902,7 @@ class Controls {
             )
         );
 
+        const strStep = String(params.step || 1);
         const input = valueDiv.appendChild(
             Object.assign(
                 document.createElement('input'),
@@ -910,7 +911,7 @@ class Controls {
                     id: `range-input-${rid}`,
                     min: String(params.min),
                     max: String(params.max),
-                    step: String(params.step || 1),
+                    step: strStep,
                     title: params.label || params.path
                 }
             )
@@ -947,9 +948,13 @@ class Controls {
         };
         document.addEventListener('mouseup', onMouseUp);
 
+        // Keep a fixed number of decimals to avoid jumping (#7)
+        const decimals = strStep.indexOf('.') >= 0 ?
+            strStep.split('.')[1].length : 0;
         const setNestedValue = (animation: boolean): void => {
             const numValue = parseFloat(input.value),
-                displayValue = unit ? `${numValue}${unit}` : String(numValue),
+                sValue = numValue.toFixed(decimals),
+                displayValue = unit ? `${sValue}${unit}` : sValue,
                 chartValue = unit ? `${numValue}${unit}` : numValue;
             valueEl.textContent = displayValue;
             this.setNestedValue(params.path, chartValue, animation);

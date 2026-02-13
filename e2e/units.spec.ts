@@ -21,7 +21,7 @@ test.describe('Highcharts Controls - Unit Support', () => {
     await rangeInput.fill('2');
 
     // Display should show value with unit
-    await expect(valueDisplay).toHaveText('2em');
+    await expect(valueDisplay).toHaveText('2.0em');
 
     // Verify chart option changed with unit
     const fontSize = await page.evaluate(() => {
