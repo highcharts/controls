@@ -1042,7 +1042,7 @@ class Controls {
         );
 
         // Add collapse button if collapsible
-        if (params.collapsible === true) {
+        if (params.collapsible || params.collapsed) {
             const collapseButton = headerDiv.appendChild(
                 Object.assign(
                     document.createElement('button'),
@@ -1498,8 +1498,10 @@ class HighchartsGroupElement extends HTMLElement {
     return {
       group: this.getAttribute('header') || 'Group',
       description,
-      collapsed: this.hasAttribute('collapsed'),
-      collapsible: this.getAttribute('collapsible') === 'true',
+      collapsed: this.hasAttribute('collapsed') &&
+        this.getAttribute('collapsed') !== 'false',
+      collapsible: this.hasAttribute('collapsible') &&
+        this.getAttribute('collapsible') !== 'false',
       className: this.getAttribute('class') || undefined,
       controls
     };

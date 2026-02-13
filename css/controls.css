@@ -224,7 +224,6 @@ highcharts-separator {
 
     .hcc-group-controls {
         max-height: 1000px;
-        display: table;
         width: 100%;
         overflow: hidden;
         transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out;

@@ -9,7 +9,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Fixed
-- **Heavy updating of array items** - Fixed #14, updating properties of one
+- **Collapsed groups** - Fixed #9, only opacity was applied
+- **Series update** - Fixed #14, updating properties of one
 series caused others to run expensive update cycles too
 
 ## [0.7.0] - 2026-02-11
