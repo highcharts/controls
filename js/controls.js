@@ -123,7 +123,11 @@ class Controls {
                     // the other colors in the array.
                     const existingArray = getNestedValue(this.target.options, keys.slice(0, i + 1).join('.'));
                     if (Array.isArray(existingArray)) {
-                        cur[k] = existingArray.slice();
+                        // But only retain primitive values, as objects may have
+                        // nested properties, so we don't want expensive updates
+                        // on those (#14)
+                        cur[k] = existingArray.slice().map(item => typeof item === 'object' && item !== null ?
+                            void 0 : item);
                     }
                     else {
                         cur[k] = [];
