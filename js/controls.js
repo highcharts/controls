@@ -1,13 +1,54 @@
 /**
- * Type guard for BooleanControlParams
+ * Type guard for SeparatorParams
  */
 function is$5(params) {
+    return params.type === 'separator';
+}
+/**
+ * Add a separator
+ */
+function add$5(container) {
+    if (!container) {
+        throw new Error('Container for controls not found');
+    }
+    const row = container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
+    const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+    // Add second cell to match the two-column layout
+    row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+    cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
+}
+
+/**
+ * Utility functions for Highcharts Controls
+ */
+/**
+ * Get a nested value from an object given a dot-separated path.
+ * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
+ */
+function getNestedValue(obj, path) {
+    path = path.replace(/^(xAxis|yAxis)\./, '$1[0].');
+    // Split path into segments, handling array notation
+    // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
+    const segments = path.split(/\.|\[|\]/).filter(s => s !== '');
+    return segments.reduce((current, key) => current?.[key], obj);
+}
+/**
+ * Type guard for GroupParams
+ */
+function isGroupParams(params) {
+    return 'group' in params && Array.isArray(params.controls);
+}
+
+/**
+ * Type guard for BooleanControlParams
+ */
+function is$4(params) {
     return params.type === 'boolean';
 }
 /**
  * Add a boolean control
  */
-function add$5(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: `toggle-checkbox-${rid}`,
@@ -32,16 +73,22 @@ function add$5(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     });
 }
 
+var BooleanControl = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add$4,
+    is: is$4
+});
+
 /**
  * Type guard for SelectControlParams
  */
-function is$4(params) {
+function is$3(params) {
     return params.type === 'select';
 }
 /**
  * Add a select control
  */
-function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
@@ -123,18 +170,24 @@ function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     }
 }
 
+var SelectControl = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add$3,
+    is: is$3
+});
+
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product$1 = window.Highcharts || window.Grid;
 /**
  * Type guard for ColorControlParams
  */
-function is$3(params) {
+function is$2(params) {
     return params.type === 'color';
 }
 /**
  * Add a color control
  */
-function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: `color-input-${rid}`,
@@ -245,16 +298,22 @@ function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     opacityInput.addEventListener('input', update);
 }
 
+var ColorControl = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add$2,
+    is: is$2
+});
+
 /**
  * Type guard for NumberControlParams
  */
-function is$2(params) {
+function is$1(params) {
     return params.type === 'number';
 }
 /**
  * Add a number control
  */
-function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'), value = params.value;
     // Extract unit from current value if it's a string
     let unit = '';
@@ -374,16 +433,22 @@ function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     });
 }
 
+var NumberControl = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add$1,
+    is: is$1
+});
+
 /**
  * Type guard for TextControlParams
  */
-function is$1(params) {
+function is(params) {
     return params.type === 'text';
 }
 /**
  * Add a text control
  */
-function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+function add(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: `text-input-${rid}`,
@@ -404,46 +469,26 @@ function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     });
 }
 
-/**
- * Type guard for SeparatorParams
- */
-function is(params) {
-    return params.type === 'separator';
-}
-/**
- * Add a separator
- */
-function add(container) {
-    if (!container) {
-        throw new Error('Container for controls not found');
-    }
-    const row = container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
-    const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
-    // Add second cell to match the two-column layout
-    row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
-    cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
-}
+var TextControl = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add,
+    is: is
+});
 
 /**
- * Utility functions for Highcharts Controls
+ * Index file for Control Types
+ * Exports all control types and their type guards
  */
 /**
- * Get a nested value from an object given a dot-separated path.
- * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
+ * Registry of all control types, in order of priority for type checking
  */
-function getNestedValue(obj, path) {
-    path = path.replace(/^(xAxis|yAxis)\./, '$1[0].');
-    // Split path into segments, handling array notation
-    // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
-    const segments = path.split(/\.|\[|\]/).filter(s => s !== '');
-    return segments.reduce((current, key) => current?.[key], obj);
-}
-/**
- * Type guard for GroupParams
- */
-function isGroupParams(params) {
-    return 'group' in params && Array.isArray(params.controls);
-}
+const controlTypeRegistry = [
+    SelectControl,
+    BooleanControl,
+    ColorControl,
+    NumberControl,
+    TextControl
+];
 
 /**
  * Highcharts Controls
@@ -481,7 +526,7 @@ class Controls {
             if (isGroupParams(control)) {
                 this.addGroup(control);
             }
-            else if (is(control)) {
+            else if (is$5(control)) {
                 this.addSeparator();
             }
             else {
@@ -676,7 +721,7 @@ class Controls {
         this.container = groupControlsDiv;
         // Add controls to the group
         params.controls.forEach((control) => {
-            if (is(control)) {
+            if (is$5(control)) {
                 this.addSeparator();
             }
             else {
@@ -726,7 +771,7 @@ class Controls {
      * Add a separator
      */
     addSeparator() {
-        add(this.container);
+        add$5(this.container);
     }
     /**
      * Add a control
@@ -744,20 +789,11 @@ class Controls {
         const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
         const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
         const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
-        if (is$4(params)) {
-            add$4(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        }
-        else if (is$5(params)) {
-            add$5(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        }
-        else if (is$3(params)) {
-            add$3(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        }
-        else if (is$2(params)) {
-            add$2(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        }
-        else if (is$1(params)) {
-            add$1(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        for (const controlType of controlTypeRegistry) {
+            if (controlType.is(params)) {
+                controlType.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+                break;
+            }
         }
     }
     /**

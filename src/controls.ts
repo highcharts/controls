@@ -11,12 +11,8 @@
 const Product = (window as any).Highcharts || (window as any).Grid;
 
 import {
-    BooleanControl,
-    SelectControl,
-    ColorControl,
-    NumberControl,
-    TextControl,
     SeparatorControl,
+    controlTypeRegistry,
     getNestedValue,
     isGroupParams,
     type ControlTarget,
@@ -514,16 +510,17 @@ class Controls {
             )
         );
 
-        if (SelectControl.is(params)) {
-            SelectControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        } else if (BooleanControl.is(params)) {
-            BooleanControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        } else if (ColorControl.is(params)) {
-            ColorControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        } else if (NumberControl.is(params)) {
-            NumberControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
-        } else if (TextControl.is(params)) {
-            TextControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        for (const controlType of controlTypeRegistry) {
+            if (controlType.is(params)) {
+                controlType.add(
+                    params,
+                    keyDiv,
+                    valueDivInner,
+                    div,
+                    this.setNestedValue.bind(this)
+                );
+                break;
+            }
         }
     }
 
