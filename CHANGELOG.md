@@ -8,6 +8,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- **Modular architecture** - Refactored codebase into modular control types
+  - Created `src/ControlTypes/` folder with separate files for each control type
+  - Each control type (Boolean, Select, Color, Number, Text, Separator) now has its own module
+  - Each module exports an `is()` type guard function and an `add()` render function
+  - Shared types moved to `ControlTypes/types.ts`
+  - Utility functions moved to `ControlTypes/utils.ts`
+  - Main `controls.ts` reduced from 1,464 to 893 lines (39% reduction)
+  - Improved maintainability, testability, and extensibility
+  - No breaking changes to the public API
+
 ### Fixed
 - **Collapsed groups** - Fixed #9, only opacity was applied
 - **Series update** - Fixed #14, updating properties of one

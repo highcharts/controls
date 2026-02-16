@@ -10,70 +10,27 @@
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = (window as any).Highcharts || (window as any).Grid;
 
-interface GenericOptionsObject {
-    [key: string]: any;
-}
-interface ControlTarget {
-    options: GenericOptionsObject;
-    getOptions(): GenericOptionsObject|void;
-    update(
-        options: GenericOptionsObject,
-        redraw?: boolean,
-        oneToOne?: boolean,
-        animation?: boolean
-    ): void;
-}
-
-type ControlTypes = 'boolean'|'color'|'number'|'select'|'text'|'separator';
-
-interface ControlParams {
-    type?: ControlTypes;
-    path: string;
-    label?: string;
-    value?: any;
-}
-
-interface SeparatorParams {
-    type: 'separator';
-}
-
-interface SelectControlParams extends ControlParams {
-    type: 'select';
-    options?: string[];
-    value?: string;
-}
-
-interface BooleanControlParams extends ControlParams {
-    type: 'boolean';
-    value?: boolean;
-}
-
-interface ColorControlParams extends ControlParams {
-    type: 'color';
-    value?: string;
-}
-
-interface NumberControlParams extends ControlParams {
-    type: 'number';
-    min?: number;
-    max?: number;
-    step?: number;
-    value?: number|string;
-}
-
-interface TextControlParams extends ControlParams {
-    type: 'text';
-    value?: string;
-}
-
-interface GroupParams {
-    group: string;
-    description?: string;
-    collapsed?: boolean;
-    collapsible?: boolean;
-    className?: string;
-    controls: Array<ControlParams | SeparatorParams>;
-}
+import {
+    BooleanControl,
+    SelectControl,
+    ColorControl,
+    NumberControl,
+    TextControl,
+    SeparatorControl,
+    getNestedValue,
+    isGroupParams,
+    type ControlTarget,
+    type ControlTypes,
+    type ControlParams,
+    type SeparatorParams,
+    type SelectControlParams,
+    type BooleanControlParams,
+    type ColorControlParams,
+    type NumberControlParams,
+    type TextControlParams,
+    type GroupParams,
+    type GenericOptionsObject
+} from './ControlTypes/index.js';
 
 interface ControlsOptionsObject {
     target?: ControlTarget;
@@ -88,81 +45,6 @@ interface ControlsOptionsObject {
         TextControlParams|
         SeparatorParams
     >;
-}
-
-/**
- * Type guard for SelectControlParams
- */
-function isSelectControlParams(
-    params: ControlParams
-): params is SelectControlParams {
-    return params.type === 'select';
-}
-
-/**
- * Type guard for BooleanControlParams
- */
-function isBooleanControlParams(
-    params: ControlParams
-): params is BooleanControlParams {
-    return params.type === 'boolean';
-}
-
-/**
- * Type guard for ColorControlParams
- */
-function isColorControlParams(
-    params: ControlParams
-): params is ColorControlParams {
-    return params.type === 'color';
-}
-
-/**
- * Type guard for NumberControlParams
- */
-function isNumberControlParams(
-    params: ControlParams
-): params is NumberControlParams {
-    return params.type === 'number';
-}
-
-/**
- * Type guard for TextControlParams
- */
-function isTextControlParams(
-    params: ControlParams
-): params is TextControlParams {
-    return params.type === 'text';
-}
-
-/**
- * Type guard for SeparatorParams
- */
-function isSeparatorParams(
-    params: any
-): params is SeparatorParams {
-    return params.type === 'separator';
-}
-
-/**
- * Type guard for GroupParams
- */
-function isGroupParams(
-    params: any
-): params is GroupParams {
-    return 'group' in params && Array.isArray(params.controls);
-}
-
-/**
- * Get a nested value from an object given a dot-separated path.
- * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
- */
-function getNestedValue(obj: any, path: string): any {
-    path = path.replace(/^(xAxis|yAxis)\./, '$1[0].');
-    // Split path into segments, handling array notation
-    // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
-    const segments = path.split(/\.|\[|\]/).filter(s => s !== '');
-    return segments.reduce((current, key): any => current?.[key], obj);
 }
 
 class Controls {
@@ -230,11 +112,11 @@ class Controls {
         // Add the controls
         options.controls?.forEach((control): void => {
             if (isGroupParams(control)) {
-                this.addGroup(control);
-            } else if (isSeparatorParams(control)) {
+                this.addGroup(control as GroupParams);
+            } else if (SeparatorControl.is(control)) {
                 this.addSeparator();
             } else {
-                this.addControl(control);
+                this.addControl(control as ControlParams);
             }
         });
 
@@ -444,581 +326,10 @@ class Controls {
         }
     }
 
-    /**
-     * Add a select control
-     */
-    private addSelectControl(
-        params: SelectControlParams,
-        keyDiv: HTMLElement,
-        valueDiv: HTMLElement,
-        controlDiv: HTMLElement
-    ): void {
-        keyDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                {
-                    innerHTML: params.label || `<code>${params.path}</code>`,
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        // Deduce options
-        if (
-            params.path.endsWith('.align') ||
-            params.path.endsWith('.textAlign')
-        ) {
-            params.options ||= ['left', 'center', 'right'];
-        }
-        if (params.path.toLowerCase().endsWith('dashstyle')) {
-            params.options ||= [
-                'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
-                'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
-                'DashDot', 'LongDashDot', 'LongDashDotDot'
-            ];
-        }
-        if (params.path.endsWith('.fontWeight')) {
-            params.options ||= ['normal', 'bold', 'lighter'];
-        }
-        if (params.path.endsWith('.verticalAlign')) {
-            params.options ||= ['top', 'middle', 'bottom'];
-        }
-
-        // Ensure current value is in options
-        const options = params.options || [];
-        if (
-            params.value !== null &&
-            params.value !== undefined &&
-            !options.includes(params.value)
-        ) {
-            options.unshift(params.value);
-        }
-
-        // Determine whether to use select dropdown or button group
-        const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
-        const useDropdown = options.length > 3 || totalLength > 24;
-
-        if (useDropdown) {
-            // Render as select dropdown
-            valueDiv.classList.add('hcc-select-control');
-
-            const select = valueDiv.appendChild(
-                Object.assign(
-                    document.createElement('select'),
-                    {
-                        className: 'hcc-select-dropdown'
-                    }
-                )
-            );
-
-            options.forEach((option): void => {
-                const isSelected = params.value !== null &&
-                    params.value !== undefined &&
-                    params.value === option;
-                select.appendChild(
-                    Object.assign(
-                        document.createElement('option'),
-                        {
-                            value: option,
-                            innerText: option,
-                            selected: isSelected
-                        }
-                    )
-                );
-            });
-
-            select.addEventListener('change', (): void => {
-                controlDiv.classList.remove('hcc-control-nullish');
-                const value = select.value;
-                this.setNestedValue(params.path, value);
-            });
-        } else {
-            // Render as button group
-            valueDiv.classList.add('hcc-button-group');
-
-            options.forEach((option): void => {
-                const isActive = params.value !== null &&
-                    params.value !== undefined &&
-                    params.value === option;
-                const button = valueDiv.appendChild(
-                    Object.assign(
-                        document.createElement('button'),
-                        {
-                            className: 'hcc-button' +
-                                (isActive ? ' active' : ''),
-                            innerText: option
-                        }
-                    )
-                );
-                button.dataset.path = params.path;
-                button.dataset.value = option;
-
-                button.addEventListener(
-                    'click',
-                    (): void => {
-                        controlDiv.classList.remove('hcc-control-nullish');
-                        const value = button.getAttribute('data-value');
-                        this.setNestedValue(params.path, value);
-
-                        // Update active state for all buttons in this group
-                        const allButtons = document.querySelectorAll(
-                            `[data-path="${params.path}"]`
-                        );
-                        allButtons.forEach(
-                            (b): void => b.classList.remove('active')
-                        );
-                        button.classList.add('active');
-                    }
-                );
-            });
-        }
-    }
-
-    /**
-     * Add a boolean control
-     */
-    private addBooleanControl(
-        params: BooleanControlParams,
-        keyDiv: HTMLElement,
-        valueDiv: HTMLElement,
-        controlDiv: HTMLElement
-    ): void {
-
-        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
-        keyDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                {
-                    htmlFor: `toggle-checkbox-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`,
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        const isNullish = params.value === null || params.value === undefined;
-        const labelToggle = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                { className: 'hcc-toggle' }
-            )
-        );
-
-        const input = labelToggle.appendChild(
-            Object.assign(
-                document.createElement('input'),
-                {
-                    type: 'checkbox',
-                    id: `toggle-checkbox-${rid}`
-                }
-            )
-        );
-
-        labelToggle.appendChild(
-            Object.assign(
-                document.createElement('span'),
-                {
-                    className: 'hcc-toggle-slider',
-                    'aria-hidden': 'true'
-                }
-            )
-        );
-
-        input.checked = Boolean(params.value);
-
-        input.addEventListener('change', (): void => {
-            controlDiv.classList.remove('hcc-control-nullish');
-            const value = input.checked;
-            this.setNestedValue(params.path, value);
-        });
-    }
-
-    /**
-     * Add a color control
-     */
-    private addColorControl(
-        params: ColorControlParams,
-        keyDiv: HTMLElement,
-        valueDiv: HTMLElement,
-        controlDiv: HTMLElement
-    ): void {
-
-        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
-        keyDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                {
-                    htmlFor: `color-input-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`,
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        const colorInput = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('input'),
-                {
-                    type: 'color',
-                    id: `color-input-${rid}`
-                }
-            )
-        );
-
-        const valueEl = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                {
-                    id: `color-value-${rid}`,
-                    className: 'hcc-color-value',
-                    htmlFor: `color-input-${rid}`,
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        const opacityDisplay = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('span'),
-                {
-                    id: `opacity-display-${rid}`,
-                    className: 'hcc-opacity-display',
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        valueDiv.appendChild(
-            Object.assign(
-                document.createElement('span'),
-                {
-                    textContent: '%',
-                    className: 'hcc-opacity-input-label'
-                }
-            )
-        );
-
-        // Container for the range slider popup
-        const opacityRangeContainer = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                {
-                    className: 'hcc-opacity-range-container hcc-hidden'
-                }
-            )
-        );
-
-        const opacityInput = opacityRangeContainer.appendChild(
-            Object.assign(
-                document.createElement('input'),
-                {
-                    type: 'range',
-                    id: `opacity-input-${rid}`,
-                    className: 'hcc-opacity-input',
-                    min: '0',
-                    max: '100',
-                    step: '1'
-                }
-            )
-        );
-
-        const getHex = (
-            color: { rgba: number[] },
-            includeAlpha?: boolean
-        ): string => {
-            const rgba = color.rgba;
-            let hex = `#${(
-                ((1 << 24) +
-                (rgba[0] << 16) +
-                (rgba[1] << 8) +
-                rgba[2]
-                )
-                    .toString(16)
-                    .slice(1)
-            ).toLowerCase()}`;
-
-            if (includeAlpha && rgba[3] !== undefined && rgba[3] !== 1) {
-                const alpha = Math.round(rgba[3] * 255);
-                hex += ((1 << 8) + alpha).toString(16).slice(1).toLowerCase();
-            }
-
-            return hex;
-        };
-
-        // Show/hide range slider on opacity display click
-        opacityDisplay.addEventListener('click', (e): void => {
-            e.stopPropagation();
-            opacityRangeContainer.classList.remove('hcc-hidden');
-            opacityInput.focus();
-        });
-
-        // Hide range slider on Enter key
-        opacityInput.addEventListener('keydown', (e): void => {
-            if (e.key === 'Enter') {
-                opacityRangeContainer.classList.add('hcc-hidden');
-            }
-        });
-
-        // Hide range slider when clicking outside
-        const hideRangeOnClickOutside = (e: MouseEvent): void => {
-            if (!opacityRangeContainer.contains(e.target as Node) &&
-                !opacityDisplay.contains(e.target as Node)) {
-                opacityRangeContainer.classList.add('hcc-hidden');
-            }
-        };
-        document.addEventListener('click', hideRangeOnClickOutside);
-
-        const isNullish = params.value === null || params.value === undefined;
-        let hcColor = isNullish ? Product.color('#808080') : Product.color(params.value);
-
-        if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
-            console.warn(
-                `Highcharts Controls: Invalid color value for path "${params.path}": ${params.value}`
-            );
-            // Treat invalid color as nullish
-            controlDiv.classList.add('hcc-control-nullish');
-            valueEl.textContent = '—';
-            colorInput.value = '#808080';
-            opacityInput.value = '100';
-            opacityDisplay.textContent = '100';
-        } else if (isNullish) {
-            valueEl.textContent = '—';
-            colorInput.value = '#808080';
-            opacityInput.value = '100';
-            opacityDisplay.textContent = '100';
-        } else {
-            const hex = getHex(hcColor),
-                opacity = (hcColor.rgba[3] || 1) * 100;
-            colorInput.value = hex;
-            valueEl.textContent = hex;
-            opacityInput.value = String(Math.round(opacity));
-            opacityDisplay.textContent = String(Math.round(opacity));
-        }
-
-        const update = (): void => {
-            controlDiv.classList.remove('hcc-control-nullish');
-            const rgba = colorInput.value; // E.g. #RRGGBB
-            const opacity = parseFloat(opacityInput.value) / 100;
-            // Use Highcharts.color to apply opacity and produce rgba()/hex
-            const hcColor = Product.color(rgba)
-                .setOpacity(opacity);
-            this.setNestedValue(
-                params.path,
-                getHex(hcColor, true),
-                false
-            );
-            valueEl.textContent = getHex(hcColor);
-            opacityDisplay.textContent = opacityInput.value;
-        };
-
-        colorInput.addEventListener('input', update);
-        opacityInput.addEventListener('input', update);
-    }
-
-    /**
-     * Add a number control
-     */
-    private addNumberControl(
-        params: NumberControlParams,
-        keyDiv: HTMLElement,
-        valueDiv: HTMLElement,
-        controlDiv: HTMLElement
-    ): void {
-
-        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'),
-            value = params.value;
-
-        // Extract unit from current value if it's a string
-        let unit = '';
-        let numericValue: number|undefined;
-
-        if (typeof value === 'string') {
-            const match = value.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
-            if (match) {
-                numericValue = parseFloat(match[1]);
-                unit = match[2] || unit;
-            }
-        } else {
-            numericValue = value;
-        }
-
-        // Set default min/max if not provided
-        if (params.min === void 0 || params.max === void 0) {
-            if (/(lineWidth|borderWidth)$/i.test(params.path)) {
-                params.min = params.min ?? 0;
-                params.max = params.max ?? 5;
-
-            } else if (/(borderRadius)$/i.test(params.path)) {
-                params.min = params.min ?? 0;
-                params.max = params.max ?? 10;
-
-            } else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(params.path)) {
-                params.min = params.min ?? -100;
-                params.max = params.max ?? 100;
-            } else if (/rotation$/i.test(params.path)) {
-                params.min = params.min ?? -90;
-                params.max = params.max ?? 90;
-            } else {
-                params.min = params.min ?? 0;
-                params.max = params.max ?? 100;
-            }
-        }
-
-        if (typeof numericValue === 'number') {
-            if (params.min > numericValue) {
-                params.min = numericValue;
-            }
-            if (params.max < numericValue) {
-                params.max = numericValue;
-            }
-        }
-
-        // Set default step for em/rem units
-        if (!params.step && (unit === 'em' || unit === 'rem')) {
-            params.step = 0.1;
-        }
 
 
-        keyDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                {
-                    htmlFor: `range-input-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`,
-                    title: params.label || params.path
-                }
-            )
-        );
 
-        const isNullish = numericValue === null || numericValue === undefined;
-        const valueEl = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('span'),
-                {
-                    id: `range-value-${rid}`,
-                    className: 'hcc-range-value',
-                    title: params.label || params.path
-                }
-            )
-        );
 
-        const strStep = String(params.step || 1);
-        const input = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('input'),
-                {
-                    type: 'range',
-                    id: `range-input-${rid}`,
-                    min: String(params.min),
-                    max: String(params.max),
-                    step: strStep,
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        if (isNullish) {
-            // Set to middle of range for nullish state
-            input.value = String((params.min + params.max) / 2);
-            valueEl.textContent = '';
-        } else {
-            input.value = String(numericValue);
-            valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
-        }
-
-        // Track if user is actively dragging vs clicking to jump
-        let isDragging = false;
-        let mouseIsDown = false;
-
-        input.addEventListener('mousedown', (): void => {
-            mouseIsDown = true;
-            isDragging = false;
-        });
-
-        // Detect actual dragging by tracking mouse movement
-        const onMouseMove = (): void => {
-            if (mouseIsDown) {
-                isDragging = true;
-            }
-        };
-        document.addEventListener('mousemove', onMouseMove);
-
-        const onMouseUp = (): void => {
-            mouseIsDown = false;
-        };
-        document.addEventListener('mouseup', onMouseUp);
-
-        // Keep a fixed number of decimals to avoid jumping (#7)
-        const decimals = strStep.indexOf('.') >= 0 ?
-            strStep.split('.')[1].length : 0;
-        const setNestedValue = (animation: boolean): void => {
-            const numValue = parseFloat(input.value),
-                sValue = numValue.toFixed(decimals),
-                displayValue = unit ? `${sValue}${unit}` : sValue,
-                chartValue = unit ? `${numValue}${unit}` : numValue;
-            valueEl.textContent = displayValue;
-            this.setNestedValue(params.path, chartValue, animation);
-        };
-
-        input.addEventListener('input', (): void => {
-            controlDiv.classList.remove('hcc-control-nullish');
-            if (isDragging) {
-                setNestedValue(false);
-            }
-        });
-
-        input.addEventListener('change', (): void => {
-            // Only animate if user clicked to jump, not after dragging
-            if (!isDragging) {
-                setNestedValue(true);
-            }
-            isDragging = false;
-        });
-    }
-
-    /**
-     * Add a text control
-     */
-    private addTextControl(
-        params: TextControlParams,
-        keyDiv: HTMLElement,
-        valueDiv: HTMLElement,
-        controlDiv: HTMLElement
-    ): void {
-
-        const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
-
-        keyDiv.appendChild(
-            Object.assign(
-                document.createElement('label'),
-                {
-                    htmlFor: `text-input-${rid}`,
-                    innerHTML: params.label || `<code>${params.path}</code>`,
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        const input = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('input'),
-                {
-                    type: 'text',
-                    id: `text-input-${rid}`,
-                    className: 'hcc-text-input',
-                    title: params.label || params.path
-                }
-            )
-        );
-
-        input.value = String(params.value || '');
-
-        input.addEventListener('input', (): void => {
-            controlDiv.classList.remove('hcc-control-nullish');
-            const value = input.value;
-            this.setNestedValue(params.path, value, false);
-        });
-    }
 
     /**
      * Add a group of controls
@@ -1100,7 +411,7 @@ class Controls {
 
         // Add controls to the group
         params.controls.forEach((control): void => {
-            if (isSeparatorParams(control)) {
+            if (SeparatorControl.is(control)) {
                 this.addSeparator();
             } else {
                 this.addControl(control);
@@ -1158,38 +469,7 @@ class Controls {
      * Add a separator
      */
     public addSeparator(): void {
-        if (!this.container) {
-            throw new Error('Container for controls not found');
-        }
-
-        const row = this.container.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: 'hcc-separator-row' }
-            )
-        );
-
-        const cell1 = row.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: 'hcc-separator-cell' }
-            )
-        );
-
-        // Add second cell to match the two-column layout
-        row.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: 'hcc-separator-cell' }
-            )
-        );
-
-        cell1.appendChild(
-            Object.assign(
-                document.createElement('hr'),
-                { className: 'hcc-separator' }
-            )
-        );
+        SeparatorControl.add(this.container);
     }
 
     /**
@@ -1234,16 +514,16 @@ class Controls {
             )
         );
 
-        if (isSelectControlParams(params)) {
-            this.addSelectControl(params, keyDiv, valueDivInner, div);
-        } else if (isBooleanControlParams(params)) {
-            this.addBooleanControl(params, keyDiv, valueDivInner, div);
-        } else if (isColorControlParams(params)) {
-            this.addColorControl(params, keyDiv, valueDivInner, div);
-        } else if (isNumberControlParams(params)) {
-            this.addNumberControl(params, keyDiv, valueDivInner, div);
-        } else if (isTextControlParams(params)) {
-            this.addTextControl(params, keyDiv, valueDivInner, div);
+        if (SelectControl.is(params)) {
+            SelectControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        } else if (BooleanControl.is(params)) {
+            BooleanControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        } else if (ColorControl.is(params)) {
+            ColorControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        } else if (NumberControl.is(params)) {
+            NumberControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        } else if (TextControl.is(params)) {
+            TextControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
         }
     }
 
