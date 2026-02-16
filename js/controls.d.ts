@@ -1,4 +1,58 @@
 /**
+ * Shared type definitions for Highcharts Controls
+ */
+interface GenericOptionsObject {
+    [key: string]: any;
+}
+interface ControlTarget {
+    options: GenericOptionsObject;
+    getOptions(): GenericOptionsObject | void;
+    update(options: GenericOptionsObject, redraw?: boolean, oneToOne?: boolean, animation?: boolean): void;
+}
+type ControlTypes = 'boolean' | 'color' | 'number' | 'select' | 'text' | 'separator';
+interface ControlParams {
+    type?: ControlTypes;
+    path: string;
+    label?: string;
+    value?: any;
+}
+interface SeparatorParams {
+    type: 'separator';
+}
+interface SelectControlParams extends ControlParams {
+    type: 'select';
+    options?: string[];
+    value?: string;
+}
+interface BooleanControlParams extends ControlParams {
+    type: 'boolean';
+    value?: boolean;
+}
+interface ColorControlParams extends ControlParams {
+    type: 'color';
+    value?: string;
+}
+interface NumberControlParams extends ControlParams {
+    type: 'number';
+    min?: number;
+    max?: number;
+    step?: number;
+    value?: number | string;
+}
+interface TextControlParams extends ControlParams {
+    type: 'text';
+    value?: string;
+}
+interface GroupParams {
+    group: string;
+    description?: string;
+    collapsed?: boolean;
+    collapsible?: boolean;
+    className?: string;
+    controls: Array<ControlParams | SeparatorParams>;
+}
+
+/**
  * Highcharts Controls
  *
  * Provides UI controls to manipulate chart options on the fly.
@@ -6,7 +60,7 @@
  * Used by the sample generator to create interactive samples:
  * - node tools/sample-generator/index.ts
  */
-import { type ControlTarget, type ControlParams, type SeparatorParams, type SelectControlParams, type BooleanControlParams, type ColorControlParams, type NumberControlParams, type TextControlParams, type GroupParams } from './ControlTypes/index.js';
+
 interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
@@ -60,5 +114,5 @@ declare class Controls {
      */
     private updateOptionsPreview;
 }
-export default Controls;
-//# sourceMappingURL=controls.d.ts.map
+
+export { Controls as default };

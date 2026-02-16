@@ -1,4 +1,451 @@
 /**
+ * Type guard for BooleanControlParams
+ */
+function is$5(params) {
+    return params.type === 'boolean';
+}
+/**
+ * Add a boolean control
+ */
+function add$5(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+    keyDiv.appendChild(Object.assign(document.createElement('label'), {
+        htmlFor: `toggle-checkbox-${rid}`,
+        innerHTML: params.label || `<code>${params.path}</code>`,
+        title: params.label || params.path
+    }));
+    params.value === null || params.value === undefined;
+    const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
+    const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
+        type: 'checkbox',
+        id: `toggle-checkbox-${rid}`
+    }));
+    labelToggle.appendChild(Object.assign(document.createElement('span'), {
+        className: 'hcc-toggle-slider',
+        'aria-hidden': 'true'
+    }));
+    input.checked = Boolean(params.value);
+    input.addEventListener('change', () => {
+        controlDiv.classList.remove('hcc-control-nullish');
+        const value = input.checked;
+        setNestedValue(params.path, value);
+    });
+}
+
+/**
+ * Type guard for SelectControlParams
+ */
+function is$4(params) {
+    return params.type === 'select';
+}
+/**
+ * Add a select control
+ */
+function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+    keyDiv.appendChild(Object.assign(document.createElement('label'), {
+        innerHTML: params.label || `<code>${params.path}</code>`,
+        title: params.label || params.path
+    }));
+    // Deduce options
+    if (params.path.endsWith('.align') ||
+        params.path.endsWith('.textAlign')) {
+        params.options || (params.options = ['left', 'center', 'right']);
+    }
+    if (params.path.toLowerCase().endsWith('dashstyle')) {
+        params.options || (params.options = [
+            'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
+            'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
+            'DashDot', 'LongDashDot', 'LongDashDotDot'
+        ]);
+    }
+    if (params.path.endsWith('.fontWeight')) {
+        params.options || (params.options = ['normal', 'bold', 'lighter']);
+    }
+    if (params.path.endsWith('.verticalAlign')) {
+        params.options || (params.options = ['top', 'middle', 'bottom']);
+    }
+    // Ensure current value is in options
+    const options = params.options || [];
+    if (params.value !== null &&
+        params.value !== undefined &&
+        !options.includes(params.value)) {
+        options.unshift(params.value);
+    }
+    // Determine whether to use select dropdown or button group
+    const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
+    const useDropdown = options.length > 3 || totalLength > 24;
+    if (useDropdown) {
+        // Render as select dropdown
+        valueDiv.classList.add('hcc-select-control');
+        const select = valueDiv.appendChild(Object.assign(document.createElement('select'), {
+            className: 'hcc-select-dropdown'
+        }));
+        options.forEach((option) => {
+            const isSelected = params.value !== null &&
+                params.value !== undefined &&
+                params.value === option;
+            select.appendChild(Object.assign(document.createElement('option'), {
+                value: option,
+                innerText: option,
+                selected: isSelected
+            }));
+        });
+        select.addEventListener('change', () => {
+            controlDiv.classList.remove('hcc-control-nullish');
+            const value = select.value;
+            setNestedValue(params.path, value);
+        });
+    }
+    else {
+        // Render as button group
+        valueDiv.classList.add('hcc-button-group');
+        options.forEach((option) => {
+            const isActive = params.value !== null &&
+                params.value !== undefined &&
+                params.value === option;
+            const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
+                className: 'hcc-button' +
+                    (isActive ? ' active' : ''),
+                innerText: option
+            }));
+            button.dataset.path = params.path;
+            button.dataset.value = option;
+            button.addEventListener('click', () => {
+                controlDiv.classList.remove('hcc-control-nullish');
+                const value = button.getAttribute('data-value');
+                setNestedValue(params.path, value);
+                // Update active state for all buttons in this group
+                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
+                allButtons.forEach((b) => b.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    }
+}
+
+/* eslint-disable @highcharts/highcharts/no-highcharts-object */
+const Product$1 = window.Highcharts || window.Grid;
+/**
+ * Type guard for ColorControlParams
+ */
+function is$3(params) {
+    return params.type === 'color';
+}
+/**
+ * Add a color control
+ */
+function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+    keyDiv.appendChild(Object.assign(document.createElement('label'), {
+        htmlFor: `color-input-${rid}`,
+        innerHTML: params.label || `<code>${params.path}</code>`,
+        title: params.label || params.path
+    }));
+    const colorInput = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+        type: 'color',
+        id: `color-input-${rid}`
+    }));
+    const valueEl = valueDiv.appendChild(Object.assign(document.createElement('label'), {
+        id: `color-value-${rid}`,
+        className: 'hcc-color-value',
+        htmlFor: `color-input-${rid}`,
+        title: params.label || params.path
+    }));
+    const opacityDisplay = valueDiv.appendChild(Object.assign(document.createElement('span'), {
+        id: `opacity-display-${rid}`,
+        className: 'hcc-opacity-display',
+        title: params.label || params.path
+    }));
+    valueDiv.appendChild(Object.assign(document.createElement('span'), {
+        textContent: '%',
+        className: 'hcc-opacity-input-label'
+    }));
+    // Container for the range slider popup
+    const opacityRangeContainer = valueDiv.appendChild(Object.assign(document.createElement('div'), {
+        className: 'hcc-opacity-range-container hcc-hidden'
+    }));
+    const opacityInput = opacityRangeContainer.appendChild(Object.assign(document.createElement('input'), {
+        type: 'range',
+        id: `opacity-input-${rid}`,
+        className: 'hcc-opacity-input',
+        min: '0',
+        max: '100',
+        step: '1'
+    }));
+    const getHex = (color, includeAlpha) => {
+        const rgba = color.rgba;
+        let hex = `#${(((1 << 24) +
+            (rgba[0] << 16) +
+            (rgba[1] << 8) +
+            rgba[2])
+            .toString(16)
+            .slice(1)).toLowerCase()}`;
+        if (includeAlpha && rgba[3] !== undefined && rgba[3] !== 1) {
+            const alpha = Math.round(rgba[3] * 255);
+            hex += ((1 << 8) + alpha).toString(16).slice(1).toLowerCase();
+        }
+        return hex;
+    };
+    // Show/hide range slider on opacity display click
+    opacityDisplay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        opacityRangeContainer.classList.remove('hcc-hidden');
+        opacityInput.focus();
+    });
+    // Hide range slider on Enter key
+    opacityInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            opacityRangeContainer.classList.add('hcc-hidden');
+        }
+    });
+    // Hide range slider when clicking outside
+    const hideRangeOnClickOutside = (e) => {
+        if (!opacityRangeContainer.contains(e.target) &&
+            !opacityDisplay.contains(e.target)) {
+            opacityRangeContainer.classList.add('hcc-hidden');
+        }
+    };
+    document.addEventListener('click', hideRangeOnClickOutside);
+    const isNullish = params.value === null || params.value === undefined;
+    let hcColor = isNullish ? Product$1.color('#808080') : Product$1.color(params.value);
+    if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
+        console.warn(`Highcharts Controls: Invalid color value for path "${params.path}": ${params.value}`);
+        // Treat invalid color as nullish
+        controlDiv.classList.add('hcc-control-nullish');
+        valueEl.textContent = '—';
+        colorInput.value = '#808080';
+        opacityInput.value = '100';
+        opacityDisplay.textContent = '100';
+    }
+    else if (isNullish) {
+        valueEl.textContent = '—';
+        colorInput.value = '#808080';
+        opacityInput.value = '100';
+        opacityDisplay.textContent = '100';
+    }
+    else {
+        const hex = getHex(hcColor), opacity = (hcColor.rgba[3] || 1) * 100;
+        colorInput.value = hex;
+        valueEl.textContent = hex;
+        opacityInput.value = String(Math.round(opacity));
+        opacityDisplay.textContent = String(Math.round(opacity));
+    }
+    const update = () => {
+        controlDiv.classList.remove('hcc-control-nullish');
+        const rgba = colorInput.value; // E.g. #RRGGBB
+        const opacity = parseFloat(opacityInput.value) / 100;
+        // Use Highcharts.color to apply opacity and produce rgba()/hex
+        const hcColor = Product$1.color(rgba)
+            .setOpacity(opacity);
+        setNestedValue(params.path, getHex(hcColor, true), false);
+        valueEl.textContent = getHex(hcColor);
+        opacityDisplay.textContent = opacityInput.value;
+    };
+    colorInput.addEventListener('input', update);
+    opacityInput.addEventListener('input', update);
+}
+
+/**
+ * Type guard for NumberControlParams
+ */
+function is$2(params) {
+    return params.type === 'number';
+}
+/**
+ * Add a number control
+ */
+function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'), value = params.value;
+    // Extract unit from current value if it's a string
+    let unit = '';
+    let numericValue;
+    if (typeof value === 'string') {
+        const match = value.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
+        if (match) {
+            numericValue = parseFloat(match[1]);
+            unit = match[2] || unit;
+        }
+    }
+    else {
+        numericValue = value;
+    }
+    // Set default min/max if not provided
+    if (params.min === void 0 || params.max === void 0) {
+        if (/(lineWidth|borderWidth)$/i.test(params.path)) {
+            params.min = params.min ?? 0;
+            params.max = params.max ?? 5;
+        }
+        else if (/(borderRadius)$/i.test(params.path)) {
+            params.min = params.min ?? 0;
+            params.max = params.max ?? 10;
+        }
+        else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(params.path)) {
+            params.min = params.min ?? -100;
+            params.max = params.max ?? 100;
+        }
+        else if (/rotation$/i.test(params.path)) {
+            params.min = params.min ?? -90;
+            params.max = params.max ?? 90;
+        }
+        else {
+            params.min = params.min ?? 0;
+            params.max = params.max ?? 100;
+        }
+    }
+    if (typeof numericValue === 'number') {
+        if (params.min > numericValue) {
+            params.min = numericValue;
+        }
+        if (params.max < numericValue) {
+            params.max = numericValue;
+        }
+    }
+    // Set default step for em/rem units
+    if (!params.step && (unit === 'em' || unit === 'rem')) {
+        params.step = 0.1;
+    }
+    keyDiv.appendChild(Object.assign(document.createElement('label'), {
+        htmlFor: `range-input-${rid}`,
+        innerHTML: params.label || `<code>${params.path}</code>`,
+        title: params.label || params.path
+    }));
+    const isNullish = numericValue === null || numericValue === undefined;
+    const valueEl = valueDiv.appendChild(Object.assign(document.createElement('span'), {
+        id: `range-value-${rid}`,
+        className: 'hcc-range-value',
+        title: params.label || params.path
+    }));
+    const strStep = String(params.step || 1);
+    const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+        type: 'range',
+        id: `range-input-${rid}`,
+        min: String(params.min),
+        max: String(params.max),
+        step: strStep,
+        title: params.label || params.path
+    }));
+    if (isNullish) {
+        // Set to middle of range for nullish state
+        input.value = String((params.min + params.max) / 2);
+        valueEl.textContent = '';
+    }
+    else {
+        input.value = String(numericValue);
+        valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
+    }
+    // Track if user is actively dragging vs clicking to jump
+    let isDragging = false;
+    let mouseIsDown = false;
+    input.addEventListener('mousedown', () => {
+        mouseIsDown = true;
+        isDragging = false;
+    });
+    // Detect actual dragging by tracking mouse movement
+    const onMouseMove = () => {
+        if (mouseIsDown) {
+            isDragging = true;
+        }
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    const onMouseUp = () => {
+        mouseIsDown = false;
+    };
+    document.addEventListener('mouseup', onMouseUp);
+    // Keep a fixed number of decimals to avoid jumping (#7)
+    const decimals = strStep.indexOf('.') >= 0 ?
+        strStep.split('.')[1].length : 0;
+    const setNestedValueWrapper = (animation) => {
+        const numValue = parseFloat(input.value), sValue = numValue.toFixed(decimals), displayValue = unit ? `${sValue}${unit}` : sValue, chartValue = unit ? `${numValue}${unit}` : numValue;
+        valueEl.textContent = displayValue;
+        setNestedValue(params.path, chartValue, animation);
+    };
+    input.addEventListener('input', () => {
+        controlDiv.classList.remove('hcc-control-nullish');
+        if (isDragging) {
+            setNestedValueWrapper(false);
+        }
+    });
+    input.addEventListener('change', () => {
+        // Only animate if user clicked to jump, not after dragging
+        if (!isDragging) {
+            setNestedValueWrapper(true);
+        }
+        isDragging = false;
+    });
+}
+
+/**
+ * Type guard for TextControlParams
+ */
+function is$1(params) {
+    return params.type === 'text';
+}
+/**
+ * Add a text control
+ */
+function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
+    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+    keyDiv.appendChild(Object.assign(document.createElement('label'), {
+        htmlFor: `text-input-${rid}`,
+        innerHTML: params.label || `<code>${params.path}</code>`,
+        title: params.label || params.path
+    }));
+    const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+        type: 'text',
+        id: `text-input-${rid}`,
+        className: 'hcc-text-input',
+        title: params.label || params.path
+    }));
+    input.value = String(params.value || '');
+    input.addEventListener('input', () => {
+        controlDiv.classList.remove('hcc-control-nullish');
+        const value = input.value;
+        setNestedValue(params.path, value, false);
+    });
+}
+
+/**
+ * Type guard for SeparatorParams
+ */
+function is(params) {
+    return params.type === 'separator';
+}
+/**
+ * Add a separator
+ */
+function add(container) {
+    if (!container) {
+        throw new Error('Container for controls not found');
+    }
+    const row = container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
+    const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+    // Add second cell to match the two-column layout
+    row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+    cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
+}
+
+/**
+ * Utility functions for Highcharts Controls
+ */
+/**
+ * Get a nested value from an object given a dot-separated path.
+ * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
+ */
+function getNestedValue(obj, path) {
+    path = path.replace(/^(xAxis|yAxis)\./, '$1[0].');
+    // Split path into segments, handling array notation
+    // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
+    const segments = path.split(/\.|\[|\]/).filter(s => s !== '');
+    return segments.reduce((current, key) => current?.[key], obj);
+}
+/**
+ * Type guard for GroupParams
+ */
+function isGroupParams(params) {
+    return 'group' in params && Array.isArray(params.controls);
+}
+
+/**
  * Highcharts Controls
  *
  * Provides UI controls to manipulate chart options on the fly.
@@ -8,7 +455,6 @@
  */
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = window.Highcharts || window.Grid;
-import { BooleanControl, SelectControl, ColorControl, NumberControl, TextControl, SeparatorControl, getNestedValue, isGroupParams } from './ControlTypes/index.js';
 class Controls {
     constructor(renderTo, options) {
         renderTo = (typeof renderTo === 'string' &&
@@ -35,7 +481,7 @@ class Controls {
             if (isGroupParams(control)) {
                 this.addGroup(control);
             }
-            else if (SeparatorControl.is(control)) {
+            else if (is(control)) {
                 this.addSeparator();
             }
             else {
@@ -230,7 +676,7 @@ class Controls {
         this.container = groupControlsDiv;
         // Add controls to the group
         params.controls.forEach((control) => {
-            if (SeparatorControl.is(control)) {
+            if (is(control)) {
                 this.addSeparator();
             }
             else {
@@ -280,7 +726,7 @@ class Controls {
      * Add a separator
      */
     addSeparator() {
-        SeparatorControl.add(this.container);
+        add(this.container);
     }
     /**
      * Add a control
@@ -298,20 +744,20 @@ class Controls {
         const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
         const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
         const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
-        if (SelectControl.is(params)) {
-            SelectControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        if (is$4(params)) {
+            add$4(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
         }
-        else if (BooleanControl.is(params)) {
-            BooleanControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        else if (is$5(params)) {
+            add$5(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
         }
-        else if (ColorControl.is(params)) {
-            ColorControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        else if (is$3(params)) {
+            add$3(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
         }
-        else if (NumberControl.is(params)) {
-            NumberControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        else if (is$2(params)) {
+            add$2(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
         }
-        else if (TextControl.is(params)) {
-            TextControl.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+        else if (is$1(params)) {
+            add$1(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
         }
     }
     /**
@@ -627,5 +1073,6 @@ function parseOptions(options) {
     }
     return [];
 }
-export default Controls;
+
+export { Controls as default };
 //# sourceMappingURL=controls.js.map
