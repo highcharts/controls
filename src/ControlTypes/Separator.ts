@@ -2,12 +2,19 @@
  * Separator Control Type
  */
 import type { SeparatorParams } from './types.js';
+import type { ControlsInstance } from './index.js';
 
 /**
  * Type guard for SeparatorParams
  */
 export function is(params: any): params is SeparatorParams {
     return params.type === 'separator';
+}
+
+export function create(
+    controls: ControlsInstance
+): void {
+    add(controls.container);
 }
 
 /**

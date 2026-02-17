@@ -12,7 +12,8 @@ import * as SelectControl from './Select.js';
 import * as ColorControl from './Color.js';
 import * as NumberControl from './Number.js';
 import * as TextControl from './Text.js';
-import type { ControlParams } from './types.js';
+import * as SeparatorControl from './Separator.js';
+import type { ControlParams, SeparatorParams } from './types.js';
 
 // Forward declaration for Controls type
 export interface ControlsInstance {
@@ -25,7 +26,7 @@ export interface ControlsInstance {
  * Base interface for control type implementations
  */
 interface ControlTypeImplementation<T extends ControlParams> {
-    is(params: ControlParams): params is T;
+    is(params: ControlParams | SeparatorParams): params is T;
     create(
         controls: ControlsInstance,
         params: T
@@ -47,5 +48,6 @@ export const controlTypeRegistry: Array<ControlTypeImplementation<any>> = [
     BooleanControl,
     ColorControl,
     NumberControl,
-    TextControl
+    TextControl,
+    SeparatorControl
 ];

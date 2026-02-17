@@ -4,6 +4,9 @@
 function is$5(params) {
     return params.type === 'separator';
 }
+function create$5(controls) {
+    add$5(controls.container);
+}
 /**
  * Add a separator
  */
@@ -17,6 +20,13 @@ function add$5(container) {
     row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
     cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
 }
+
+var SeparatorControl = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add$5,
+    create: create$5,
+    is: is$5
+});
 
 /**
  * Utility functions for Highcharts Controls
@@ -542,7 +552,8 @@ const controlTypeRegistry = [
     BooleanControl,
     ColorControl,
     NumberControl,
-    TextControl
+    TextControl,
+    SeparatorControl
 ];
 
 /**
@@ -580,9 +591,6 @@ class Controls {
         options.controls?.forEach((control) => {
             if (isGroupParams(control)) {
                 this.addGroup(control);
-            }
-            else if (is$5(control)) {
-                this.addSeparator();
             }
             else {
                 this.addControl(control);
@@ -776,12 +784,7 @@ class Controls {
         this.container = groupControlsDiv;
         // Add controls to the group
         params.controls.forEach((control) => {
-            if (is$5(control)) {
-                this.addSeparator();
-            }
-            else {
-                this.addControl(control);
-            }
+            this.addControl(control);
         });
         // Restore original container
         this.container = originalContainer;
@@ -823,12 +826,6 @@ class Controls {
         return 'text';
     }
     /**
-     * Add a separator
-     */
-    addSeparator() {
-        add$5(this.container);
-    }
-    /**
      * Add a control
      */
     addControl(params) {
@@ -837,8 +834,10 @@ class Controls {
         }
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
-        params.value ?? (params.value = getNestedValue(this.target.options, params.path));
-        params.type || (params.type = this.deduceControlType(params));
+        if (!is$5(params)) {
+            params.value ?? (params.value = getNestedValue(this.target.options, params.path));
+            params.type || (params.type = this.deduceControlType(params));
+        }
         // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
             if (controlType.is(params)) {

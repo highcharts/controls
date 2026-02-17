@@ -2,6 +2,8 @@
  * Utility functions for Highcharts Controls
  */
 
+import { GroupParams } from "./types";
+
 /**
  * Get a nested value from an object given a dot-separated path.
  * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
@@ -17,6 +19,6 @@ export function getNestedValue(obj: any, path: string): any {
 /**
  * Type guard for GroupParams
  */
-export function isGroupParams(params: any): boolean {
+export function isGroupParams(params: any): params is GroupParams {
     return 'group' in params && Array.isArray(params.controls);
 }

@@ -108,11 +108,9 @@ class Controls {
         // Add the controls
         options.controls?.forEach((control): void => {
             if (isGroupParams(control)) {
-                this.addGroup(control as GroupParams);
-            } else if (SeparatorControl.is(control)) {
-                this.addSeparator();
+                this.addGroup(control);
             } else {
-                this.addControl(control as ControlParams);
+                this.addControl(control);
             }
         });
 
@@ -407,11 +405,7 @@ class Controls {
 
         // Add controls to the group
         params.controls.forEach((control): void => {
-            if (SeparatorControl.is(control)) {
-                this.addSeparator();
-            } else {
-                this.addControl(control);
-            }
+            this.addControl(control);
         });
 
         // Restore original container
@@ -462,16 +456,9 @@ class Controls {
     }
 
     /**
-     * Add a separator
-     */
-    public addSeparator(): void {
-        SeparatorControl.add(this.container);
-    }
-
-    /**
      * Add a control
      */
-    public addControl(params: ControlParams): void {
+    public addControl(params: ControlParams | SeparatorParams): void {
 
         if (!this.container) {
             throw new Error('Container for controls not found');
@@ -479,8 +466,10 @@ class Controls {
 
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
-        params.value ??= getNestedValue(this.target.options, params.path)
-        params.type ||= this.deduceControlType(params);
+        if (!SeparatorControl.is(params)) {
+            params.value ??= getNestedValue(this.target.options, params.path);
+            params.type ||= this.deduceControlType(params);
+        }
 
         // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {

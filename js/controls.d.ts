@@ -94,13 +94,9 @@ declare class Controls {
      */
     private deduceControlType;
     /**
-     * Add a separator
-     */
-    addSeparator(): void;
-    /**
      * Add a control
      */
-    addControl(params: ControlParams): void;
+    addControl(params: ControlParams | SeparatorParams): void;
     /**
      * Escape HTML entities in a string.
      */
