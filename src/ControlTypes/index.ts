@@ -30,13 +30,6 @@ interface ControlTypeImplementation<T extends ControlParams> {
         controls: ControlsInstance,
         params: T
     ): void;
-    add(
-        params: T,
-        keyDiv: HTMLElement,
-        valueDivInner: HTMLElement,
-        div: HTMLElement,
-        setNestedValue: (path: string, value: any, animation?: boolean) => void
-    ): void;
 }
 
 /**

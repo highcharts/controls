@@ -14,18 +14,11 @@ export function is(params: any): params is SeparatorParams {
 export function create(
     controls: ControlsInstance
 ): void {
-    add(controls.container);
-}
-
-/**
- * Add a separator
- */
-export function add(container: HTMLElement): void {
-    if (!container) {
+    if (!controls.container) {
         throw new Error('Container for controls not found');
     }
 
-    const row = container.appendChild(
+    const row = controls.container.appendChild(
         Object.assign(
             document.createElement('div'),
             { className: 'hcc-separator-row' }

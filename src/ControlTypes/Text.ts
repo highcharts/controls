@@ -23,19 +23,7 @@ export function create(
         params,
         controls.container
     );
-    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
 
-/**
- * Add a text control
- */
-export function add(
-    params: TextControlParams,
-    keyDiv: HTMLElement,
-    valueDiv: HTMLElement,
-    controlDiv: HTMLElement,
-    setNestedValue: (path: string, value: any, animation?: boolean) => void
-): void {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
 
     keyDiv.appendChild(
@@ -49,7 +37,7 @@ export function add(
         )
     );
 
-    const input = valueDiv.appendChild(
+    const input = valueDivInner.appendChild(
         Object.assign(
             document.createElement('input'),
             {
@@ -66,6 +54,6 @@ export function add(
     input.addEventListener('input', (): void => {
         controlDiv.classList.remove('hcc-control-nullish');
         const value = input.value;
-        setNestedValue(params.path, value, false);
+        controls.setNestedValue(params.path, value, false);
     });
 }

@@ -23,19 +23,7 @@ export function create(
         params,
         controls.container
     );
-    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
 
-/**
- * Add a boolean control
- */
-export function add(
-    params: BooleanControlParams,
-    keyDiv: HTMLElement,
-    valueDiv: HTMLElement,
-    controlDiv: HTMLElement,
-    setNestedValue: (path: string, value: any, animation?: boolean) => void
-): void {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(
         Object.assign(
@@ -48,8 +36,7 @@ export function add(
         )
     );
 
-    const isNullish = params.value === null || params.value === undefined;
-    const labelToggle = valueDiv.appendChild(
+    const labelToggle = valueDivInner.appendChild(
         Object.assign(
             document.createElement('label'),
             { className: 'hcc-toggle' }
@@ -81,6 +68,6 @@ export function add(
     input.addEventListener('change', (): void => {
         controlDiv.classList.remove('hcc-control-nullish');
         const value = input.checked;
-        setNestedValue(params.path, value);
+        controls.setNestedValue(params.path, value);
     });
 }

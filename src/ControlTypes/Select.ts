@@ -23,19 +23,7 @@ export function create(
         params,
         controls.container
     );
-    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
 
-/**
- * Add a select control
- */
-export function add(
-    params: SelectControlParams,
-    keyDiv: HTMLElement,
-    valueDiv: HTMLElement,
-    controlDiv: HTMLElement,
-    setNestedValue: (path: string, value: any, animation?: boolean) => void
-): void {
     keyDiv.appendChild(
         Object.assign(
             document.createElement('label'),
@@ -83,9 +71,9 @@ export function add(
 
     if (useDropdown) {
         // Render as select dropdown
-        valueDiv.classList.add('hcc-select-control');
+        valueDivInner.classList.add('hcc-select-control');
 
-        const select = valueDiv.appendChild(
+        const select = valueDivInner.appendChild(
             Object.assign(
                 document.createElement('select'),
                 {
@@ -113,17 +101,17 @@ export function add(
         select.addEventListener('change', (): void => {
             controlDiv.classList.remove('hcc-control-nullish');
             const value = select.value;
-            setNestedValue(params.path, value);
+            controls.setNestedValue(params.path, value);
         });
     } else {
         // Render as button group
-        valueDiv.classList.add('hcc-button-group');
+        valueDivInner.classList.add('hcc-button-group');
 
         options.forEach((option): void => {
             const isActive = params.value !== null &&
                 params.value !== undefined &&
                 params.value === option;
-            const button = valueDiv.appendChild(
+            const button = valueDivInner.appendChild(
                 Object.assign(
                     document.createElement('button'),
                     {
@@ -141,7 +129,7 @@ export function add(
                 (): void => {
                     controlDiv.classList.remove('hcc-control-nullish');
                     const value = button.getAttribute('data-value');
-                    setNestedValue(params.path, value);
+                    controls.setNestedValue(params.path, value);
 
                     // Update active state for all buttons in this group
                     const allButtons = document.querySelectorAll(

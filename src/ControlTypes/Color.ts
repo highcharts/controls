@@ -26,19 +26,7 @@ export function create(
         params,
         controls.container
     );
-    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
 
-/**
- * Add a color control
- */
-export function add(
-    params: ColorControlParams,
-    keyDiv: HTMLElement,
-    valueDiv: HTMLElement,
-    controlDiv: HTMLElement,
-    setNestedValue: (path: string, value: any, animation?: boolean) => void
-): void {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(
         Object.assign(
@@ -51,7 +39,7 @@ export function add(
         )
     );
 
-    const colorInput = valueDiv.appendChild(
+    const colorInput = valueDivInner.appendChild(
         Object.assign(
             document.createElement('input'),
             {
@@ -61,7 +49,7 @@ export function add(
         )
     );
 
-    const valueEl = valueDiv.appendChild(
+    const valueEl = valueDivInner.appendChild(
         Object.assign(
             document.createElement('label'),
             {
@@ -73,7 +61,7 @@ export function add(
         )
     );
 
-    const opacityDisplay = valueDiv.appendChild(
+    const opacityDisplay = valueDivInner.appendChild(
         Object.assign(
             document.createElement('span'),
             {
@@ -84,7 +72,7 @@ export function add(
         )
     );
 
-    valueDiv.appendChild(
+    valueDivInner.appendChild(
         Object.assign(
             document.createElement('span'),
             {
@@ -95,7 +83,7 @@ export function add(
     );
 
     // Container for the range slider popup
-    const opacityRangeContainer = valueDiv.appendChild(
+    const opacityRangeContainer = valueDivInner.appendChild(
         Object.assign(
             document.createElement('div'),
             {
@@ -198,7 +186,7 @@ export function add(
         // Use Highcharts.color to apply opacity and produce rgba()/hex
         const hcColor = Product.color(rgba)
             .setOpacity(opacity);
-        setNestedValue(
+        controls.setNestedValue(
             params.path,
             getHex(hcColor, true),
             false

@@ -23,19 +23,7 @@ export function create(
         params,
         controls.container
     );
-    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
 
-/**
- * Add a number control
- */
-export function add(
-    params: NumberControlParams,
-    keyDiv: HTMLElement,
-    valueDiv: HTMLElement,
-    controlDiv: HTMLElement,
-    setNestedValue: (path: string, value: any, animation?: boolean) => void
-): void {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'),
         value = params.value;
 
@@ -102,7 +90,7 @@ export function add(
     );
 
     const isNullish = numericValue === null || numericValue === undefined;
-    const valueEl = valueDiv.appendChild(
+    const valueEl = valueDivInner.appendChild(
         Object.assign(
             document.createElement('span'),
             {
@@ -114,7 +102,7 @@ export function add(
     );
 
     const strStep = String(params.step || 1);
-    const input = valueDiv.appendChild(
+    const input = valueDivInner.appendChild(
         Object.assign(
             document.createElement('input'),
             {
@@ -168,7 +156,7 @@ export function add(
             displayValue = unit ? `${sValue}${unit}` : sValue,
             chartValue = unit ? `${numValue}${unit}` : numValue;
         valueEl.textContent = displayValue;
-        setNestedValue(params.path, chartValue, animation);
+        controls.setNestedValue(params.path, chartValue, animation);
     };
 
     input.addEventListener('input', (): void => {

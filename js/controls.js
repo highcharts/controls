@@ -5,16 +5,10 @@ function is$5(params) {
     return params.type === 'separator';
 }
 function create$5(controls) {
-    add$5(controls.container);
-}
-/**
- * Add a separator
- */
-function add$5(container) {
-    if (!container) {
+    if (!controls.container) {
         throw new Error('Container for controls not found');
     }
-    const row = container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
+    const row = controls.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
     const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
     // Add second cell to match the two-column layout
     row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
@@ -23,7 +17,6 @@ function add$5(container) {
 
 var SeparatorControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    add: add$5,
     create: create$5,
     is: is$5
 });
@@ -74,20 +67,13 @@ function is$4(params) {
  */
 function create$4(controls, params) {
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    add$4(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
-/**
- * Add a boolean control
- */
-function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: `toggle-checkbox-${rid}`,
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
     }));
-    params.value === null || params.value === undefined;
-    const labelToggle = valueDiv.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
+    const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
     const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
         type: 'checkbox',
         id: `toggle-checkbox-${rid}`
@@ -100,13 +86,12 @@ function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     input.addEventListener('change', () => {
         controlDiv.classList.remove('hcc-control-nullish');
         const value = input.checked;
-        setNestedValue(params.path, value);
+        controls.setNestedValue(params.path, value);
     });
 }
 
 var BooleanControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    add: add$4,
     create: create$4,
     is: is$4
 });
@@ -122,12 +107,6 @@ function is$3(params) {
  */
 function create$3(controls, params) {
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    add$3(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
-/**
- * Add a select control
- */
-function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
@@ -162,8 +141,8 @@ function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const useDropdown = options.length > 3 || totalLength > 24;
     if (useDropdown) {
         // Render as select dropdown
-        valueDiv.classList.add('hcc-select-control');
-        const select = valueDiv.appendChild(Object.assign(document.createElement('select'), {
+        valueDivInner.classList.add('hcc-select-control');
+        const select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
             className: 'hcc-select-dropdown'
         }));
         options.forEach((option) => {
@@ -179,17 +158,17 @@ function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
         select.addEventListener('change', () => {
             controlDiv.classList.remove('hcc-control-nullish');
             const value = select.value;
-            setNestedValue(params.path, value);
+            controls.setNestedValue(params.path, value);
         });
     }
     else {
         // Render as button group
-        valueDiv.classList.add('hcc-button-group');
+        valueDivInner.classList.add('hcc-button-group');
         options.forEach((option) => {
             const isActive = params.value !== null &&
                 params.value !== undefined &&
                 params.value === option;
-            const button = valueDiv.appendChild(Object.assign(document.createElement('button'), {
+            const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
                 className: 'hcc-button' +
                     (isActive ? ' active' : ''),
                 innerText: option
@@ -199,7 +178,7 @@ function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
             button.addEventListener('click', () => {
                 controlDiv.classList.remove('hcc-control-nullish');
                 const value = button.getAttribute('data-value');
-                setNestedValue(params.path, value);
+                controls.setNestedValue(params.path, value);
                 // Update active state for all buttons in this group
                 const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
                 allButtons.forEach((b) => b.classList.remove('active'));
@@ -211,7 +190,6 @@ function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 
 var SelectControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    add: add$3,
     create: create$3,
     is: is$3
 });
@@ -229,39 +207,33 @@ function is$2(params) {
  */
 function create$2(controls, params) {
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    add$2(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
-/**
- * Add a color control
- */
-function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: `color-input-${rid}`,
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
     }));
-    const colorInput = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+    const colorInput = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
         type: 'color',
         id: `color-input-${rid}`
     }));
-    const valueEl = valueDiv.appendChild(Object.assign(document.createElement('label'), {
+    const valueEl = valueDivInner.appendChild(Object.assign(document.createElement('label'), {
         id: `color-value-${rid}`,
         className: 'hcc-color-value',
         htmlFor: `color-input-${rid}`,
         title: params.label || params.path
     }));
-    const opacityDisplay = valueDiv.appendChild(Object.assign(document.createElement('span'), {
+    const opacityDisplay = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
         id: `opacity-display-${rid}`,
         className: 'hcc-opacity-display',
         title: params.label || params.path
     }));
-    valueDiv.appendChild(Object.assign(document.createElement('span'), {
+    valueDivInner.appendChild(Object.assign(document.createElement('span'), {
         textContent: '%',
         className: 'hcc-opacity-input-label'
     }));
     // Container for the range slider popup
-    const opacityRangeContainer = valueDiv.appendChild(Object.assign(document.createElement('div'), {
+    const opacityRangeContainer = valueDivInner.appendChild(Object.assign(document.createElement('div'), {
         className: 'hcc-opacity-range-container hcc-hidden'
     }));
     const opacityInput = opacityRangeContainer.appendChild(Object.assign(document.createElement('input'), {
@@ -337,7 +309,7 @@ function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
         // Use Highcharts.color to apply opacity and produce rgba()/hex
         const hcColor = Product$1.color(rgba)
             .setOpacity(opacity);
-        setNestedValue(params.path, getHex(hcColor, true), false);
+        controls.setNestedValue(params.path, getHex(hcColor, true), false);
         valueEl.textContent = getHex(hcColor);
         opacityDisplay.textContent = opacityInput.value;
     };
@@ -347,7 +319,6 @@ function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 
 var ColorControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    add: add$2,
     create: create$2,
     is: is$2
 });
@@ -363,12 +334,6 @@ function is$1(params) {
  */
 function create$1(controls, params) {
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    add$1(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
-/**
- * Add a number control
- */
-function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'), value = params.value;
     // Extract unit from current value if it's a string
     let unit = '';
@@ -424,13 +389,13 @@ function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
         title: params.label || params.path
     }));
     const isNullish = numericValue === null || numericValue === undefined;
-    const valueEl = valueDiv.appendChild(Object.assign(document.createElement('span'), {
+    const valueEl = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
         id: `range-value-${rid}`,
         className: 'hcc-range-value',
         title: params.label || params.path
     }));
     const strStep = String(params.step || 1);
-    const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+    const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
         type: 'range',
         id: `range-input-${rid}`,
         min: String(params.min),
@@ -471,7 +436,7 @@ function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const setNestedValueWrapper = (animation) => {
         const numValue = parseFloat(input.value), sValue = numValue.toFixed(decimals), displayValue = unit ? `${sValue}${unit}` : sValue, chartValue = unit ? `${numValue}${unit}` : numValue;
         valueEl.textContent = displayValue;
-        setNestedValue(params.path, chartValue, animation);
+        controls.setNestedValue(params.path, chartValue, animation);
     };
     input.addEventListener('input', () => {
         controlDiv.classList.remove('hcc-control-nullish');
@@ -490,7 +455,6 @@ function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 
 var NumberControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    add: add$1,
     create: create$1,
     is: is$1
 });
@@ -506,19 +470,13 @@ function is(params) {
  */
 function create(controls, params) {
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
-}
-/**
- * Add a text control
- */
-function add(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: `text-input-${rid}`,
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
     }));
-    const input = valueDiv.appendChild(Object.assign(document.createElement('input'), {
+    const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
         type: 'text',
         id: `text-input-${rid}`,
         className: 'hcc-text-input',
@@ -528,13 +486,12 @@ function add(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
     input.addEventListener('input', () => {
         controlDiv.classList.remove('hcc-control-nullish');
         const value = input.value;
-        setNestedValue(params.path, value, false);
+        controls.setNestedValue(params.path, value, false);
     });
 }
 
 var TextControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    add: add,
     create: create,
     is: is
 });
