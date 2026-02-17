@@ -5,7 +5,6 @@
 export * as SeparatorControl from './Separator.js';
 export * from './types.js';
 export * from './utils.js';
-export * from './scaffolding.js';
 
 import * as BooleanControl from './Boolean.js';
 import * as SelectControl from './Select.js';

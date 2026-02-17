@@ -2,7 +2,7 @@
  * Utility functions for Highcharts Controls
  */
 
-import { GroupParams } from "./types";
+import type { ControlParams, GroupParams } from "./types";
 
 /**
  * Get a nested value from an object given a dot-separated path.
@@ -21,4 +21,52 @@ export function getNestedValue(obj: any, path: string): any {
  */
 export function isGroupParams(params: any): params is GroupParams {
     return 'group' in params && Array.isArray(params.controls);
+}
+
+/**
+ * Create the common scaffolding structure for all control types
+ * Returns the created DOM elements for the control type to populate
+ */
+export function createControlScaffolding(
+    params: ControlParams,
+    container: HTMLElement
+): {
+    controlDiv: HTMLElement;
+    keyDiv: HTMLElement;
+    valueDiv: HTMLElement;
+    valueDivInner: HTMLElement;
+} {
+    const isNullish = params.value === null || params.value === undefined;
+
+    const controlDiv = container.appendChild(
+        Object.assign(
+            document.createElement('div'),
+            {
+                className: `hcc-control hcc-control-${params.type}${isNullish ? ' hcc-control-nullish' : ''}`
+            }
+        )
+    );
+
+    const keyDiv = controlDiv.appendChild(
+        Object.assign(
+            document.createElement('div'),
+            { className: 'hcc-key' }
+        )
+    );
+
+    const valueDiv = controlDiv.appendChild(
+        Object.assign(
+            document.createElement('div'),
+            { className: 'hcc-value' }
+        )
+    );
+
+    const valueDivInner = valueDiv.appendChild(
+        Object.assign(
+            document.createElement('div'),
+            { className: 'hcc-value-inner' }
+        )
+    );
+
+    return { controlDiv, keyDiv, valueDiv, valueDivInner };
 }

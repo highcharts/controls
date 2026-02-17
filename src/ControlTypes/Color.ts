@@ -3,7 +3,7 @@
  */
 import type { ColorControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './scaffolding.js';
+import { createControlScaffolding } from './utils.js';
 
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = (window as any).Highcharts || (window as any).Grid;

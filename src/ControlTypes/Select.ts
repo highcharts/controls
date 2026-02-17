@@ -3,7 +3,7 @@
  */
 import type { SelectControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './scaffolding.js';
+import { createControlScaffolding } from './utils.js';
 
 /**
  * Type guard for SelectControlParams

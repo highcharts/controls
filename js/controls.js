@@ -48,7 +48,6 @@ function getNestedValue(obj, path) {
 function isGroupParams(params) {
     return 'group' in params && Array.isArray(params.controls);
 }
-
 /**
  * Create the common scaffolding structure for all control types
  * Returns the created DOM elements for the control type to populate
