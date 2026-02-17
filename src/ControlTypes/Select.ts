@@ -2,12 +2,28 @@
  * Select Control Type
  */
 import type { SelectControlParams, ControlParams } from './types.js';
+import { createControlScaffolding } from './scaffolding.js';
 
 /**
  * Type guard for SelectControlParams
  */
 export function is(params: ControlParams): params is SelectControlParams {
     return params.type === 'select';
+}
+
+/**
+ * Create a select control with scaffolding
+ */
+export function create(
+    params: SelectControlParams,
+    container: HTMLElement,
+    setNestedValue: (path: string, value: any, animation?: boolean) => void
+): void {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
+        params,
+        container
+    );
+    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 
 /**

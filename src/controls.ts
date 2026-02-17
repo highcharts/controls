@@ -482,41 +482,12 @@ class Controls {
         params.value ??= getNestedValue(this.target.options, params.path)
         params.type ||= this.deduceControlType(params);
 
-        const isNullish = params.value === null || params.value === undefined;
-
-        const div = this.container.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: `hcc-control hcc-control-${params.type}${isNullish ? ' hcc-control-nullish' : ''}` }
-            )
-        );
-        const keyDiv = div.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: 'hcc-key' }
-            )
-        );
-        const valueDiv = div.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: 'hcc-value' }
-            )
-        );
-
-        const valueDivInner = valueDiv.appendChild(
-            Object.assign(
-                document.createElement('div'),
-                { className: 'hcc-value-inner' }
-            )
-        );
-
+        // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
             if (controlType.is(params)) {
-                controlType.add(
+                controlType.create(
                     params,
-                    keyDiv,
-                    valueDivInner,
-                    div,
+                    this.container,
                     this.setNestedValue.bind(this)
                 );
                 break;

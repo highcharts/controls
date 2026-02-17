@@ -5,6 +5,7 @@
 export * as SeparatorControl from './Separator.js';
 export * from './types.js';
 export * from './utils.js';
+export * from './scaffolding.js';
 
 import * as BooleanControl from './Boolean.js';
 import * as SelectControl from './Select.js';
@@ -18,6 +19,11 @@ import type { ControlParams } from './types.js';
  */
 interface ControlTypeImplementation<T extends ControlParams> {
     is(params: ControlParams): params is T;
+    create(
+        params: T,
+        container: HTMLElement,
+        setNestedValue: (path: string, value: any, animation?: boolean) => void
+    ): void;
     add(
         params: T,
         keyDiv: HTMLElement,

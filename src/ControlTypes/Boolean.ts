@@ -2,12 +2,28 @@
  * Boolean Control Type
  */
 import type { BooleanControlParams, ControlParams } from './types.js';
+import { createControlScaffolding } from './scaffolding.js';
 
 /**
  * Type guard for BooleanControlParams
  */
 export function is(params: ControlParams): params is BooleanControlParams {
     return params.type === 'boolean';
+}
+
+/**
+ * Create a boolean control with scaffolding
+ */
+export function create(
+    params: BooleanControlParams,
+    container: HTMLElement,
+    setNestedValue: (path: string, value: any, animation?: boolean) => void
+): void {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
+        params,
+        container
+    );
+    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 
 /**

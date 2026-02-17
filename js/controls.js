@@ -40,10 +40,32 @@ function isGroupParams(params) {
 }
 
 /**
+ * Create the common scaffolding structure for all control types
+ * Returns the created DOM elements for the control type to populate
+ */
+function createControlScaffolding(params, container) {
+    const isNullish = params.value === null || params.value === undefined;
+    const controlDiv = container.appendChild(Object.assign(document.createElement('div'), {
+        className: `hcc-control hcc-control-${params.type}${isNullish ? ' hcc-control-nullish' : ''}`
+    }));
+    const keyDiv = controlDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
+    const valueDiv = controlDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
+    const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
+    return { controlDiv, keyDiv, valueDiv, valueDivInner };
+}
+
+/**
  * Type guard for BooleanControlParams
  */
 function is$4(params) {
     return params.type === 'boolean';
+}
+/**
+ * Create a boolean control with scaffolding
+ */
+function create$4(params, container, setNestedValue) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
+    add$4(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 /**
  * Add a boolean control
@@ -76,6 +98,7 @@ function add$4(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 var BooleanControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     add: add$4,
+    create: create$4,
     is: is$4
 });
 
@@ -84,6 +107,13 @@ var BooleanControl = /*#__PURE__*/Object.freeze({
  */
 function is$3(params) {
     return params.type === 'select';
+}
+/**
+ * Create a select control with scaffolding
+ */
+function create$3(params, container, setNestedValue) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
+    add$3(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 /**
  * Add a select control
@@ -173,6 +203,7 @@ function add$3(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 var SelectControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     add: add$3,
+    create: create$3,
     is: is$3
 });
 
@@ -183,6 +214,13 @@ const Product$1 = window.Highcharts || window.Grid;
  */
 function is$2(params) {
     return params.type === 'color';
+}
+/**
+ * Create a color control with scaffolding
+ */
+function create$2(params, container, setNestedValue) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
+    add$2(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 /**
  * Add a color control
@@ -301,6 +339,7 @@ function add$2(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 var ColorControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     add: add$2,
+    create: create$2,
     is: is$2
 });
 
@@ -309,6 +348,13 @@ var ColorControl = /*#__PURE__*/Object.freeze({
  */
 function is$1(params) {
     return params.type === 'number';
+}
+/**
+ * Create a number control with scaffolding
+ */
+function create$1(params, container, setNestedValue) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
+    add$1(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 /**
  * Add a number control
@@ -436,6 +482,7 @@ function add$1(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 var NumberControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     add: add$1,
+    create: create$1,
     is: is$1
 });
 
@@ -444,6 +491,13 @@ var NumberControl = /*#__PURE__*/Object.freeze({
  */
 function is(params) {
     return params.type === 'text';
+}
+/**
+ * Create a text control with scaffolding
+ */
+function create(params, container, setNestedValue) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
+    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 /**
  * Add a text control
@@ -472,6 +526,7 @@ function add(params, keyDiv, valueDiv, controlDiv, setNestedValue) {
 var TextControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     add: add,
+    create: create,
     is: is
 });
 
@@ -784,14 +839,10 @@ class Controls {
         // influence type deduction.
         params.value ?? (params.value = getNestedValue(this.target.options, params.path));
         params.type || (params.type = this.deduceControlType(params));
-        const isNullish = params.value === null || params.value === undefined;
-        const div = this.container.appendChild(Object.assign(document.createElement('div'), { className: `hcc-control hcc-control-${params.type}${isNullish ? ' hcc-control-nullish' : ''}` }));
-        const keyDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-key' }));
-        const valueDiv = div.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value' }));
-        const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
+        // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
             if (controlType.is(params)) {
-                controlType.add(params, keyDiv, valueDivInner, div, this.setNestedValue.bind(this));
+                controlType.create(params, this.container, this.setNestedValue.bind(this));
                 break;
             }
         }

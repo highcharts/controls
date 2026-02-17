@@ -2,6 +2,7 @@
  * Color Control Type
  */
 import type { ColorControlParams, ControlParams } from './types.js';
+import { createControlScaffolding } from './scaffolding.js';
 
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = (window as any).Highcharts || (window as any).Grid;
@@ -11,6 +12,21 @@ const Product = (window as any).Highcharts || (window as any).Grid;
  */
 export function is(params: ControlParams): params is ColorControlParams {
     return params.type === 'color';
+}
+
+/**
+ * Create a color control with scaffolding
+ */
+export function create(
+    params: ColorControlParams,
+    container: HTMLElement,
+    setNestedValue: (path: string, value: any, animation?: boolean) => void
+): void {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
+        params,
+        container
+    );
+    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 
 /**

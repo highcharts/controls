@@ -2,12 +2,28 @@
  * Text Control Type
  */
 import type { TextControlParams, ControlParams } from './types.js';
+import { createControlScaffolding } from './scaffolding.js';
 
 /**
  * Type guard for TextControlParams
  */
 export function is(params: ControlParams): params is TextControlParams {
     return params.type === 'text';
+}
+
+/**
+ * Create a text control with scaffolding
+ */
+export function create(
+    params: TextControlParams,
+    container: HTMLElement,
+    setNestedValue: (path: string, value: any, animation?: boolean) => void
+): void {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
+        params,
+        container
+    );
+    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
 }
 
 /**
