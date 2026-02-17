@@ -14,15 +14,21 @@ import * as NumberControl from './Number.js';
 import * as TextControl from './Text.js';
 import type { ControlParams } from './types.js';
 
+// Forward declaration for Controls type
+export interface ControlsInstance {
+    container: HTMLElement;
+    target: any;
+    setNestedValue(path: string, value: any, animation?: boolean): void;
+}
+
 /**
  * Base interface for control type implementations
  */
 interface ControlTypeImplementation<T extends ControlParams> {
     is(params: ControlParams): params is T;
     create(
-        params: T,
-        container: HTMLElement,
-        setNestedValue: (path: string, value: any, animation?: boolean) => void
+        controls: ControlsInstance,
+        params: T
     ): void;
     add(
         params: T,

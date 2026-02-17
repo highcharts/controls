@@ -82,7 +82,7 @@ declare class Controls {
      * Set a nested value on the target given a dot-separated path.
      * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
-    private setNestedValue;
+    setNestedValue(path: string, value: any, animation?: boolean): void;
     private injectCSS;
     private addPreview;
     /**

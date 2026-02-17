@@ -128,7 +128,7 @@ class Controls {
      * Set a nested value on the target given a dot-separated path.
      * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
-    private setNestedValue(
+    public setNestedValue(
         path: string,
         value: any,
         animation?: boolean
@@ -485,11 +485,7 @@ class Controls {
         // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
             if (controlType.is(params)) {
-                controlType.create(
-                    params,
-                    this.container,
-                    this.setNestedValue.bind(this)
-                );
+                controlType.create(this, params);
                 break;
             }
         }

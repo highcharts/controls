@@ -2,6 +2,7 @@
  * Number Control Type
  */
 import type { NumberControlParams, ControlParams } from './types.js';
+import type { ControlsInstance } from './index.js';
 import { createControlScaffolding } from './scaffolding.js';
 
 /**
@@ -15,15 +16,14 @@ export function is(params: ControlParams): params is NumberControlParams {
  * Create a number control with scaffolding
  */
 export function create(
-    params: NumberControlParams,
-    container: HTMLElement,
-    setNestedValue: (path: string, value: any, animation?: boolean) => void
+    controls: ControlsInstance,
+    params: NumberControlParams
 ): void {
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
         params,
-        container
+        controls.container
     );
-    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
+    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
 }
 
 /**

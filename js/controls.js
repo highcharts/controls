@@ -63,9 +63,9 @@ function is$4(params) {
 /**
  * Create a boolean control with scaffolding
  */
-function create$4(params, container, setNestedValue) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
-    add$4(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
+function create$4(controls, params) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
+    add$4(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
 }
 /**
  * Add a boolean control
@@ -111,9 +111,9 @@ function is$3(params) {
 /**
  * Create a select control with scaffolding
  */
-function create$3(params, container, setNestedValue) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
-    add$3(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
+function create$3(controls, params) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
+    add$3(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
 }
 /**
  * Add a select control
@@ -218,9 +218,9 @@ function is$2(params) {
 /**
  * Create a color control with scaffolding
  */
-function create$2(params, container, setNestedValue) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
-    add$2(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
+function create$2(controls, params) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
+    add$2(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
 }
 /**
  * Add a color control
@@ -352,9 +352,9 @@ function is$1(params) {
 /**
  * Create a number control with scaffolding
  */
-function create$1(params, container, setNestedValue) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
-    add$1(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
+function create$1(controls, params) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
+    add$1(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
 }
 /**
  * Add a number control
@@ -495,9 +495,9 @@ function is(params) {
 /**
  * Create a text control with scaffolding
  */
-function create(params, container, setNestedValue) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, container);
-    add(params, keyDiv, valueDivInner, controlDiv, setNestedValue);
+function create(controls, params) {
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
+    add(params, keyDiv, valueDivInner, controlDiv, controls.setNestedValue.bind(controls));
 }
 /**
  * Add a text control
@@ -842,7 +842,7 @@ class Controls {
         // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
             if (controlType.is(params)) {
-                controlType.create(params, this.container, this.setNestedValue.bind(this));
+                controlType.create(this, params);
                 break;
             }
         }
