@@ -32,7 +32,7 @@
                     group: 'Text Controls',
                     description: 'Text input with nullable support',
                     controls: [
-                        { path: 'title.text', type: 'text', label: 'Title', nullable: true }
+                        { path: 'title.text', type: 'text', nullable: true }
                     ]
                 },
                 {
@@ -58,8 +58,9 @@
                 },
                 {
                     group: 'Select Controls',
-                    description: 'Select with nullable support',
+                    description: 'Select with nullable support. When subtitle align is null, it should inherit alignment from title.',
                     controls: [
+                        { path: 'title.align', type: 'select', nullable: true, options: ['left', 'center', 'right'] },
                         { path: 'subtitle.align', type: 'select', nullable: true, options: ['left', 'center', 'right'] },
                         { path: 'series[0].dashStyle', type: 'select', nullable: true, options: ['Solid', 'ShortDash', 'ShortDot', 'ShortDashDot', 'ShortDashDotDot', 'Dot', 'Dash', 'LongDash', 'DashDot', 'LongDashDot', 'LongDashDotDot'] }
                     ]

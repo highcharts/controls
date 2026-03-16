@@ -231,13 +231,24 @@ function create$3(controls, params) {
     // Determine whether to use select dropdown or button group
     const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
     const useDropdown = options.length > 3 || totalLength > 24;
-    let lastNonNullValue = params.value;
     if (useDropdown) {
         // Render as select dropdown
         valueDivInner.classList.add('hcc-select-control');
         const select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
             className: 'hcc-select-dropdown'
         }));
+        // Add null option if nullable
+        if (params.nullable) {
+            const isNullSelected = params.value === null || params.value === undefined;
+            select.appendChild(Object.assign(document.createElement('option'), {
+                value: '__null__',
+                innerText: '—',
+                selected: isNullSelected
+            }));
+            if (isNullSelected) {
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+        }
         options.forEach((option) => {
             const isSelected = params.value !== null &&
                 params.value !== undefined &&
@@ -249,36 +260,42 @@ function create$3(controls, params) {
             }));
         });
         select.addEventListener('change', () => {
-            controlDiv.classList.remove('hcc-control-nullish');
             const value = select.value;
-            lastNonNullValue = value;
-            controls.setNestedValue(params.path, value);
-        });
-        if (params.nullable) {
-            const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
-                if (isNull) {
-                    lastNonNullValue = select.value;
-                    select.disabled = true;
-                    controls.setNestedValue(params.path, null);
-                }
-                else {
-                    select.disabled = false;
-                    if (lastNonNullValue && options.includes(lastNonNullValue)) {
-                        select.value = lastNonNullValue;
-                        controls.setNestedValue(params.path, lastNonNullValue);
-                    }
-                }
-            });
-            valueDivInner.appendChild(nullableButton);
-            // Initialize disabled state if value is null
-            if (params.value === null || params.value === undefined) {
-                select.disabled = true;
+            if (value === '__null__') {
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
             }
-        }
+            else {
+                controlDiv.classList.remove('hcc-control-nullish');
+                controls.setNestedValue(params.path, value);
+            }
+        });
     }
     else {
         // Render as button group
         valueDivInner.classList.add('hcc-button-group');
+        // Add null button if nullable
+        if (params.nullable) {
+            const isNullActive = params.value === null || params.value === undefined;
+            const nullButton = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
+                className: 'hcc-button' +
+                    (isNullActive ? ' active' : ''),
+                innerHTML: '⊘'
+            }));
+            nullButton.dataset.path = params.path;
+            nullButton.dataset.value = '__null__';
+            if (isNullActive) {
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+            nullButton.addEventListener('click', () => {
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
+                // Update active state for all buttons in this group
+                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
+                allButtons.forEach((b) => b.classList.remove('active'));
+                nullButton.classList.add('active');
+            });
+        }
         options.forEach((option) => {
             const isActive = params.value !== null &&
                 params.value !== undefined &&
@@ -293,7 +310,6 @@ function create$3(controls, params) {
             button.addEventListener('click', () => {
                 controlDiv.classList.remove('hcc-control-nullish');
                 const value = button.getAttribute('data-value');
-                lastNonNullValue = value;
                 controls.setNestedValue(params.path, value);
                 // Update active state for all buttons in this group
                 const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
@@ -301,42 +317,6 @@ function create$3(controls, params) {
                 button.classList.add('active');
             });
         });
-        if (params.nullable) {
-            const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                if (isNull) {
-                    const activeButton = Array.from(allButtons).find(b => b.classList.contains('active'));
-                    if (activeButton) {
-                        lastNonNullValue = activeButton.getAttribute('data-value');
-                    }
-                    allButtons.forEach((b) => {
-                        b.disabled = true;
-                        b.classList.remove('active');
-                    });
-                    controls.setNestedValue(params.path, null);
-                }
-                else {
-                    allButtons.forEach((b) => {
-                        b.disabled = false;
-                    });
-                    if (lastNonNullValue) {
-                        const buttonToActivate = Array.from(allButtons).find(b => b.getAttribute('data-value') === lastNonNullValue);
-                        if (buttonToActivate) {
-                            buttonToActivate.classList.add('active');
-                            controls.setNestedValue(params.path, lastNonNullValue);
-                        }
-                    }
-                }
-            });
-            valueDivInner.appendChild(nullableButton);
-            // Initialize disabled state if value is null
-            if (params.value === null || params.value === undefined) {
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                allButtons.forEach((b) => {
-                    b.disabled = true;
-                });
-            }
-        }
     }
 }
 
