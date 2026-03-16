@@ -199,41 +199,15 @@ export function create(
     opacityInput.addEventListener('input', update);
 
     if (params.nullable) {
-        let lastNonNullColor = isNullish ? '#808080' : getHex(hcColor, true);
-
         const nullableButton = createNullableButton(
             params,
             controlDiv,
             (isNull: boolean): void => {
-                if (isNull) {
-                    lastNonNullColor = getHex(Product.color(colorInput.value).setOpacity(parseFloat(opacityInput.value) / 100), true);
-                    colorInput.disabled = true;
-                    opacityDisplay.style.pointerEvents = 'none';
-                    opacityDisplay.style.opacity = '0.4';
-                    valueEl.textContent = '—';
-                    controls.setNestedValue(params.path, null, false);
-                } else {
-                    colorInput.disabled = false;
-                    opacityDisplay.style.pointerEvents = '';
-                    opacityDisplay.style.opacity = '';
-                    hcColor = Product.color(lastNonNullColor);
-                    const hex = getHex(hcColor);
-                    const opacity = (hcColor.rgba[3] || 1) * 100;
-                    colorInput.value = hex;
-                    valueEl.textContent = hex;
-                    opacityInput.value = String(Math.round(opacity));
-                    opacityDisplay.textContent = String(Math.round(opacity));
-                    controls.setNestedValue(params.path, lastNonNullColor, false);
-                }
+                valueEl.textContent = '—';
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null, false);
             }
         );
         valueDivInner.appendChild(nullableButton);
-
-        // Initialize disabled state if value is null
-        if (isNullish) {
-            colorInput.disabled = true;
-            opacityDisplay.style.pointerEvents = 'none';
-            opacityDisplay.style.opacity = '0.4';
-        }
     }
 }

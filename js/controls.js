@@ -440,37 +440,12 @@ function create$2(controls, params) {
     colorInput.addEventListener('input', update);
     opacityInput.addEventListener('input', update);
     if (params.nullable) {
-        let lastNonNullColor = isNullish ? '#808080' : getHex(hcColor, true);
         const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
-            if (isNull) {
-                lastNonNullColor = getHex(Product$1.color(colorInput.value).setOpacity(parseFloat(opacityInput.value) / 100), true);
-                colorInput.disabled = true;
-                opacityDisplay.style.pointerEvents = 'none';
-                opacityDisplay.style.opacity = '0.4';
-                valueEl.textContent = '—';
-                controls.setNestedValue(params.path, null, false);
-            }
-            else {
-                colorInput.disabled = false;
-                opacityDisplay.style.pointerEvents = '';
-                opacityDisplay.style.opacity = '';
-                hcColor = Product$1.color(lastNonNullColor);
-                const hex = getHex(hcColor);
-                const opacity = (hcColor.rgba[3] || 1) * 100;
-                colorInput.value = hex;
-                valueEl.textContent = hex;
-                opacityInput.value = String(Math.round(opacity));
-                opacityDisplay.textContent = String(Math.round(opacity));
-                controls.setNestedValue(params.path, lastNonNullColor, false);
-            }
+            valueEl.textContent = '—';
+            controlDiv.classList.add('hcc-control-nullish');
+            controls.setNestedValue(params.path, null, false);
         });
         valueDivInner.appendChild(nullableButton);
-        // Initialize disabled state if value is null
-        if (isNullish) {
-            colorInput.disabled = true;
-            opacityDisplay.style.pointerEvents = 'none';
-            opacityDisplay.style.opacity = '0.4';
-        }
     }
 }
 
@@ -609,31 +584,12 @@ function create$1(controls, params) {
         isDragging = false;
     });
     if (params.nullable) {
-        let lastNonNullValue = numericValue;
         const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
-            if (isNull) {
-                lastNonNullValue = parseFloat(input.value);
-                valueEl.textContent = '';
-                input.disabled = true;
-                controls.setNestedValue(params.path, null);
-            }
-            else {
-                input.disabled = false;
-                if (lastNonNullValue !== undefined) {
-                    input.value = String(lastNonNullValue);
-                    const sValue = lastNonNullValue.toFixed(decimals);
-                    const displayValue = unit ? `${sValue}${unit}` : sValue;
-                    const chartValue = unit ? `${lastNonNullValue}${unit}` : lastNonNullValue;
-                    valueEl.textContent = displayValue;
-                    controls.setNestedValue(params.path, chartValue);
-                }
-            }
+            valueEl.textContent = '';
+            controlDiv.classList.add('hcc-control-nullish');
+            controls.setNestedValue(params.path, null);
         });
         valueDivInner.appendChild(nullableButton);
-        // Initialize disabled state if value is null
-        if (isNullish) {
-            input.disabled = true;
-        }
     }
 }
 
@@ -666,35 +622,28 @@ function create(controls, params) {
         className: 'hcc-text-input',
         title: params.label || params.path
     }));
-    input.value = String(params.value || '');
-    let lastNonNullValue = input.value;
+    const isNullish = params.value === null || params.value === undefined;
+    if (isNullish) {
+        input.value = '';
+        input.placeholder = 'null';
+    }
+    else {
+        input.value = String(params.value || '');
+    }
     input.addEventListener('input', () => {
         controlDiv.classList.remove('hcc-control-nullish');
+        input.placeholder = '';
         const value = input.value;
-        lastNonNullValue = value;
         controls.setNestedValue(params.path, value, false);
     });
     if (params.nullable) {
         const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
-            if (isNull) {
-                lastNonNullValue = input.value;
-                input.value = '';
-                input.disabled = true;
-                controls.setNestedValue(params.path, null);
-            }
-            else {
-                input.disabled = false;
-                input.value = lastNonNullValue;
-                controls.setNestedValue(params.path, lastNonNullValue);
-                input.focus();
-            }
+            input.value = '';
+            input.placeholder = 'null';
+            controlDiv.classList.add('hcc-control-nullish');
+            controls.setNestedValue(params.path, null, false);
         });
         valueDivInner.appendChild(nullableButton);
-        // Initialize disabled state if value is null
-        if (params.value === null || params.value === undefined) {
-            input.disabled = true;
-            input.value = '';
-        }
     }
 }
 

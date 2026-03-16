@@ -175,35 +175,15 @@ export function create(
     });
 
     if (params.nullable) {
-        let lastNonNullValue = numericValue;
-
         const nullableButton = createNullableButton(
             params,
             controlDiv,
             (isNull: boolean): void => {
-                if (isNull) {
-                    lastNonNullValue = parseFloat(input.value);
-                    valueEl.textContent = '';
-                    input.disabled = true;
-                    controls.setNestedValue(params.path, null);
-                } else {
-                    input.disabled = false;
-                    if (lastNonNullValue !== undefined) {
-                        input.value = String(lastNonNullValue);
-                        const sValue = lastNonNullValue.toFixed(decimals);
-                        const displayValue = unit ? `${sValue}${unit}` : sValue;
-                        const chartValue = unit ? `${lastNonNullValue}${unit}` : lastNonNullValue;
-                        valueEl.textContent = displayValue;
-                        controls.setNestedValue(params.path, chartValue);
-                    }
-                }
+                valueEl.textContent = '';
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
             }
         );
         valueDivInner.appendChild(nullableButton);
-
-        // Initialize disabled state if value is null
-        if (isNullish) {
-            input.disabled = true;
-        }
     }
 }
