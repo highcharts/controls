@@ -178,7 +178,7 @@ export function create(
         const nullableButton = createNullableButton(
             params,
             controlDiv,
-            (isNull: boolean): void => {
+            (): void => {
                 valueEl.textContent = '';
                 controlDiv.classList.add('hcc-control-nullish');
                 controls.setNestedValue(params.path, null);

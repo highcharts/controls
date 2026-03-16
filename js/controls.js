@@ -60,34 +60,17 @@ function createControlScaffolding(params, container) {
  * Returns the button element that can be appended to a control
  */
 function createNullableButton(params, controlDiv, onToggle) {
-    const isNullish = params.value === null || params.value === undefined;
     const button = Object.assign(document.createElement('button'), {
         type: 'button',
         className: 'hcc-nullable-button',
-        title: isNullish ? 'Set value' : 'Set to null',
+        title: 'Set to null',
         innerHTML: '⊘',
-        'aria-label': isNullish ? 'Set value' : 'Set to null'
+        'aria-label': 'Set to null'
     });
-    if (isNullish) {
-        button.classList.add('hcc-nullable-active');
-    }
     button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const willBeNull = !button.classList.contains('hcc-nullable-active');
-        if (willBeNull) {
-            button.classList.add('hcc-nullable-active');
-            button.title = 'Set value';
-            button.setAttribute('aria-label', 'Set value');
-            controlDiv.classList.add('hcc-control-nullish');
-        }
-        else {
-            button.classList.remove('hcc-nullable-active');
-            button.title = 'Set to null';
-            button.setAttribute('aria-label', 'Set to null');
-            controlDiv.classList.remove('hcc-control-nullish');
-        }
-        onToggle(willBeNull);
+        onToggle();
     });
     return button;
 }
@@ -440,7 +423,7 @@ function create$2(controls, params) {
     colorInput.addEventListener('input', update);
     opacityInput.addEventListener('input', update);
     if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
             valueEl.textContent = '—';
             controlDiv.classList.add('hcc-control-nullish');
             controls.setNestedValue(params.path, null, false);
@@ -584,7 +567,7 @@ function create$1(controls, params) {
         isDragging = false;
     });
     if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
             valueEl.textContent = '';
             controlDiv.classList.add('hcc-control-nullish');
             controls.setNestedValue(params.path, null);
@@ -637,7 +620,7 @@ function create(controls, params) {
         controls.setNestedValue(params.path, value, false);
     });
     if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
             input.value = '';
             input.placeholder = 'null';
             controlDiv.classList.add('hcc-control-nullish');

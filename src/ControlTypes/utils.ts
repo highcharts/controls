@@ -78,44 +78,23 @@ export function createControlScaffolding(
 export function createNullableButton(
     params: ControlParams,
     controlDiv: HTMLElement,
-    onToggle: (isNull: boolean) => void
+    onToggle: () => void
 ): HTMLButtonElement {
-    const isNullish = params.value === null || params.value === undefined;
-
     const button = Object.assign(
         document.createElement('button'),
         {
             type: 'button',
             className: 'hcc-nullable-button',
-            title: isNullish ? 'Set value' : 'Set to null',
+            title: 'Set to null',
             innerHTML: '⊘',
-            'aria-label': isNullish ? 'Set value' : 'Set to null'
+            'aria-label': 'Set to null'
         }
     );
-
-    if (isNullish) {
-        button.classList.add('hcc-nullable-active');
-    }
 
     button.addEventListener('click', (e): void => {
         e.preventDefault();
         e.stopPropagation();
-
-        const willBeNull = !button.classList.contains('hcc-nullable-active');
-
-        if (willBeNull) {
-            button.classList.add('hcc-nullable-active');
-            button.title = 'Set value';
-            button.setAttribute('aria-label', 'Set value');
-            controlDiv.classList.add('hcc-control-nullish');
-        } else {
-            button.classList.remove('hcc-nullable-active');
-            button.title = 'Set to null';
-            button.setAttribute('aria-label', 'Set to null');
-            controlDiv.classList.remove('hcc-control-nullish');
-        }
-
-        onToggle(willBeNull);
+        onToggle();
     });
 
     return button;

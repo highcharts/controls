@@ -69,7 +69,7 @@ export function create(
         const nullableButton = createNullableButton(
             params,
             controlDiv,
-            (isNull: boolean): void => {
+            (): void => {
                 input.value = '';
                 input.placeholder = 'null';
                 controlDiv.classList.add('hcc-control-nullish');

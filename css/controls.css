@@ -149,14 +149,6 @@ highcharts-separator {
         color: light-dark(#666666, #aaaaaa);
     }
 
-    .hcc-nullable-button.hcc-nullable-active {
-        color: light-dark(#ff4444, #ff6666);
-    }
-
-    .hcc-nullable-button.hcc-nullable-active:hover {
-        color: light-dark(#cc0000, #ff8888);
-    }
-
     /* Display mode adjustments, when the width should fit into a container */
     &.hcc-display-block {
 
