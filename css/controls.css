@@ -487,6 +487,10 @@ highcharts-separator {
         opacity: 0.4;
     }
 
+    .hcc-control-nullish .hcc-text-input {
+        font-weight: normal;
+    }
+
     .hcc-control-nullish input[id^="range-input-"] {
         opacity: 0.35;
         filter: saturate(0.3);
