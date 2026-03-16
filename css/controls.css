@@ -495,6 +495,11 @@ highcharts-separator {
         opacity: 0.4;
     }
 
+    .hcc-control-nullish input[id^="range-input-"] {
+        opacity: 0.35;
+        filter: saturate(0.3);
+    }
+
     /* Nullable toggle styles - wider toggle with three positions */
     .hcc-toggle-nullable {
         width: 70px;
