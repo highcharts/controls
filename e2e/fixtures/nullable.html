@@ -20,7 +20,7 @@
             series: [{
                 name: 'Series 1',
                 data: [1, 3, 2, 4],
-                type: 'column'
+                type: 'spline'
             }]
         });
 
@@ -53,14 +53,15 @@
                     group: 'Boolean Controls',
                     description: 'Tri-state toggle when nullable',
                     controls: [
-                        { path: 'series[0].visible', type: 'boolean', nullable: false }
+                        { path: 'series[0].visible', type: 'boolean', nullable: true }
                     ]
                 },
                 {
                     group: 'Select Controls',
                     description: 'Select with nullable support',
                     controls: [
-                        { path: 'subtitle.align', type: 'select', nullable: true, options: ['left', 'center', 'right'] }
+                        { path: 'subtitle.align', type: 'select', nullable: true, options: ['left', 'center', 'right'] },
+                        { path: 'series[0].dashStyle', type: 'select', nullable: true, options: ['Solid', 'ShortDash', 'ShortDot', 'ShortDashDot', 'ShortDashDotDot', 'Dot', 'Dash', 'LongDash', 'DashDot', 'LongDashDot', 'LongDashDotDot'] }
                     ]
                 }
             ]
