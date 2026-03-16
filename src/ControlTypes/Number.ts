@@ -185,7 +185,7 @@ export function create(
                     lastNonNullValue = parseFloat(input.value);
                     valueEl.textContent = '';
                     input.disabled = true;
-                    controls.setNestedValue(params.path, null, false);
+                    controls.setNestedValue(params.path, null);
                 } else {
                     input.disabled = false;
                     if (lastNonNullValue !== undefined) {
@@ -194,7 +194,7 @@ export function create(
                         const displayValue = unit ? `${sValue}${unit}` : sValue;
                         const chartValue = unit ? `${lastNonNullValue}${unit}` : lastNonNullValue;
                         valueEl.textContent = displayValue;
-                        controls.setNestedValue(params.path, chartValue, false);
+                        controls.setNestedValue(params.path, chartValue);
                     }
                 }
             }

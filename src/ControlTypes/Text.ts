@@ -69,11 +69,11 @@ export function create(
                     lastNonNullValue = input.value;
                     input.value = '';
                     input.disabled = true;
-                    controls.setNestedValue(params.path, null, false);
+                    controls.setNestedValue(params.path, null);
                 } else {
                     input.disabled = false;
                     input.value = lastNonNullValue;
-                    controls.setNestedValue(params.path, lastNonNullValue, false);
+                    controls.setNestedValue(params.path, lastNonNullValue);
                     input.focus();
                 }
             }
