@@ -495,6 +495,49 @@ highcharts-separator {
         opacity: 0.4;
     }
 
+    /* Nullable toggle styles - wider toggle with three positions */
+    .hcc-toggle-nullable {
+        width: 70px;
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider::before {
+        transition: transform 200ms, opacity 200ms;
+    }
+
+    /* Left position (false) */
+    .hcc-toggle-nullable .hcc-toggle-slider-false {
+        background: light-dark(#cfcfcf, #555555);
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider-false::before {
+        transform: translateX(0);
+    }
+
+    /* Middle position (null) */
+    .hcc-toggle-nullable .hcc-toggle-slider-null {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#e0e0e0, #444444),
+            light-dark(#e0e0e0, #444444) 3px,
+            light-dark(#cfcfcf, #555555) 3px,
+            light-dark(#cfcfcf, #555555) 6px
+        );
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider-null::before {
+        transform: translateX(22px);
+        opacity: 0.6;
+    }
+
+    /* Right position (true) */
+    .hcc-toggle-nullable .hcc-toggle-slider-true {
+        background: light-dark(#141414, #ffffff);
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider-true::before {
+        transform: translateX(44px);
+    }
+
     /* Tri-state toggle styles for nullable booleans */
     .hcc-tristate-container {
         display: inline-block;

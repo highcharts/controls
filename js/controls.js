@@ -110,55 +110,47 @@ function create$4(controls, params) {
         title: params.label || params.path
     }));
     if (params.nullable) {
-        // Tri-state toggle: null, false, true
-        const container = valueDivInner.appendChild(Object.assign(document.createElement('div'), {
-            className: 'hcc-tristate-container',
-            id: `tristate-${rid}`
-        }));
+        // Nullable tri-state toggle: false (left), null (middle), true (right)
+        const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle hcc-toggle-nullable' }));
         let currentState = params.value === null || params.value === undefined ? null : Boolean(params.value);
-        const updateTristate = () => {
-            container.textContent = '';
+        // Create a hidden input to store state (not used for interaction)
+        labelToggle.appendChild(Object.assign(document.createElement('input'), {
+            type: 'hidden',
+            id: `toggle-checkbox-${rid}`
+        }));
+        const slider = labelToggle.appendChild(Object.assign(document.createElement('span'), {
+            className: 'hcc-toggle-slider',
+            'aria-hidden': 'true'
+        }));
+        const updateTogglePosition = () => {
+            // Remove all state classes
+            slider.classList.remove('hcc-toggle-slider-false', 'hcc-toggle-slider-null', 'hcc-toggle-slider-true');
             if (currentState === null) {
-                container.appendChild(Object.assign(document.createElement('button'), {
-                    type: 'button',
-                    className: 'hcc-tristate-button hcc-tristate-null',
-                    textContent: '⊘',
-                    title: 'Null'
-                }));
+                slider.classList.add('hcc-toggle-slider-null');
                 controlDiv.classList.add('hcc-control-nullish');
             }
             else if (currentState === false) {
-                container.appendChild(Object.assign(document.createElement('button'), {
-                    type: 'button',
-                    className: 'hcc-tristate-button hcc-tristate-false',
-                    textContent: 'False',
-                    title: 'False'
-                }));
+                slider.classList.add('hcc-toggle-slider-false');
                 controlDiv.classList.remove('hcc-control-nullish');
             }
             else {
-                container.appendChild(Object.assign(document.createElement('button'), {
-                    type: 'button',
-                    className: 'hcc-tristate-button hcc-tristate-true',
-                    textContent: 'True',
-                    title: 'True'
-                }));
+                slider.classList.add('hcc-toggle-slider-true');
                 controlDiv.classList.remove('hcc-control-nullish');
             }
         };
-        updateTristate();
-        container.addEventListener('click', () => {
-            // Cycle: null -> false -> true -> null
-            if (currentState === null) {
-                currentState = false;
+        updateTogglePosition();
+        slider.addEventListener('click', () => {
+            // Cycle: false -> null -> true -> false
+            if (currentState === false) {
+                currentState = null;
             }
-            else if (currentState === false) {
+            else if (currentState === null) {
                 currentState = true;
             }
             else {
-                currentState = null;
+                currentState = false;
             }
-            updateTristate();
+            updateTogglePosition();
             controls.setNestedValue(params.path, currentState);
         });
     }
