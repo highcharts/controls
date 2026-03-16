@@ -130,7 +130,43 @@ export function create(
         // Render as button group
         valueDivInner.classList.add('hcc-button-group');
 
-        // Add null button if nullable
+        options.forEach((option): void => {
+            const isActive = params.value !== null &&
+                params.value !== undefined &&
+                params.value === option;
+            const button = valueDivInner.appendChild(
+                Object.assign(
+                    document.createElement('button'),
+                    {
+                        className: 'hcc-button' +
+                            (isActive ? ' active' : ''),
+                        innerText: option
+                    }
+                )
+            );
+            button.dataset.path = params.path;
+            button.dataset.value = option;
+
+            button.addEventListener(
+                'click',
+                (): void => {
+                    controlDiv.classList.remove('hcc-control-nullish');
+                    const value = button.getAttribute('data-value');
+                    controls.setNestedValue(params.path, value);
+
+                    // Update active state for all buttons in this group
+                    const allButtons = document.querySelectorAll(
+                        `[data-path="${params.path}"]`
+                    );
+                    allButtons.forEach(
+                        (b): void => b.classList.remove('active')
+                    );
+                    button.classList.add('active');
+                }
+            );
+        });
+
+        // Add null button if nullable (at the end, on the right)
         if (params.nullable) {
             const isNullActive = params.value === null || params.value === undefined;
             const nullButton = valueDivInner.appendChild(
@@ -167,41 +203,5 @@ export function create(
                 }
             );
         }
-
-        options.forEach((option): void => {
-            const isActive = params.value !== null &&
-                params.value !== undefined &&
-                params.value === option;
-            const button = valueDivInner.appendChild(
-                Object.assign(
-                    document.createElement('button'),
-                    {
-                        className: 'hcc-button' +
-                            (isActive ? ' active' : ''),
-                        innerText: option
-                    }
-                )
-            );
-            button.dataset.path = params.path;
-            button.dataset.value = option;
-
-            button.addEventListener(
-                'click',
-                (): void => {
-                    controlDiv.classList.remove('hcc-control-nullish');
-                    const value = button.getAttribute('data-value');
-                    controls.setNestedValue(params.path, value);
-
-                    // Update active state for all buttons in this group
-                    const allButtons = document.querySelectorAll(
-                        `[data-path="${params.path}"]`
-                    );
-                    allButtons.forEach(
-                        (b): void => b.classList.remove('active')
-                    );
-                    button.classList.add('active');
-                }
-            );
-        });
     }
 }
