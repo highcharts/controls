@@ -24,6 +24,7 @@ export interface ControlParams {
     path: string;
     label?: string;
     value?: any;
+    nullable?: boolean;
 }
 
 export interface SeparatorParams {

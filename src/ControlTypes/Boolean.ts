@@ -36,38 +36,115 @@ export function create(
         )
     );
 
-    const labelToggle = valueDivInner.appendChild(
-        Object.assign(
-            document.createElement('label'),
-            { className: 'hcc-toggle' }
-        )
-    );
+    if (params.nullable) {
+        // Tri-state toggle: null, false, true
+        const container = valueDivInner.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                {
+                    className: 'hcc-tristate-container',
+                    id: `tristate-${rid}`
+                }
+            )
+        );
 
-    const input = labelToggle.appendChild(
-        Object.assign(
-            document.createElement('input'),
-            {
-                type: 'checkbox',
-                id: `toggle-checkbox-${rid}`
+        let currentState: boolean|null =
+            params.value === null || params.value === undefined ? null : Boolean(params.value);
+
+        const updateTristate = (): void => {
+            container.textContent = '';
+
+            if (currentState === null) {
+                container.appendChild(
+                    Object.assign(
+                        document.createElement('button'),
+                        {
+                            type: 'button',
+                            className: 'hcc-tristate-button hcc-tristate-null',
+                            textContent: '⊘',
+                            title: 'Null'
+                        }
+                    )
+                );
+                controlDiv.classList.add('hcc-control-nullish');
+            } else if (currentState === false) {
+                container.appendChild(
+                    Object.assign(
+                        document.createElement('button'),
+                        {
+                            type: 'button',
+                            className: 'hcc-tristate-button hcc-tristate-false',
+                            textContent: 'False',
+                            title: 'False'
+                        }
+                    )
+                );
+                controlDiv.classList.remove('hcc-control-nullish');
+            } else {
+                container.appendChild(
+                    Object.assign(
+                        document.createElement('button'),
+                        {
+                            type: 'button',
+                            className: 'hcc-tristate-button hcc-tristate-true',
+                            textContent: 'True',
+                            title: 'True'
+                        }
+                    )
+                );
+                controlDiv.classList.remove('hcc-control-nullish');
             }
-        )
-    );
+        };
 
-    labelToggle.appendChild(
-        Object.assign(
-            document.createElement('span'),
-            {
-                className: 'hcc-toggle-slider',
-                'aria-hidden': 'true'
+        updateTristate();
+
+        container.addEventListener('click', (): void => {
+            // Cycle: null -> false -> true -> null
+            if (currentState === null) {
+                currentState = false;
+            } else if (currentState === false) {
+                currentState = true;
+            } else {
+                currentState = null;
             }
-        )
-    );
+            updateTristate();
+            controls.setNestedValue(params.path, currentState);
+        });
+    } else {
+        // Standard two-state toggle
+        const labelToggle = valueDivInner.appendChild(
+            Object.assign(
+                document.createElement('label'),
+                { className: 'hcc-toggle' }
+            )
+        );
 
-    input.checked = Boolean(params.value);
+        const input = labelToggle.appendChild(
+            Object.assign(
+                document.createElement('input'),
+                {
+                    type: 'checkbox',
+                    id: `toggle-checkbox-${rid}`
+                }
+            )
+        );
 
-    input.addEventListener('change', (): void => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        const value = input.checked;
-        controls.setNestedValue(params.path, value);
-    });
+        labelToggle.appendChild(
+            Object.assign(
+                document.createElement('span'),
+                {
+                    className: 'hcc-toggle-slider',
+                    'aria-hidden': 'true'
+                }
+            )
+        );
+
+        input.checked = Boolean(params.value);
+
+        input.addEventListener('change', (): void => {
+            controlDiv.classList.remove('hcc-control-nullish');
+            const value = input.checked;
+            controls.setNestedValue(params.path, value);
+        });
+    }
 }

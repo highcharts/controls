@@ -55,6 +55,42 @@ function createControlScaffolding(params, container) {
     const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
     return { controlDiv, keyDiv, valueDiv, valueDivInner };
 }
+/**
+ * Create a nullable toggle button
+ * Returns the button element that can be appended to a control
+ */
+function createNullableButton(params, controlDiv, onToggle) {
+    const isNullish = params.value === null || params.value === undefined;
+    const button = Object.assign(document.createElement('button'), {
+        type: 'button',
+        className: 'hcc-nullable-button',
+        title: isNullish ? 'Set value' : 'Set to null',
+        innerHTML: '⊘',
+        'aria-label': isNullish ? 'Set value' : 'Set to null'
+    });
+    if (isNullish) {
+        button.classList.add('hcc-nullable-active');
+    }
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const willBeNull = !button.classList.contains('hcc-nullable-active');
+        if (willBeNull) {
+            button.classList.add('hcc-nullable-active');
+            button.title = 'Set value';
+            button.setAttribute('aria-label', 'Set value');
+            controlDiv.classList.add('hcc-control-nullish');
+        }
+        else {
+            button.classList.remove('hcc-nullable-active');
+            button.title = 'Set to null';
+            button.setAttribute('aria-label', 'Set to null');
+            controlDiv.classList.remove('hcc-control-nullish');
+        }
+        onToggle(willBeNull);
+    });
+    return button;
+}
 
 /**
  * Type guard for BooleanControlParams
@@ -73,21 +109,77 @@ function create$4(controls, params) {
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
     }));
-    const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
-    const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
-        type: 'checkbox',
-        id: `toggle-checkbox-${rid}`
-    }));
-    labelToggle.appendChild(Object.assign(document.createElement('span'), {
-        className: 'hcc-toggle-slider',
-        'aria-hidden': 'true'
-    }));
-    input.checked = Boolean(params.value);
-    input.addEventListener('change', () => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        const value = input.checked;
-        controls.setNestedValue(params.path, value);
-    });
+    if (params.nullable) {
+        // Tri-state toggle: null, false, true
+        const container = valueDivInner.appendChild(Object.assign(document.createElement('div'), {
+            className: 'hcc-tristate-container',
+            id: `tristate-${rid}`
+        }));
+        let currentState = params.value === null || params.value === undefined ? null : Boolean(params.value);
+        const updateTristate = () => {
+            container.textContent = '';
+            if (currentState === null) {
+                container.appendChild(Object.assign(document.createElement('button'), {
+                    type: 'button',
+                    className: 'hcc-tristate-button hcc-tristate-null',
+                    textContent: '⊘',
+                    title: 'Null'
+                }));
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+            else if (currentState === false) {
+                container.appendChild(Object.assign(document.createElement('button'), {
+                    type: 'button',
+                    className: 'hcc-tristate-button hcc-tristate-false',
+                    textContent: 'False',
+                    title: 'False'
+                }));
+                controlDiv.classList.remove('hcc-control-nullish');
+            }
+            else {
+                container.appendChild(Object.assign(document.createElement('button'), {
+                    type: 'button',
+                    className: 'hcc-tristate-button hcc-tristate-true',
+                    textContent: 'True',
+                    title: 'True'
+                }));
+                controlDiv.classList.remove('hcc-control-nullish');
+            }
+        };
+        updateTristate();
+        container.addEventListener('click', () => {
+            // Cycle: null -> false -> true -> null
+            if (currentState === null) {
+                currentState = false;
+            }
+            else if (currentState === false) {
+                currentState = true;
+            }
+            else {
+                currentState = null;
+            }
+            updateTristate();
+            controls.setNestedValue(params.path, currentState);
+        });
+    }
+    else {
+        // Standard two-state toggle
+        const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
+        const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
+            type: 'checkbox',
+            id: `toggle-checkbox-${rid}`
+        }));
+        labelToggle.appendChild(Object.assign(document.createElement('span'), {
+            className: 'hcc-toggle-slider',
+            'aria-hidden': 'true'
+        }));
+        input.checked = Boolean(params.value);
+        input.addEventListener('change', () => {
+            controlDiv.classList.remove('hcc-control-nullish');
+            const value = input.checked;
+            controls.setNestedValue(params.path, value);
+        });
+    }
 }
 
 var BooleanControl = /*#__PURE__*/Object.freeze({
@@ -139,6 +231,7 @@ function create$3(controls, params) {
     // Determine whether to use select dropdown or button group
     const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
     const useDropdown = options.length > 3 || totalLength > 24;
+    let lastNonNullValue = params.value;
     if (useDropdown) {
         // Render as select dropdown
         valueDivInner.classList.add('hcc-select-control');
@@ -158,8 +251,30 @@ function create$3(controls, params) {
         select.addEventListener('change', () => {
             controlDiv.classList.remove('hcc-control-nullish');
             const value = select.value;
+            lastNonNullValue = value;
             controls.setNestedValue(params.path, value);
         });
+        if (params.nullable) {
+            const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+                if (isNull) {
+                    lastNonNullValue = select.value;
+                    select.disabled = true;
+                    controls.setNestedValue(params.path, null);
+                }
+                else {
+                    select.disabled = false;
+                    if (lastNonNullValue && options.includes(lastNonNullValue)) {
+                        select.value = lastNonNullValue;
+                        controls.setNestedValue(params.path, lastNonNullValue);
+                    }
+                }
+            });
+            valueDivInner.appendChild(nullableButton);
+            // Initialize disabled state if value is null
+            if (params.value === null || params.value === undefined) {
+                select.disabled = true;
+            }
+        }
     }
     else {
         // Render as button group
@@ -178,6 +293,7 @@ function create$3(controls, params) {
             button.addEventListener('click', () => {
                 controlDiv.classList.remove('hcc-control-nullish');
                 const value = button.getAttribute('data-value');
+                lastNonNullValue = value;
                 controls.setNestedValue(params.path, value);
                 // Update active state for all buttons in this group
                 const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
@@ -185,6 +301,42 @@ function create$3(controls, params) {
                 button.classList.add('active');
             });
         });
+        if (params.nullable) {
+            const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
+                if (isNull) {
+                    const activeButton = Array.from(allButtons).find(b => b.classList.contains('active'));
+                    if (activeButton) {
+                        lastNonNullValue = activeButton.getAttribute('data-value');
+                    }
+                    allButtons.forEach((b) => {
+                        b.disabled = true;
+                        b.classList.remove('active');
+                    });
+                    controls.setNestedValue(params.path, null);
+                }
+                else {
+                    allButtons.forEach((b) => {
+                        b.disabled = false;
+                    });
+                    if (lastNonNullValue) {
+                        const buttonToActivate = Array.from(allButtons).find(b => b.getAttribute('data-value') === lastNonNullValue);
+                        if (buttonToActivate) {
+                            buttonToActivate.classList.add('active');
+                            controls.setNestedValue(params.path, lastNonNullValue);
+                        }
+                    }
+                }
+            });
+            valueDivInner.appendChild(nullableButton);
+            // Initialize disabled state if value is null
+            if (params.value === null || params.value === undefined) {
+                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
+                allButtons.forEach((b) => {
+                    b.disabled = true;
+                });
+            }
+        }
     }
 }
 
@@ -315,6 +467,39 @@ function create$2(controls, params) {
     };
     colorInput.addEventListener('input', update);
     opacityInput.addEventListener('input', update);
+    if (params.nullable) {
+        let lastNonNullColor = isNullish ? '#808080' : getHex(hcColor, true);
+        const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+            if (isNull) {
+                lastNonNullColor = getHex(Product$1.color(colorInput.value).setOpacity(parseFloat(opacityInput.value) / 100), true);
+                colorInput.disabled = true;
+                opacityDisplay.style.pointerEvents = 'none';
+                opacityDisplay.style.opacity = '0.4';
+                valueEl.textContent = '—';
+                controls.setNestedValue(params.path, null, false);
+            }
+            else {
+                colorInput.disabled = false;
+                opacityDisplay.style.pointerEvents = '';
+                opacityDisplay.style.opacity = '';
+                hcColor = Product$1.color(lastNonNullColor);
+                const hex = getHex(hcColor);
+                const opacity = (hcColor.rgba[3] || 1) * 100;
+                colorInput.value = hex;
+                valueEl.textContent = hex;
+                opacityInput.value = String(Math.round(opacity));
+                opacityDisplay.textContent = String(Math.round(opacity));
+                controls.setNestedValue(params.path, lastNonNullColor, false);
+            }
+        });
+        valueDivInner.appendChild(nullableButton);
+        // Initialize disabled state if value is null
+        if (isNullish) {
+            colorInput.disabled = true;
+            opacityDisplay.style.pointerEvents = 'none';
+            opacityDisplay.style.opacity = '0.4';
+        }
+    }
 }
 
 var ColorControl = /*#__PURE__*/Object.freeze({
@@ -451,6 +636,33 @@ function create$1(controls, params) {
         }
         isDragging = false;
     });
+    if (params.nullable) {
+        let lastNonNullValue = numericValue;
+        const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+            if (isNull) {
+                lastNonNullValue = parseFloat(input.value);
+                valueEl.textContent = '';
+                input.disabled = true;
+                controls.setNestedValue(params.path, null, false);
+            }
+            else {
+                input.disabled = false;
+                if (lastNonNullValue !== undefined) {
+                    input.value = String(lastNonNullValue);
+                    const sValue = lastNonNullValue.toFixed(decimals);
+                    const displayValue = unit ? `${sValue}${unit}` : sValue;
+                    const chartValue = unit ? `${lastNonNullValue}${unit}` : lastNonNullValue;
+                    valueEl.textContent = displayValue;
+                    controls.setNestedValue(params.path, chartValue, false);
+                }
+            }
+        });
+        valueDivInner.appendChild(nullableButton);
+        // Initialize disabled state if value is null
+        if (isNullish) {
+            input.disabled = true;
+        }
+    }
 }
 
 var NumberControl = /*#__PURE__*/Object.freeze({
@@ -483,11 +695,35 @@ function create(controls, params) {
         title: params.label || params.path
     }));
     input.value = String(params.value || '');
+    let lastNonNullValue = input.value;
     input.addEventListener('input', () => {
         controlDiv.classList.remove('hcc-control-nullish');
         const value = input.value;
+        lastNonNullValue = value;
         controls.setNestedValue(params.path, value, false);
     });
+    if (params.nullable) {
+        const nullableButton = createNullableButton(params, controlDiv, (isNull) => {
+            if (isNull) {
+                lastNonNullValue = input.value;
+                input.value = '';
+                input.disabled = true;
+                controls.setNestedValue(params.path, null, false);
+            }
+            else {
+                input.disabled = false;
+                input.value = lastNonNullValue;
+                controls.setNestedValue(params.path, lastNonNullValue, false);
+                input.focus();
+            }
+        });
+        valueDivInner.appendChild(nullableButton);
+        // Initialize disabled state if value is null
+        if (params.value === null || params.value === undefined) {
+            input.disabled = true;
+            input.value = '';
+        }
+    }
 }
 
 var TextControl = /*#__PURE__*/Object.freeze({

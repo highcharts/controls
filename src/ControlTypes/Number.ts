@@ -3,7 +3,7 @@
  */
 import type { NumberControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './utils.js';
+import { createControlScaffolding, createNullableButton } from './utils.js';
 
 /**
  * Type guard for NumberControlParams
@@ -173,4 +173,37 @@ export function create(
         }
         isDragging = false;
     });
+
+    if (params.nullable) {
+        let lastNonNullValue = numericValue;
+
+        const nullableButton = createNullableButton(
+            params,
+            controlDiv,
+            (isNull: boolean): void => {
+                if (isNull) {
+                    lastNonNullValue = parseFloat(input.value);
+                    valueEl.textContent = '';
+                    input.disabled = true;
+                    controls.setNestedValue(params.path, null, false);
+                } else {
+                    input.disabled = false;
+                    if (lastNonNullValue !== undefined) {
+                        input.value = String(lastNonNullValue);
+                        const sValue = lastNonNullValue.toFixed(decimals);
+                        const displayValue = unit ? `${sValue}${unit}` : sValue;
+                        const chartValue = unit ? `${lastNonNullValue}${unit}` : lastNonNullValue;
+                        valueEl.textContent = displayValue;
+                        controls.setNestedValue(params.path, chartValue, false);
+                    }
+                }
+            }
+        );
+        valueDivInner.appendChild(nullableButton);
+
+        // Initialize disabled state if value is null
+        if (isNullish) {
+            input.disabled = true;
+        }
+    }
 }

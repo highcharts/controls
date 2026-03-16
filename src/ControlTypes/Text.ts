@@ -3,7 +3,7 @@
  */
 import type { TextControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './utils.js';
+import { createControlScaffolding, createNullableButton } from './utils.js';
 
 /**
  * Type guard for TextControlParams
@@ -51,9 +51,39 @@ export function create(
 
     input.value = String(params.value || '');
 
+    let lastNonNullValue = input.value;
+
     input.addEventListener('input', (): void => {
         controlDiv.classList.remove('hcc-control-nullish');
         const value = input.value;
+        lastNonNullValue = value;
         controls.setNestedValue(params.path, value, false);
     });
+
+    if (params.nullable) {
+        const nullableButton = createNullableButton(
+            params,
+            controlDiv,
+            (isNull: boolean): void => {
+                if (isNull) {
+                    lastNonNullValue = input.value;
+                    input.value = '';
+                    input.disabled = true;
+                    controls.setNestedValue(params.path, null, false);
+                } else {
+                    input.disabled = false;
+                    input.value = lastNonNullValue;
+                    controls.setNestedValue(params.path, lastNonNullValue, false);
+                    input.focus();
+                }
+            }
+        );
+        valueDivInner.appendChild(nullableButton);
+
+        // Initialize disabled state if value is null
+        if (params.value === null || params.value === undefined) {
+            input.disabled = true;
+            input.value = '';
+        }
+    }
 }

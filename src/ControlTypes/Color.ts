@@ -3,7 +3,7 @@
  */
 import type { ColorControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './utils.js';
+import { createControlScaffolding, createNullableButton } from './utils.js';
 
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = (window as any).Highcharts || (window as any).Grid;
@@ -197,4 +197,43 @@ export function create(
 
     colorInput.addEventListener('input', update);
     opacityInput.addEventListener('input', update);
+
+    if (params.nullable) {
+        let lastNonNullColor = isNullish ? '#808080' : getHex(hcColor, true);
+
+        const nullableButton = createNullableButton(
+            params,
+            controlDiv,
+            (isNull: boolean): void => {
+                if (isNull) {
+                    lastNonNullColor = getHex(Product.color(colorInput.value).setOpacity(parseFloat(opacityInput.value) / 100), true);
+                    colorInput.disabled = true;
+                    opacityDisplay.style.pointerEvents = 'none';
+                    opacityDisplay.style.opacity = '0.4';
+                    valueEl.textContent = '—';
+                    controls.setNestedValue(params.path, null, false);
+                } else {
+                    colorInput.disabled = false;
+                    opacityDisplay.style.pointerEvents = '';
+                    opacityDisplay.style.opacity = '';
+                    hcColor = Product.color(lastNonNullColor);
+                    const hex = getHex(hcColor);
+                    const opacity = (hcColor.rgba[3] || 1) * 100;
+                    colorInput.value = hex;
+                    valueEl.textContent = hex;
+                    opacityInput.value = String(Math.round(opacity));
+                    opacityDisplay.textContent = String(Math.round(opacity));
+                    controls.setNestedValue(params.path, lastNonNullColor, false);
+                }
+            }
+        );
+        valueDivInner.appendChild(nullableButton);
+
+        // Initialize disabled state if value is null
+        if (isNullish) {
+            colorInput.disabled = true;
+            opacityDisplay.style.pointerEvents = 'none';
+            opacityDisplay.style.opacity = '0.4';
+        }
+    }
 }

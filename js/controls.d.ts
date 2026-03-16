@@ -15,6 +15,7 @@ interface ControlParams {
     path: string;
     label?: string;
     value?: any;
+    nullable?: boolean;
 }
 interface SeparatorParams {
     type: 'separator';
