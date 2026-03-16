@@ -616,6 +616,7 @@ highcharts-separator {
         cursor: pointer;
         display: inline-block;
         font-size: 0.8rem;
+        line-height: 1rem;
         padding: 0.3rem 1.5rem;
         margin: 0.1rem 0 0.5rem 10px;
         transition: background 250ms;
