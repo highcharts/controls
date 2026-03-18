@@ -18,6 +18,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Main `controls.ts` reduced from 1,464 to 893 lines (39% reduction)
   - Improved maintainability, testability, and extensibility
   - No breaking changes to the public API
+- **Color opacity slider** - Enhanced opacity slider with gradient background
 
 ### Fixed
 - **Collapsed groups** - Fixed #9, only opacity was applied

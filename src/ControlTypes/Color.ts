@@ -152,6 +152,15 @@ export function create(
     };
     document.addEventListener('click', hideRangeOnClickOutside);
 
+    // Update opacity slider gradient based on color
+    const updateOpacityGradient = (color: { rgba: number[] }): void => {
+        const r = color.rgba[0];
+        const g = color.rgba[1];
+        const b = color.rgba[2];
+        opacityInput.style.setProperty('--hcc-opacity-gradient-start', `rgba(${r}, ${g}, ${b}, 0)`);
+        opacityInput.style.setProperty('--hcc-opacity-gradient-end', `rgba(${r}, ${g}, ${b}, 1)`);
+    };
+
     const isNullish = params.value === null || params.value === undefined;
     let hcColor = isNullish ? Product.color('#808080') : Product.color(params.value);
 
@@ -179,6 +188,9 @@ export function create(
         opacityDisplay.textContent = String(Math.round(opacity));
     }
 
+    // Initialize opacity slider gradient
+    updateOpacityGradient(hcColor);
+
     const update = (): void => {
         controlDiv.classList.remove('hcc-control-nullish');
         const rgba = colorInput.value; // E.g. #RRGGBB
@@ -193,6 +205,9 @@ export function create(
         );
         valueEl.textContent = getHex(hcColor);
         opacityDisplay.textContent = opacityInput.value;
+
+        // Update opacity slider gradient based on current color
+        updateOpacityGradient(hcColor);
     };
 
     colorInput.addEventListener('input', update);
