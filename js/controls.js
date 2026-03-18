@@ -278,6 +278,14 @@ function create$2(controls, params) {
         }
     };
     document.addEventListener('click', hideRangeOnClickOutside);
+    // Update opacity slider gradient based on color
+    const updateOpacityGradient = (color) => {
+        const r = color.rgba[0];
+        const g = color.rgba[1];
+        const b = color.rgba[2];
+        opacityInput.style.setProperty('--hcc-opacity-gradient-start', `rgba(${r}, ${g}, ${b}, 0)`);
+        opacityInput.style.setProperty('--hcc-opacity-gradient-end', `rgba(${r}, ${g}, ${b}, 1)`);
+    };
     const isNullish = params.value === null || params.value === undefined;
     let hcColor = isNullish ? Product$1.color('#808080') : Product$1.color(params.value);
     if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
@@ -302,6 +310,8 @@ function create$2(controls, params) {
         opacityInput.value = String(Math.round(opacity));
         opacityDisplay.textContent = String(Math.round(opacity));
     }
+    // Initialize opacity slider gradient
+    updateOpacityGradient(hcColor);
     const update = () => {
         controlDiv.classList.remove('hcc-control-nullish');
         const rgba = colorInput.value; // E.g. #RRGGBB
@@ -312,6 +322,8 @@ function create$2(controls, params) {
         controls.setNestedValue(params.path, getHex(hcColor, true), false);
         valueEl.textContent = getHex(hcColor);
         opacityDisplay.textContent = opacityInput.value;
+        // Update opacity slider gradient based on current color
+        updateOpacityGradient(hcColor);
     };
     colorInput.addEventListener('input', update);
     opacityInput.addEventListener('input', update);
