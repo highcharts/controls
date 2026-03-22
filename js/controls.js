@@ -55,6 +55,25 @@ function createControlScaffolding(params, container) {
     const valueDivInner = valueDiv.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-value-inner' }));
     return { controlDiv, keyDiv, valueDiv, valueDivInner };
 }
+/**
+ * Create a nullable toggle button
+ * Returns the button element that can be appended to a control
+ */
+function createNullableButton(params, controlDiv, onToggle) {
+    const button = Object.assign(document.createElement('button'), {
+        type: 'button',
+        className: 'hcc-nullable-button',
+        title: 'Set to null',
+        innerHTML: '⊘',
+        'aria-label': 'Set to null'
+    });
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggle();
+    });
+    return button;
+}
 
 /**
  * Type guard for BooleanControlParams
@@ -73,21 +92,69 @@ function create$4(controls, params) {
         innerHTML: params.label || `<code>${params.path}</code>`,
         title: params.label || params.path
     }));
-    const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
-    const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
-        type: 'checkbox',
-        id: `toggle-checkbox-${rid}`
-    }));
-    labelToggle.appendChild(Object.assign(document.createElement('span'), {
-        className: 'hcc-toggle-slider',
-        'aria-hidden': 'true'
-    }));
-    input.checked = Boolean(params.value);
-    input.addEventListener('change', () => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        const value = input.checked;
-        controls.setNestedValue(params.path, value);
-    });
+    if (params.nullable) {
+        // Nullable tri-state toggle: false (left), null (middle), true (right)
+        const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle hcc-toggle-nullable' }));
+        let currentState = params.value === null || params.value === undefined ? null : Boolean(params.value);
+        // Create a hidden input to store state (not used for interaction)
+        labelToggle.appendChild(Object.assign(document.createElement('input'), {
+            type: 'hidden',
+            id: `toggle-checkbox-${rid}`
+        }));
+        const slider = labelToggle.appendChild(Object.assign(document.createElement('span'), {
+            className: 'hcc-toggle-slider',
+            'aria-hidden': 'true'
+        }));
+        const updateTogglePosition = () => {
+            // Remove all state classes
+            slider.classList.remove('hcc-toggle-slider-false', 'hcc-toggle-slider-null', 'hcc-toggle-slider-true');
+            if (currentState === null) {
+                slider.classList.add('hcc-toggle-slider-null');
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+            else if (currentState === false) {
+                slider.classList.add('hcc-toggle-slider-false');
+                controlDiv.classList.remove('hcc-control-nullish');
+            }
+            else {
+                slider.classList.add('hcc-toggle-slider-true');
+                controlDiv.classList.remove('hcc-control-nullish');
+            }
+        };
+        updateTogglePosition();
+        slider.addEventListener('click', () => {
+            // Cycle: false -> null -> true -> false
+            if (currentState === false) {
+                currentState = null;
+            }
+            else if (currentState === null) {
+                currentState = true;
+            }
+            else {
+                currentState = false;
+            }
+            updateTogglePosition();
+            controls.setNestedValue(params.path, currentState);
+        });
+    }
+    else {
+        // Standard two-state toggle
+        const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
+        const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
+            type: 'checkbox',
+            id: `toggle-checkbox-${rid}`
+        }));
+        labelToggle.appendChild(Object.assign(document.createElement('span'), {
+            className: 'hcc-toggle-slider',
+            'aria-hidden': 'true'
+        }));
+        input.checked = Boolean(params.value);
+        input.addEventListener('change', () => {
+            controlDiv.classList.remove('hcc-control-nullish');
+            const value = input.checked;
+            controls.setNestedValue(params.path, value);
+        });
+    }
 }
 
 var BooleanControl = /*#__PURE__*/Object.freeze({
@@ -145,6 +212,18 @@ function create$3(controls, params) {
         const select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
             className: 'hcc-select-dropdown'
         }));
+        // Add null option if nullable
+        if (params.nullable) {
+            const isNullSelected = params.value === null || params.value === undefined;
+            select.appendChild(Object.assign(document.createElement('option'), {
+                value: '__null__',
+                innerText: '—',
+                selected: isNullSelected
+            }));
+            if (isNullSelected) {
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+        }
         options.forEach((option) => {
             const isSelected = params.value !== null &&
                 params.value !== undefined &&
@@ -156,9 +235,15 @@ function create$3(controls, params) {
             }));
         });
         select.addEventListener('change', () => {
-            controlDiv.classList.remove('hcc-control-nullish');
             const value = select.value;
-            controls.setNestedValue(params.path, value);
+            if (value === '__null__') {
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
+            }
+            else {
+                controlDiv.classList.remove('hcc-control-nullish');
+                controls.setNestedValue(params.path, value);
+            }
         });
     }
     else {
@@ -185,6 +270,28 @@ function create$3(controls, params) {
                 button.classList.add('active');
             });
         });
+        // Add null button if nullable (at the end, on the right)
+        if (params.nullable) {
+            const isNullActive = params.value === null || params.value === undefined;
+            const nullButton = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
+                className: 'hcc-button' +
+                    (isNullActive ? ' active' : ''),
+                innerHTML: '⊘'
+            }));
+            nullButton.dataset.path = params.path;
+            nullButton.dataset.value = '__null__';
+            if (isNullActive) {
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+            nullButton.addEventListener('click', () => {
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
+                // Update active state for all buttons in this group
+                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
+                allButtons.forEach((b) => b.classList.remove('active'));
+                nullButton.classList.add('active');
+            });
+        }
     }
 }
 
@@ -327,6 +434,14 @@ function create$2(controls, params) {
     };
     colorInput.addEventListener('input', update);
     opacityInput.addEventListener('input', update);
+    if (params.nullable) {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
+            valueEl.textContent = '—';
+            controlDiv.classList.add('hcc-control-nullish');
+            controls.setNestedValue(params.path, null, false);
+        });
+        valueDivInner.appendChild(nullableButton);
+    }
 }
 
 var ColorControl = /*#__PURE__*/Object.freeze({
@@ -463,6 +578,14 @@ function create$1(controls, params) {
         }
         isDragging = false;
     });
+    if (params.nullable) {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
+            valueEl.textContent = '';
+            controlDiv.classList.add('hcc-control-nullish');
+            controls.setNestedValue(params.path, null);
+        });
+        valueDivInner.appendChild(nullableButton);
+    }
 }
 
 var NumberControl = /*#__PURE__*/Object.freeze({
@@ -494,12 +617,29 @@ function create(controls, params) {
         className: 'hcc-text-input',
         title: params.label || params.path
     }));
-    input.value = String(params.value || '');
+    const isNullish = params.value === null || params.value === undefined;
+    if (isNullish) {
+        input.value = '';
+        input.placeholder = 'null';
+    }
+    else {
+        input.value = String(params.value || '');
+    }
     input.addEventListener('input', () => {
         controlDiv.classList.remove('hcc-control-nullish');
+        input.placeholder = '';
         const value = input.value;
         controls.setNestedValue(params.path, value, false);
     });
+    if (params.nullable) {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
+            input.value = '';
+            input.placeholder = 'null';
+            controlDiv.classList.add('hcc-control-nullish');
+            controls.setNestedValue(params.path, null, false);
+        });
+        valueDivInner.appendChild(nullableButton);
+    }
 }
 
 var TextControl = /*#__PURE__*/Object.freeze({
@@ -1008,6 +1148,9 @@ class HighchartsControlElement extends HTMLElement {
         }
         if (this.hasAttribute('step')) {
             config.step = parseFloat(this.getAttribute('step') || '1');
+        }
+        if (this.hasAttribute('nullable')) {
+            config.nullable = true;
         }
         return config;
     }

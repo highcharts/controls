@@ -82,6 +82,24 @@ export function create(
             )
         );
 
+        // Add null option if nullable
+        if (params.nullable) {
+            const isNullSelected = params.value === null || params.value === undefined;
+            select.appendChild(
+                Object.assign(
+                    document.createElement('option'),
+                    {
+                        value: '__null__',
+                        innerText: '—',
+                        selected: isNullSelected
+                    }
+                )
+            );
+            if (isNullSelected) {
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+        }
+
         options.forEach((option): void => {
             const isSelected = params.value !== null &&
                 params.value !== undefined &&
@@ -99,9 +117,14 @@ export function create(
         });
 
         select.addEventListener('change', (): void => {
-            controlDiv.classList.remove('hcc-control-nullish');
             const value = select.value;
-            controls.setNestedValue(params.path, value);
+            if (value === '__null__') {
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
+            } else {
+                controlDiv.classList.remove('hcc-control-nullish');
+                controls.setNestedValue(params.path, value);
+            }
         });
     } else {
         // Render as button group
@@ -142,5 +165,43 @@ export function create(
                 }
             );
         });
+
+        // Add null button if nullable (at the end, on the right)
+        if (params.nullable) {
+            const isNullActive = params.value === null || params.value === undefined;
+            const nullButton = valueDivInner.appendChild(
+                Object.assign(
+                    document.createElement('button'),
+                    {
+                        className: 'hcc-button' +
+                            (isNullActive ? ' active' : ''),
+                        innerHTML: '⊘'
+                    }
+                )
+            );
+            nullButton.dataset.path = params.path;
+            nullButton.dataset.value = '__null__';
+
+            if (isNullActive) {
+                controlDiv.classList.add('hcc-control-nullish');
+            }
+
+            nullButton.addEventListener(
+                'click',
+                (): void => {
+                    controlDiv.classList.add('hcc-control-nullish');
+                    controls.setNestedValue(params.path, null);
+
+                    // Update active state for all buttons in this group
+                    const allButtons = document.querySelectorAll(
+                        `[data-path="${params.path}"]`
+                    );
+                    allButtons.forEach(
+                        (b): void => b.classList.remove('active')
+                    );
+                    nullButton.classList.add('active');
+                }
+            );
+        }
     }
 }

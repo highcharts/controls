@@ -3,7 +3,7 @@
  */
 import type { TextControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './utils.js';
+import { createControlScaffolding, createNullableButton } from './utils.js';
 
 /**
  * Type guard for TextControlParams
@@ -49,11 +49,33 @@ export function create(
         )
     );
 
-    input.value = String(params.value || '');
+    const isNullish = params.value === null || params.value === undefined;
+
+    if (isNullish) {
+        input.value = '';
+        input.placeholder = 'null';
+    } else {
+        input.value = String(params.value || '');
+    }
 
     input.addEventListener('input', (): void => {
         controlDiv.classList.remove('hcc-control-nullish');
+        input.placeholder = '';
         const value = input.value;
         controls.setNestedValue(params.path, value, false);
     });
+
+    if (params.nullable) {
+        const nullableButton = createNullableButton(
+            params,
+            controlDiv,
+            (): void => {
+                input.value = '';
+                input.placeholder = 'null';
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null, false);
+            }
+        );
+        valueDivInner.appendChild(nullableButton);
+    }
 }

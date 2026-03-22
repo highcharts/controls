@@ -703,6 +703,11 @@ class HighchartsControlElement extends HTMLElement {
             this.getAttribute('step') || '1'
         );
     }
+
+    if (this.hasAttribute('nullable')) {
+        config.nullable = true;
+    }
+
     return config;
   }
 }

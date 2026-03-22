@@ -70,3 +70,32 @@ export function createControlScaffolding(
 
     return { controlDiv, keyDiv, valueDiv, valueDivInner };
 }
+
+/**
+ * Create a nullable toggle button
+ * Returns the button element that can be appended to a control
+ */
+export function createNullableButton(
+    params: ControlParams,
+    controlDiv: HTMLElement,
+    onToggle: () => void
+): HTMLButtonElement {
+    const button = Object.assign(
+        document.createElement('button'),
+        {
+            type: 'button',
+            className: 'hcc-nullable-button',
+            title: 'Set to null',
+            innerHTML: '⊘',
+            'aria-label': 'Set to null'
+        }
+    );
+
+    button.addEventListener('click', (e): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggle();
+    });
+
+    return button;
+}

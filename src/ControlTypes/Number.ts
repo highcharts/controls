@@ -3,7 +3,7 @@
  */
 import type { NumberControlParams, ControlParams } from './types.js';
 import type { ControlsInstance } from './index.js';
-import { createControlScaffolding } from './utils.js';
+import { createControlScaffolding, createNullableButton } from './utils.js';
 
 /**
  * Type guard for NumberControlParams
@@ -173,4 +173,17 @@ export function create(
         }
         isDragging = false;
     });
+
+    if (params.nullable) {
+        const nullableButton = createNullableButton(
+            params,
+            controlDiv,
+            (): void => {
+                valueEl.textContent = '';
+                controlDiv.classList.add('hcc-control-nullish');
+                controls.setNestedValue(params.path, null);
+            }
+        );
+        valueDivInner.appendChild(nullableButton);
+    }
 }

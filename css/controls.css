@@ -125,6 +125,30 @@ highcharts-separator {
         white-space: nowrap;
     }
 
+    /* Nullable button styles */
+    .hcc-nullable-button {
+        background: none;
+        border: none;
+        border-left: 1px solid light-dark(#dddddd, #555555);
+        color: light-dark(#888888, #888888);
+        cursor: pointer;
+        font-size: 1em;
+        padding: 0.3em 0.6em;
+        margin: 0;
+        height: 2.2em;
+        min-height: 2.2em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 200ms, background 200ms;
+        vertical-align: middle;
+    }
+
+    .hcc-nullable-button:hover {
+        background: light-dark(#f0f0f0, #2a2a2a);
+        color: light-dark(#666666, #aaaaaa);
+    }
+
     /* Display mode adjustments, when the width should fit into a container */
     &.hcc-display-block {
 
@@ -463,6 +487,120 @@ highcharts-separator {
         opacity: 0.4;
     }
 
+    .hcc-control-nullish .hcc-text-input {
+        font-weight: normal;
+    }
+
+    .hcc-control-nullish input[id^="range-input-"] {
+        opacity: 0.35;
+        filter: saturate(0.3);
+    }
+
+    /* Nullable toggle styles - wider toggle with three positions */
+    .hcc-toggle-nullable {
+        width: 70px;
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider::before {
+        transition: transform 200ms, opacity 200ms;
+    }
+
+    /* Left position (false) */
+    .hcc-toggle-nullable .hcc-toggle-slider-false {
+        background: light-dark(#cfcfcf, #555555);
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider-false::before {
+        transform: translateX(0);
+    }
+
+    /* Middle position (null) */
+    .hcc-toggle-nullable .hcc-toggle-slider-null {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#e0e0e0, #444444),
+            light-dark(#e0e0e0, #444444) 3px,
+            light-dark(#cfcfcf, #555555) 3px,
+            light-dark(#cfcfcf, #555555) 6px
+        );
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider-null::before {
+        transform: translateX(22px);
+        opacity: 0.6;
+    }
+
+    /* Right position (true) */
+    .hcc-toggle-nullable .hcc-toggle-slider-true {
+        background: light-dark(#141414, #ffffff);
+    }
+
+    .hcc-toggle-nullable .hcc-toggle-slider-true::before {
+        transform: translateX(44px);
+    }
+
+    /* Tri-state toggle styles for nullable booleans */
+    .hcc-tristate-container {
+        display: inline-block;
+        min-height: 2.2em;
+        margin-left: 10px;
+    }
+
+    .hcc-tristate-button {
+        background: light-dark(#f8f9fa, #212529);
+        border: 1px solid light-dark(#dddddd, #555555);
+        border-radius: 7px;
+        color: light-dark(#141414, #ffffff);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.9em;
+        font-weight: 600;
+        padding: 0.4em 1.2em;
+        min-width: 5em;
+        transition: background 200ms, border-color 200ms, color 200ms;
+    }
+
+    .hcc-tristate-button:hover {
+        background: light-dark(#e9ecef, #2d2d2d);
+    }
+
+    .hcc-tristate-button.hcc-tristate-true {
+        background: light-dark(#141414, #ffffff);
+        color: light-dark(#ffffff, #141414);
+        border-color: light-dark(#141414, #ffffff);
+    }
+
+    .hcc-tristate-button.hcc-tristate-true:hover {
+        background: light-dark(#2a2a2a, #e9e9e9);
+    }
+
+    .hcc-tristate-button.hcc-tristate-false {
+        background: light-dark(#f8f9fa, #212529);
+        color: light-dark(#141414, #ffffff);
+    }
+
+    .hcc-tristate-button.hcc-tristate-null {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#f0f0f0, #2a2a2a),
+            light-dark(#f0f0f0, #2a2a2a) 3px,
+            light-dark(#f8f9fa, #212529) 3px,
+            light-dark(#f8f9fa, #212529) 6px
+        );
+        color: light-dark(#888888, #888888);
+        font-size: 1.2em;
+    }
+
+    .hcc-tristate-button.hcc-tristate-null:hover {
+        background: repeating-linear-gradient(
+            45deg,
+            light-dark(#e5e5e5, #333333),
+            light-dark(#e5e5e5, #333333) 3px,
+            light-dark(#e9ecef, #2d2d2d) 3px,
+            light-dark(#e9ecef, #2d2d2d) 6px
+        );
+    }
+
     .hcc-color-value {
         display: inline-block;
         min-width: 4.7em;
@@ -479,6 +617,7 @@ highcharts-separator {
         cursor: pointer;
         display: inline-block;
         font-size: 0.8rem;
+        line-height: 1rem;
         padding: 0.3rem 1.5rem;
         margin: 0.1rem 0 0.5rem 10px;
         transition: background 250ms;
