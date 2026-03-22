@@ -17,7 +17,7 @@ import type { ControlParams, SeparatorParams } from './types.js';
 // Forward declaration for Controls type
 export interface ControlsInstance {
     container: HTMLElement;
-    target: any;
+    target?: any;  // Optional target - controls can work standalone
     setNestedValue(path: string, value: any, animation?: boolean): void;
 }
 
