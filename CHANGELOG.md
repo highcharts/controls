@@ -8,6 +8,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **Nullable option** - Added `nullable` option to allow controls to explicitly set null values
+  - JavaScript API: Use `nullable: true` in control configuration
+  - Web Components: Use `nullable` attribute (e.g., `<highcharts-control nullable>`)
+
 ### Changed
 - **Modular architecture** - Refactored codebase into modular control types
   - Created `src/ControlTypes/` folder with separate files for each control type

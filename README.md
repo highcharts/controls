@@ -241,9 +241,12 @@ Toggle chart options on/off with a styled checkbox.
 {
     type: 'boolean',
     path: 'legend.enabled',  // Dot-separated path to option
-    value: true              // Initial value (optional)
+    value: true,             // Initial value (optional)
+    nullable: true           // Enable tri-state toggle (optional)
 }
 ```
+
+**Nullable behavior:** When `nullable: true`, the control becomes a tri-state toggle with a wider slider that cycles through false (left) → null (middle) → true (right). The middle position shows a diagonal striped pattern and applies the `hcc-control-nullish` class.
 
 #### Select Control
 
@@ -254,9 +257,16 @@ Select from predefined options with button group.
     type: 'select',
     path: 'legend.align',
     options: ['left', 'center', 'right'],  // Available options
-    value: 'center'                         // Initial selection (optional)
+    value: 'center',                        // Initial selection (optional)
+    nullable: true                          // Add null option (optional)
 }
 ```
+
+**Nullable behavior:** When `nullable: true`, adds a null option:
+- Button group mode: Adds a button with ⊘ symbol as the rightmost button
+- Dropdown mode: Adds "—" as the first option
+
+Clicking the null option sets the value to null and applies the `hcc-control-nullish` class.
 
 #### Number Control
 
@@ -266,12 +276,15 @@ Adjust numeric values with a range slider. Supports length units like `px`, `em`
 {
     type: 'number',
     path: 'legend.x',
-    min: -100,   // Minimum value (optional)
-    max: 100,    // Maximum value (optional)
-    step: 10,    // Step increment (optional, defaults to 1)
-    value: 0     // Initial value (optional, can be number or string with unit)
+    min: -100,    // Minimum value (optional)
+    max: 100,     // Maximum value (optional)
+    step: 10,     // Step increment (optional, defaults to 1)
+    value: 0,     // Initial value (optional, can be number or string with unit)
+    nullable: true // Add nullable button (optional)
 }
 ```
+
+**Nullable behavior:** When `nullable: true`, adds a ⊘ button to the right of the control. Clicking it clears the value display and sets the value to null. The range slider remains interactive and becomes visually dimmed (reduced opacity and saturation). User can adjust the slider at any time to restore a value.
 
 **Unit Support:**
 
@@ -316,9 +329,12 @@ Choose colors with a color picker and opacity control.
 {
     type: 'color',
     path: 'chart.backgroundColor',
-    value: '#FFFFFF'  // Initial color (optional)
+    value: '#FFFFFF',  // Initial color (optional)
+    nullable: true     // Add nullable button (optional)
 }
 ```
+
+**Nullable behavior:** When `nullable: true`, adds a ⊘ button to the right of the control. Clicking it shows "—" in the color value display and sets the value to null. The color picker and opacity slider remain interactive, allowing immediate color selection to restore a value.
 
 #### Text Control
 
@@ -328,9 +344,12 @@ Edit text values with a text input field.
 {
     type: 'text',
     path: 'title.text',
-    value: 'My Chart Title'  // Initial text (optional)
+    value: 'My Chart Title',  // Initial text (optional)
+    nullable: true            // Add nullable button (optional)
 }
 ```
+
+**Nullable behavior:** When `nullable: true`, adds a ⊘ button to the right of the control. Clicking it clears the input, shows a "null" placeholder, and sets the value to null. The input remains active and typing immediately removes the placeholder and restores a value.
 
 #### Separator
 
@@ -499,6 +518,7 @@ Individual control element. Must be a child of `<highcharts-controls>`.
 - `min` (optional for number) - Minimum value for range slider
 - `max` (optional for number) - Maximum value for range slider
 - `step` (optional for number) - Step increment for range slider
+- `nullable` (optional) - Add nullable button/option to allow setting null values (attribute presence enables it)
 
 **Examples:**
 
@@ -556,6 +576,19 @@ Individual control element. Must be a child of `<highcharts-controls>`.
     type="text"
     path="title.text"
     value="My Chart Title">
+</highcharts-control>
+
+<!-- With nullable option -->
+<highcharts-control
+    type="boolean"
+    path="legend.enabled"
+    nullable>
+</highcharts-control>
+
+<highcharts-control
+    type="text"
+    path="subtitle.text"
+    nullable>
 </highcharts-control>
 ```
 
