@@ -15,12 +15,18 @@
 
         // Create a chart
         const chart = Highcharts.chart('container', {
-            title: { text: 'Test Chart' },
-            subtitle: { text: 'Subtitle' },
+            title: { text: 'Test Chart', align: 'center' },
+            subtitle: { text: 'Subtitle', align: 'center' },
+            yAxis: {
+                max: 10
+            },
             series: [{
                 name: 'Series 1',
                 data: [1, 3, 2, 4],
-                type: 'spline'
+                type: 'spline',
+                visible: true,
+                color: '#7cb5ec',
+                dashStyle: 'Solid'
             }]
         });
 
