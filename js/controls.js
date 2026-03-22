@@ -1149,6 +1149,9 @@ class HighchartsControlElement extends HTMLElement {
         if (this.hasAttribute('step')) {
             config.step = parseFloat(this.getAttribute('step') || '1');
         }
+        if (this.hasAttribute('nullable')) {
+            config.nullable = true;
+        }
         return config;
     }
 }

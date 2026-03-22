@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Highcharts Controls - Web Components Nullable Test</title>
+    <script src="../../node_modules/highcharts/highcharts.js"></script>
+    <script type="module" src="/js/controls.js"></script>
+</head>
+<body>
+    <div id="container" style="height: 400px; margin: 20px;"></div>
+
+    <script>
+        // Create a chart
+        Highcharts.chart('container', {
+            title: {
+                text: 'Test Chart',
+                align: 'center'
+            },
+            subtitle: {
+                text: 'Subtitle',
+                align: 'center'
+            },
+            legend: {
+                enabled: true,
+                x: 0
+            },
+            yAxis: {
+                max: 10
+            },
+            series: [{
+                name: 'Series 1',
+                data: [1, 2, 3, 4, 5],
+                visible: true,
+                color: '#7cb5ec',
+                dashStyle: 'Solid'
+            }]
+        });
+    </script>
+
+    <highcharts-controls target="#container" display="block">
+        <highcharts-group name="Text Controls">
+            <highcharts-control
+                type="text"
+                path="title.text"
+                label="Title"
+                nullable>
+            </highcharts-control>
+
+            <highcharts-control
+                type="text"
+                path="subtitle.text"
+                label="Subtitle"
+                nullable>
+            </highcharts-control>
+        </highcharts-group>
+
+        <highcharts-group name="Number Controls">
+            <highcharts-control
+                type="number"
+                path="yAxis[0].max"
+                label="Y-axis max"
+                max="20"
+                nullable>
+            </highcharts-control>
+
+            <highcharts-control
+                type="number"
+                path="legend.x"
+                label="Legend X"
+                min="-100"
+                max="100"
+                nullable>
+            </highcharts-control>
+        </highcharts-group>
+
+        <highcharts-group name="Color Controls">
+            <highcharts-control
+                type="color"
+                path="series[0].color"
+                label="Series Color"
+                nullable>
+            </highcharts-control>
+        </highcharts-group>
+
+        <highcharts-group name="Boolean Controls">
+            <highcharts-control
+                type="boolean"
+                path="series[0].visible"
+                label="Series Visible"
+                nullable>
+            </highcharts-control>
+
+            <highcharts-control
+                type="boolean"
+                path="legend.enabled"
+                label="Legend Enabled"
+                nullable>
+            </highcharts-control>
+        </highcharts-group>
+
+        <highcharts-group name="Select Controls">
+            <highcharts-control
+                type="select"
+                path="title.align"
+                label="Title Align"
+                options="left,center,right"
+                nullable>
+            </highcharts-control>
+
+            <highcharts-control
+                type="select"
+                path="series[0].dashStyle"
+                label="Dash Style"
+                options="Solid,ShortDash,ShortDot,Dash,LongDash"
+                nullable>
+            </highcharts-control>
+        </highcharts-group>
+    </highcharts-controls>
+</body>
+</html>
