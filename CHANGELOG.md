@@ -10,6 +10,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 - **Color control animation behavior** - Color picker and opacity slider now animate on click-to-jump updates, while drag updates remain non-animated
+- **Sensible default min and max for font size** - Different default range based
+  on the unit
 
 ## [0.8.0] - 2026-04-14
 

@@ -812,6 +812,20 @@ class NumberControl extends Control {
                 this.params.min = this.params.min ?? -90;
                 this.params.max = this.params.max ?? 90;
             }
+            else if (/fontSize$/i.test(this.params.path)) {
+                if (this.unit === 'em') {
+                    this.params.min ?? (this.params.min = 0.6);
+                    this.params.max ?? (this.params.max = 2);
+                }
+                else if (this.unit === 'rem') {
+                    this.params.min ?? (this.params.min = 0.6);
+                    this.params.max ?? (this.params.max = 2);
+                }
+                else {
+                    this.params.min ?? (this.params.min = 6);
+                    this.params.max ?? (this.params.max = 32);
+                }
+            }
             else {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 100;
