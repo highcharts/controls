@@ -8,6 +8,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- **Color control animation behavior** - Color picker and opacity slider now animate on click-to-jump updates, while drag updates remain non-animated
+
+## [0.8.0] - 2026-04-14
+
 ### Added
 - **Nullable option** - Added `nullable` option to allow controls to explicitly set null values
   - JavaScript API: Use `nullable: true` in control configuration

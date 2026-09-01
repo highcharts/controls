@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Standalone Controls Test</title>
+    <!-- Load Highcharts for color utilities (controls still work standalone,
+         but use Highcharts.color for color parsing) -->
+    <script src="../../node_modules/highcharts/highcharts.js"></script>
+    <link rel="stylesheet" href="/css/controls.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            max-width: 800px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+        }
+        .output {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-family: monospace;
+            min-height: 30px;
+        }
+        .demo-box {
+            margin-top: 15px;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>Standalone Controls Test</h1>
+    <p>Testing controls without Highcharts/Datagrid dependency</p>
+
+    <!-- Color Control Test -->
+    <div class="test-section">
+        <h2>ColorControl Standalone</h2>
+        <div id="color-control-container"></div>
+        <div class="output" id="color-output">No color selected</div>
+        <div class="demo-box" id="color-demo-box" style="background-color: #3498db;">
+            Demo Box - background changes with color
+        </div>
+    </div>
+
+    <!-- Boolean Control Test -->
+    <div class="test-section">
+        <h2>BooleanControl Standalone</h2>
+        <div id="boolean-control-container"></div>
+        <div class="output" id="boolean-output">State: undefined</div>
+        <div class="demo-box" id="boolean-demo-box" style="display: none;">
+            Demo Box - visibility controlled by toggle
+        </div>
+    </div>
+
+    <!-- Number Control Test -->
+    <div class="test-section">
+        <h2>NumberControl Standalone</h2>
+        <div id="number-control-container"></div>
+        <div class="output" id="number-output">Value: undefined</div>
+        <div class="demo-box" id="number-demo-box" style="font-size: 16px;">
+            Demo Text - size controlled by slider
+        </div>
+    </div>
+
+    <!-- Multiple Controls Test -->
+    <div class="test-section">
+        <h2>Multiple Controls (No Chart Target)</h2>
+        <div id="multi-controls-container"></div>
+        <div class="output" id="multi-output">
+            Theme: <span id="theme-bg">—</span>,
+            Dark Mode: <span id="theme-dark">—</span>,
+            Opacity: <span id="theme-opacity">—</span>
+        </div>
+        <div class="demo-box" id="multi-demo-box"
+             style="background-color: #ffffff; opacity: 1;">
+            Theme Demo Box
+        </div>
+    </div>
+
+    <!-- Programmatic Control Test -->
+    <div class="test-section">
+        <h2>Programmatic Value Updates</h2>
+        <div id="programmatic-control-container"></div>
+        <div class="output" id="programmatic-output">Value: undefined</div>
+        <button id="set-value-btn" style="padding: 8px 16px; margin-top: 10px;">
+            Set Value to #e74c3c
+        </button>
+    </div>
+
+    <script type="module">
+        import Controls, {
+            ColorControl,
+            BooleanControl,
+            NumberControl
+        } from '/js/controls.js';
+
+        // Store controls globally for testing
+        window.Controls = Controls;
+        window.ColorControl = ColorControl;
+        window.BooleanControl = BooleanControl;
+        window.NumberControl = NumberControl;
+
+        // 1. ColorControl Standalone
+        const colorControl = new ColorControl({
+            type: 'color',
+            path: 'theme.primaryColor',
+            label: 'Primary Color',
+            value: '#3498db'
+        });
+        colorControl.render(document.getElementById('color-control-container'));
+
+        colorControl.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('color-output').textContent =
+                `Color changed to: ${value}`;
+            document.getElementById('color-demo-box').style.backgroundColor =
+                value;
+        });
+
+        // Store for testing
+        window.colorControl = colorControl;
+
+        // 2. BooleanControl Standalone
+        const booleanControl = new BooleanControl({
+            type: 'boolean',
+            path: 'feature.enabled',
+            label: 'Show Demo Box',
+            value: false
+        });
+        booleanControl.render(document.getElementById('boolean-control-container'));
+
+        booleanControl.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('boolean-output').textContent =
+                `State: ${value}`;
+            document.getElementById('boolean-demo-box').style.display =
+                value ? 'block' : 'none';
+        });
+
+        window.booleanControl = booleanControl;
+
+        // 3. NumberControl Standalone
+        const numberControl = new NumberControl({
+            type: 'number',
+            path: 'style.fontSize',
+            label: 'Font Size',
+            value: 16,
+            min: 10,
+            max: 40,
+            step: 2
+        });
+        numberControl.render(document.getElementById('number-control-container'));
+
+        numberControl.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('number-output').textContent =
+                `Value: ${value}px`;
+            document.getElementById('number-demo-box').style.fontSize =
+                `${value}px`;
+        });
+
+        window.numberControl = numberControl;
+
+        // 4. Multiple Controls without target
+        const multiControls = Controls.controls('multi-controls-container', {
+            // NO target specified!
+            controls: [
+                {
+                    type: 'color',
+                    path: 'theme.background',
+                    label: 'Background',
+                    value: '#ffffff'
+                },
+                {
+                    type: 'boolean',
+                    path: 'theme.darkMode',
+                    label: 'Dark Mode',
+                    value: false
+                },
+                {
+                    type: 'number',
+                    path: 'theme.opacity',
+                    label: 'Opacity',
+                    value: 100,
+                    min: 0,
+                    max: 100,
+                    step: 10
+                }
+            ]
+        });
+
+        // Since there's no target, we need to manually wire up the events
+        // by accessing the container and listening to native events
+        const multiContainer = document.getElementById('multi-controls-container');
+
+        multiContainer.addEventListener('input', (e) => {
+            // For color input
+            if (e.target.type === 'color') {
+                const colorValue = e.target.value;
+                document.getElementById('theme-bg').textContent = colorValue;
+                document.getElementById('multi-demo-box').style.backgroundColor = colorValue;
+            }
+            // For range input (opacity)
+            if (e.target.type === 'range') {
+                const opacityValue = e.target.value;
+                document.getElementById('theme-opacity').textContent = opacityValue + '%';
+                document.getElementById('multi-demo-box').style.opacity = opacityValue / 100;
+            }
+        });
+
+        multiContainer.addEventListener('change', (e) => {
+            // For checkbox (boolean)
+            if (e.target.type === 'checkbox') {
+                const darkMode = e.target.checked;
+                document.getElementById('theme-dark').textContent = String(darkMode);
+                if (darkMode) {
+                    document.getElementById('multi-demo-box').style.color = '#ffffff';
+                } else {
+                    document.getElementById('multi-demo-box').style.color = '#000000';
+                }
+            }
+        });
+
+        // 5. Programmatic Control
+        const programmaticControl = new ColorControl({
+            type: 'color',
+            path: 'app.accentColor',
+            label: 'Accent Color',
+            value: '#9b59b6'
+        });
+        programmaticControl.render(document.getElementById('programmatic-control-container'));
+
+        programmaticControl.addEventListener('change', (e) => {
+            document.getElementById('programmatic-output').textContent =
+                `Value: ${e.detail.value}`;
+        });
+
+        // Button to set value programmatically
+        document.getElementById('set-value-btn').addEventListener('click', () => {
+            programmaticControl.value = '#e74c3c';
+        });
+
+        window.programmaticControl = programmaticControl;
+    </script>
+</body>
+</html>

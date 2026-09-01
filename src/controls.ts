@@ -59,7 +59,7 @@ class Controls {
     };
 
     public container: HTMLElement;
-    public target: ControlTarget;
+    public target?: ControlTarget;
 
     constructor(renderTo: string|HTMLElement, options: ControlsOptionsObject) {
         renderTo = (
@@ -95,10 +95,9 @@ class Controls {
             options.target ||
             Product?.charts?.[0] ||
             Product?.grids?.[0]
-        ) as ControlTarget;
-        if (!this.target) {
-            throw new Error('No target chart found for Highcharts Controls');
-        }
+        ) as ControlTarget | undefined;
+
+        // Target is now optional - controls can work standalone
 
         // Inject CSS if requested
         if (options.injectCSS !== false) {
@@ -131,6 +130,11 @@ class Controls {
         value: any,
         animation?: boolean
     ): void {
+        // If no target, skip updating the chart
+        if (!this.target) {
+            return;
+        }
+
         // Split path into segments, handling array notation
         // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
         const keys = path.split(/\.|\[|\]/).filter(s => s !== '');
@@ -458,6 +462,9 @@ class Controls {
     /**
      * Add a control
      */
+    /**
+     * Add a control
+     */
     public addControl(params: ControlParams | SeparatorParams): void {
 
         if (!this.container) {
@@ -467,7 +474,10 @@ class Controls {
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
         if (!SeparatorControl.is(params)) {
-            params.value ??= getNestedValue(this.target.options, params.path);
+            // Only try to get nested value if target exists
+            if (this.target?.options) {
+                params.value ??= getNestedValue(this.target.options, params.path);
+            }
             params.type ||= this.deduceControlType(params);
         }
 
@@ -568,7 +578,7 @@ class Controls {
     private updateOptionsPreview(): void {
         const previewEl = this.container.parentElement
             ?.querySelector('.hcc-options-preview');
-        if (previewEl) {
+        if (previewEl && this.target) {
             const options = this.target.getOptions() || {};
             // Empty xAxis and yAxis structures
             Object.keys(options).forEach((key): void => {
@@ -847,5 +857,14 @@ function parseOptions(options: string | null): string[] {
     }
     return [];
 }
+
+// Export Control base class and class-based control types for standalone usage
+export { Control } from './Control.js';
+export { ColorControl } from './ControlTypes/Color.js';
+export { BooleanControl } from './ControlTypes/Boolean.js';
+export { NumberControl } from './ControlTypes/Number.js';
+
+// Export types
+export type { ControlParams, ColorControlParams, BooleanControlParams, NumberControlParams, SelectControlParams, TextControlParams, SeparatorParams } from './ControlTypes/types.js';
 
 export default Controls;
