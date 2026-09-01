@@ -19,6 +19,13 @@ export class ColorControl extends Control<ColorControlParams> {
     private valueEl?: HTMLElement;
     private opacityRangeContainer?: HTMLElement;
     private hideRangeHandler?: (e: MouseEvent) => void;
+    private colorInputCount = 0;
+    private lastColorInputAt = 0;
+    private colorInputResetTimer?: number;
+    private opacityIsDragging = false;
+    private opacityMouseIsDown = false;
+    private onOpacityMouseMove?: () => void;
+    private onOpacityMouseUp?: () => void;
 
     /**
      * Type guard for ColorControlParams
@@ -119,6 +126,23 @@ export class ColorControl extends Control<ColorControlParams> {
             )
         );
 
+        this.opacityInput.addEventListener('mousedown', (): void => {
+            this.opacityMouseIsDown = true;
+            this.opacityIsDragging = false;
+        });
+
+        this.onOpacityMouseMove = (): void => {
+            if (this.opacityMouseIsDown) {
+                this.opacityIsDragging = true;
+            }
+        };
+        document.addEventListener('mousemove', this.onOpacityMouseMove);
+
+        this.onOpacityMouseUp = (): void => {
+            this.opacityMouseIsDown = false;
+        };
+        document.addEventListener('mouseup', this.onOpacityMouseUp);
+
         // Show/hide range slider on opacity display click
         this.opacityDisplay.addEventListener('click', (e): void => {
             e.stopPropagation();
@@ -142,13 +166,21 @@ export class ColorControl extends Control<ColorControlParams> {
         };
         document.addEventListener('click', this.hideRangeHandler);
 
-        // Set up event listeners
-        this.colorInput.addEventListener('input', () => {
-            this.handleInputChange();
+        // Track color picker interaction to distinguish drag preview from single click
+        this.colorInput.addEventListener('input', (e) => {
+            this.handleColorInput(e);
         });
 
-        this.opacityInput.addEventListener('input', () => {
-            this.handleInputChange();
+        this.colorInput.addEventListener('change', () => {
+            this.handleColorChange();
+        });
+
+        this.opacityInput.addEventListener('input', (e) => {
+            this.handleOpacityInput(e);
+        });
+
+        this.opacityInput.addEventListener('change', () => {
+            this.handleOpacityChange();
         });
 
         // Add nullable button if needed
@@ -170,7 +202,95 @@ export class ColorControl extends Control<ColorControlParams> {
     /**
      * Handle input changes from color picker or opacity slider
      */
-    private handleInputChange(): void {
+    private handleColorInput(event: Event): void {
+        if (!this.colorInput || !this.opacityInput) return;
+
+        // Programmatic updates (tests/scripts) usually only trigger input.
+        if (!event.isTrusted) {
+            this.resetColorInputSession();
+            this.applyInputsAndEmit(false);
+            return;
+        }
+
+        const now = Date.now();
+
+        // New interaction session (first click or after a short idle gap)
+        if (this.colorInputCount > 0 && now - this.lastColorInputAt > 250) {
+            this.colorInputCount = 0;
+        }
+
+        this.colorInputCount += 1;
+        this.lastColorInputAt = now;
+
+        // First color pick in a session behaves like a click jump (animate).
+        // Follow-up picks in same session are treated like dragging (no animation).
+        this.applyInputsAndEmit(this.colorInputCount === 1);
+
+        if (this.colorInputResetTimer) {
+            window.clearTimeout(this.colorInputResetTimer);
+        }
+
+        this.colorInputResetTimer = window.setTimeout((): void => {
+            this.resetColorInputSession();
+        }, 300);
+    }
+
+    /**
+     * Handle color picker commit
+     */
+    private handleColorChange(): void {
+        if (!this.colorInput) return;
+
+        // Fallback for browsers that only emit change from the native picker
+        if (this.colorInputCount === 0) {
+            this.applyInputsAndEmit(true);
+        }
+
+        this.resetColorInputSession();
+    }
+
+    /**
+     * Handle opacity slider input
+     */
+    private handleOpacityInput(event: Event): void {
+        // Programmatic updates (tests/scripts) usually only trigger input.
+        if (!event.isTrusted) {
+            this.applyInputsAndEmit(false);
+            return;
+        }
+
+        if (this.opacityIsDragging) {
+            this.applyInputsAndEmit(false);
+        }
+    }
+
+    /**
+     * Handle opacity slider commit
+     */
+    private handleOpacityChange(): void {
+        if (!this.opacityIsDragging) {
+            this.applyInputsAndEmit(true);
+        }
+        this.opacityIsDragging = false;
+    }
+
+    /**
+     * Reset color interaction tracking
+     */
+    private resetColorInputSession(): void {
+        if (this.colorInputResetTimer) {
+            window.clearTimeout(this.colorInputResetTimer);
+            this.colorInputResetTimer = undefined;
+        }
+
+        this.colorInputCount = 0;
+        this.lastColorInputAt = 0;
+    }
+
+    /**
+     * Update from current inputs and emit change
+     */
+    private applyInputsAndEmit(animation: boolean): void {
         if (!this.colorInput || !this.opacityInput) return;
 
         this.elements.controlDiv?.classList.remove('hcc-control-nullish');
@@ -194,7 +314,8 @@ export class ColorControl extends Control<ColorControlParams> {
         this.emit('change', {
             value: newValue,
             oldValue,
-            path: this.params.path
+            path: this.params.path,
+            animation
         });
     }
 
@@ -279,8 +400,15 @@ export class ColorControl extends Control<ColorControlParams> {
      * Clean up event listeners
      */
     destroy(): void {
+        this.resetColorInputSession();
         if (this.hideRangeHandler) {
             document.removeEventListener('click', this.hideRangeHandler);
+        }
+        if (this.onOpacityMouseMove) {
+            document.removeEventListener('mousemove', this.onOpacityMouseMove);
+        }
+        if (this.onOpacityMouseUp) {
+            document.removeEventListener('mouseup', this.onOpacityMouseUp);
         }
         super.destroy();
     }
@@ -303,7 +431,7 @@ export function create(
         controls.setNestedValue(
             params.path,
             customEvent.detail.value,
-            false
+            customEvent.detail.animation
         );
     }) as EventListener);
 }

@@ -114,6 +114,75 @@ test.describe('Highcharts Controls - Script API', () => {
     expect(bgColor).not.toBe('#FFEEAA');
   });
 
+  test('color opacity slider click-to-jump uses animation', async ({ page }) => {
+    const colorControl = page.locator('.hcc-control-color').first();
+    const opacityDisplay = colorControl.locator('.hcc-opacity-display');
+    const opacityInput = colorControl.locator('.hcc-opacity-input');
+
+    await page.evaluate(() => {
+      const chart = (window as any).Highcharts.charts[0];
+      const originalUpdate = chart.update.bind(chart);
+      (window as any).__hccAnimations = [];
+
+      chart.update = function (
+        options: any,
+        redraw?: boolean,
+        oneToOne?: boolean,
+        animation?: boolean
+      ): void {
+        (window as any).__hccAnimations.push(animation);
+        originalUpdate(options, redraw, oneToOne, animation);
+      };
+    });
+
+    await opacityDisplay.click();
+    await opacityInput.click({ position: { x: 5, y: 5 } });
+
+    const animations = await page.evaluate(() => (window as any).__hccAnimations);
+    expect(animations.length).toBeGreaterThan(0);
+    expect(animations.at(-1)).toBe(true);
+  });
+
+  test('color opacity slider drag uses non-animated updates', async ({ page }) => {
+    const colorControl = page.locator('.hcc-control-color').first();
+    const opacityDisplay = colorControl.locator('.hcc-opacity-display');
+    const opacityInput = colorControl.locator('.hcc-opacity-input');
+
+    await page.evaluate(() => {
+      const chart = (window as any).Highcharts.charts[0];
+      const originalUpdate = chart.update.bind(chart);
+      (window as any).__hccAnimations = [];
+
+      chart.update = function (
+        options: any,
+        redraw?: boolean,
+        oneToOne?: boolean,
+        animation?: boolean
+      ): void {
+        (window as any).__hccAnimations.push(animation);
+        originalUpdate(options, redraw, oneToOne, animation);
+      };
+    });
+
+    await opacityDisplay.click();
+    const box = await opacityInput.boundingBox();
+    expect(box).not.toBeNull();
+
+    if (!box) {
+      return;
+    }
+
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width - 4, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 8, y, { steps: 6 });
+    await page.mouse.up();
+
+    const animations = await page.evaluate(() => (window as any).__hccAnimations);
+    expect(animations.length).toBeGreaterThan(0);
+    expect(animations.every((animation: unknown) => animation === false)).toBe(true);
+  });
+
   test('preview options button toggles preview section', async ({ page }) => {
     const previewButton = page.locator('button.hcc-show-preview-button');
     const previewSection = page.locator('.hcc-preview-section');

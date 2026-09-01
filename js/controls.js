@@ -428,6 +428,13 @@ const Product$1 = window.Highcharts || window.Grid;
  * ColorControl class - standalone color picker with opacity
  */
 class ColorControl extends Control {
+    constructor() {
+        super(...arguments);
+        this.colorInputCount = 0;
+        this.lastColorInputAt = 0;
+        this.opacityIsDragging = false;
+        this.opacityMouseIsDown = false;
+    }
     /**
      * Type guard for ColorControlParams
      */
@@ -479,6 +486,20 @@ class ColorControl extends Control {
             max: '100',
             step: '1'
         }));
+        this.opacityInput.addEventListener('mousedown', () => {
+            this.opacityMouseIsDown = true;
+            this.opacityIsDragging = false;
+        });
+        this.onOpacityMouseMove = () => {
+            if (this.opacityMouseIsDown) {
+                this.opacityIsDragging = true;
+            }
+        };
+        document.addEventListener('mousemove', this.onOpacityMouseMove);
+        this.onOpacityMouseUp = () => {
+            this.opacityMouseIsDown = false;
+        };
+        document.addEventListener('mouseup', this.onOpacityMouseUp);
         // Show/hide range slider on opacity display click
         this.opacityDisplay.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -499,12 +520,18 @@ class ColorControl extends Control {
             }
         };
         document.addEventListener('click', this.hideRangeHandler);
-        // Set up event listeners
-        this.colorInput.addEventListener('input', () => {
-            this.handleInputChange();
+        // Track color picker interaction to distinguish drag preview from single click
+        this.colorInput.addEventListener('input', (e) => {
+            this.handleColorInput(e);
         });
-        this.opacityInput.addEventListener('input', () => {
-            this.handleInputChange();
+        this.colorInput.addEventListener('change', () => {
+            this.handleColorChange();
+        });
+        this.opacityInput.addEventListener('input', (e) => {
+            this.handleOpacityInput(e);
+        });
+        this.opacityInput.addEventListener('change', () => {
+            this.handleOpacityChange();
         });
         // Add nullable button if needed
         if (this.params.nullable) {
@@ -519,7 +546,81 @@ class ColorControl extends Control {
     /**
      * Handle input changes from color picker or opacity slider
      */
-    handleInputChange() {
+    handleColorInput(event) {
+        if (!this.colorInput || !this.opacityInput)
+            return;
+        // Programmatic updates (tests/scripts) usually only trigger input.
+        if (!event.isTrusted) {
+            this.resetColorInputSession();
+            this.applyInputsAndEmit(false);
+            return;
+        }
+        const now = Date.now();
+        // New interaction session (first click or after a short idle gap)
+        if (this.colorInputCount > 0 && now - this.lastColorInputAt > 250) {
+            this.colorInputCount = 0;
+        }
+        this.colorInputCount += 1;
+        this.lastColorInputAt = now;
+        // First color pick in a session behaves like a click jump (animate).
+        // Follow-up picks in same session are treated like dragging (no animation).
+        this.applyInputsAndEmit(this.colorInputCount === 1);
+        if (this.colorInputResetTimer) {
+            window.clearTimeout(this.colorInputResetTimer);
+        }
+        this.colorInputResetTimer = window.setTimeout(() => {
+            this.resetColorInputSession();
+        }, 300);
+    }
+    /**
+     * Handle color picker commit
+     */
+    handleColorChange() {
+        if (!this.colorInput)
+            return;
+        // Fallback for browsers that only emit change from the native picker
+        if (this.colorInputCount === 0) {
+            this.applyInputsAndEmit(true);
+        }
+        this.resetColorInputSession();
+    }
+    /**
+     * Handle opacity slider input
+     */
+    handleOpacityInput(event) {
+        // Programmatic updates (tests/scripts) usually only trigger input.
+        if (!event.isTrusted) {
+            this.applyInputsAndEmit(false);
+            return;
+        }
+        if (this.opacityIsDragging) {
+            this.applyInputsAndEmit(false);
+        }
+    }
+    /**
+     * Handle opacity slider commit
+     */
+    handleOpacityChange() {
+        if (!this.opacityIsDragging) {
+            this.applyInputsAndEmit(true);
+        }
+        this.opacityIsDragging = false;
+    }
+    /**
+     * Reset color interaction tracking
+     */
+    resetColorInputSession() {
+        if (this.colorInputResetTimer) {
+            window.clearTimeout(this.colorInputResetTimer);
+            this.colorInputResetTimer = undefined;
+        }
+        this.colorInputCount = 0;
+        this.lastColorInputAt = 0;
+    }
+    /**
+     * Update from current inputs and emit change
+     */
+    applyInputsAndEmit(animation) {
         if (!this.colorInput || !this.opacityInput)
             return;
         this.elements.controlDiv?.classList.remove('hcc-control-nullish');
@@ -539,7 +640,8 @@ class ColorControl extends Control {
         this.emit('change', {
             value: newValue,
             oldValue,
-            path: this.params.path
+            path: this.params.path,
+            animation
         });
     }
     /**
@@ -612,8 +714,15 @@ class ColorControl extends Control {
      * Clean up event listeners
      */
     destroy() {
+        this.resetColorInputSession();
         if (this.hideRangeHandler) {
             document.removeEventListener('click', this.hideRangeHandler);
+        }
+        if (this.onOpacityMouseMove) {
+            document.removeEventListener('mousemove', this.onOpacityMouseMove);
+        }
+        if (this.onOpacityMouseUp) {
+            document.removeEventListener('mouseup', this.onOpacityMouseUp);
         }
         super.destroy();
     }
@@ -628,7 +737,7 @@ function create$2(controls, params) {
     // Bind to target if it exists
     control.addEventListener('change', ((e) => {
         const customEvent = e;
-        controls.setNestedValue(params.path, customEvent.detail.value, false);
+        controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
     }));
 }
 /**

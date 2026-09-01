@@ -116,6 +116,13 @@ declare class ColorControl extends Control<ColorControlParams> {
     private valueEl?;
     private opacityRangeContainer?;
     private hideRangeHandler?;
+    private colorInputCount;
+    private lastColorInputAt;
+    private colorInputResetTimer?;
+    private opacityIsDragging;
+    private opacityMouseIsDown;
+    private onOpacityMouseMove?;
+    private onOpacityMouseUp?;
     /**
      * Type guard for ColorControlParams
      */
@@ -127,7 +134,27 @@ declare class ColorControl extends Control<ColorControlParams> {
     /**
      * Handle input changes from color picker or opacity slider
      */
-    private handleInputChange;
+    private handleColorInput;
+    /**
+     * Handle color picker commit
+     */
+    private handleColorChange;
+    /**
+     * Handle opacity slider input
+     */
+    private handleOpacityInput;
+    /**
+     * Handle opacity slider commit
+     */
+    private handleOpacityChange;
+    /**
+     * Reset color interaction tracking
+     */
+    private resetColorInputSession;
+    /**
+     * Update from current inputs and emit change
+     */
+    private applyInputsAndEmit;
     /**
      * Update UI to reflect current value
      */
