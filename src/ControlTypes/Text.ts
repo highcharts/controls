@@ -62,7 +62,7 @@ export function create(
         controlDiv.classList.remove('hcc-control-nullish');
         input.placeholder = '';
         const value = input.value;
-        controls.setNestedValue(params.path, value, false);
+        controls.setNestedValue(params.path, value, true);
     });
 
     if (params.nullable) {
@@ -73,7 +73,7 @@ export function create(
                 input.value = '';
                 input.placeholder = 'null';
                 controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null, false);
+                controls.setNestedValue(params.path, null, true);
             }
         );
         valueDivInner.appendChild(nullableButton);
