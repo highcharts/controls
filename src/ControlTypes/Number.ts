@@ -66,6 +66,10 @@ export class NumberControl extends Control<NumberControlParams> {
             } else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(this.params.path)) {
                 this.params.min = this.params.min ?? -100;
                 this.params.max = this.params.max ?? 100;
+            } else if (/opacity$/i.test(this.params.path)) {
+                this.params.min = this.params.min ?? 0;
+                this.params.max = this.params.max ?? 1;
+                this.params.step ??= 0.01;
             } else if (/rotation$/i.test(this.params.path)) {
                 this.params.min = this.params.min ?? -90;
                 this.params.max = this.params.max ?? 90;

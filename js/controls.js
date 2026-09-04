@@ -776,6 +776,7 @@ class NumberControl extends Control {
      * Render the number control
      */
     render(container) {
+        var _a;
         const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
         this.elements.controlDiv = controlDiv;
         this.elements.keyDiv = keyDiv;
@@ -807,6 +808,11 @@ class NumberControl extends Control {
             else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(this.params.path)) {
                 this.params.min = this.params.min ?? -100;
                 this.params.max = this.params.max ?? 100;
+            }
+            else if (/opacity$/i.test(this.params.path)) {
+                this.params.min = this.params.min ?? 0;
+                this.params.max = this.params.max ?? 1;
+                (_a = this.params).step ?? (_a.step = 0.01);
             }
             else if (/rotation$/i.test(this.params.path)) {
                 this.params.min = this.params.min ?? -90;
