@@ -249,6 +249,30 @@ declare class NumberControl extends Control<NumberControlParams> {
 }
 
 /**
+ * Select Control Type
+ */
+
+/**
+ * SelectControl class - dropdown or button-group selector for string values
+ */
+declare class SelectControl extends Control<SelectControlParams> {
+    private select?;
+    private buttons;
+    /**
+     * Type guard for SelectControlParams
+     */
+    static is(params: ControlParams): params is SelectControlParams;
+    /**
+     * Render the select control
+     */
+    render(container: HTMLElement): void;
+    /**
+     * Update the UI to reflect the current value
+     */
+    protected updateUI(): void;
+}
+
+/**
  * Highcharts Controls
  *
  * Provides UI controls to manipulate chart options on the fly.
@@ -310,5 +334,5 @@ declare class Controls {
     private updateOptionsPreview;
 }
 
-export { BooleanControl, ColorControl, Control, NumberControl, Controls as default };
+export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, Controls as default };
 export type { BooleanControlParams, ColorControlParams, ControlParams, NumberControlParams, SelectControlParams, SeparatorParams, TextControlParams };

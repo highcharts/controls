@@ -469,139 +469,198 @@ var BooleanControl$1 = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * Type guard for SelectControlParams
+ * SelectControl class - dropdown or button-group selector for string values
  */
-function is$3(params) {
-    return params.type === 'select';
-}
-/**
- * Create a select control with scaffolding
- */
-function create$3(controls, params) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
-    }));
-    // Deduce options
-    if (params.path.endsWith('.align') ||
-        params.path.endsWith('.textAlign')) {
-        params.options || (params.options = ['left', 'center', 'right']);
+class SelectControl extends Control {
+    constructor() {
+        super(...arguments);
+        this.buttons = [];
     }
-    if (params.path.toLowerCase().endsWith('dashstyle')) {
-        params.options || (params.options = [
-            'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
-            'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
-            'DashDot', 'LongDashDot', 'LongDashDotDot'
-        ]);
+    /**
+     * Type guard for SelectControlParams
+     */
+    static is(params) {
+        return params.type === 'select';
     }
-    if (params.path.endsWith('.fontWeight')) {
-        params.options || (params.options = ['normal', 'bold', 'lighter']);
-    }
-    if (params.path.endsWith('.verticalAlign')) {
-        params.options || (params.options = ['top', 'middle', 'bottom']);
-    }
-    // Ensure current value is in options
-    const options = params.options || [];
-    if (params.value !== null &&
-        params.value !== undefined &&
-        !options.includes(params.value)) {
-        options.unshift(params.value);
-    }
-    // Determine whether to use select dropdown or button group
-    const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
-    const useDropdown = options.length > 3 || totalLength > 24;
-    if (useDropdown) {
-        // Render as select dropdown
-        valueDivInner.classList.add('hcc-select-control');
-        const select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
-            className: 'hcc-select-dropdown'
+    /**
+     * Render the select control
+     */
+    render(container) {
+        var _a, _b, _c, _d;
+        const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        this.elements.controlDiv = controlDiv;
+        this.elements.keyDiv = keyDiv;
+        this.elements.valueDivInner = valueDivInner;
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            innerHTML: this.params.label || `<code>${this.params.path}</code>`,
+            title: this.params.label || this.params.path
         }));
-        // Add null option if nullable
-        if (params.nullable) {
-            const isNullSelected = params.value === null || params.value === undefined;
-            select.appendChild(Object.assign(document.createElement('option'), {
-                value: '__null__',
-                innerText: '—',
-                selected: isNullSelected
+        // Deduce options
+        if (this.params.path.endsWith('.align') ||
+            this.params.path.endsWith('.textAlign')) {
+            (_a = this.params).options || (_a.options = ['left', 'center', 'right']);
+        }
+        if (this.params.path.toLowerCase().endsWith('dashstyle')) {
+            (_b = this.params).options || (_b.options = [
+                'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
+                'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
+                'DashDot', 'LongDashDot', 'LongDashDotDot'
+            ]);
+        }
+        if (this.params.path.endsWith('.fontWeight')) {
+            (_c = this.params).options || (_c.options = ['normal', 'bold', 'lighter']);
+        }
+        if (this.params.path.endsWith('.verticalAlign')) {
+            (_d = this.params).options || (_d.options = ['top', 'middle', 'bottom']);
+        }
+        const options = this.params.options || [];
+        if (this._value !== null &&
+            this._value !== undefined &&
+            !options.includes(this._value)) {
+            options.unshift(String(this._value));
+        }
+        const totalLength = options.reduce((sum, opt) => sum + String(opt).length, 0);
+        const useDropdown = options.length > 3 || totalLength > 24;
+        if (useDropdown) {
+            valueDivInner.classList.add('hcc-select-control');
+            this.select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
+                className: 'hcc-select-dropdown'
             }));
-            if (isNullSelected) {
-                controlDiv.classList.add('hcc-control-nullish');
+            if (this.params.nullable) {
+                const isNullSelected = this._value === null || this._value === undefined;
+                this.select.appendChild(Object.assign(document.createElement('option'), {
+                    value: '__null__',
+                    innerText: '—',
+                    selected: isNullSelected
+                }));
+                if (isNullSelected) {
+                    controlDiv.classList.add('hcc-control-nullish');
+                }
+            }
+            options.forEach((option) => {
+                const isSelected = this._value !== null &&
+                    this._value !== undefined &&
+                    this._value === option;
+                this.select.appendChild(Object.assign(document.createElement('option'), {
+                    value: String(option),
+                    innerText: String(option),
+                    selected: isSelected
+                }));
+            });
+            this.select.addEventListener('change', () => {
+                const oldValue = this._value;
+                const value = this.select.value;
+                this._value = value === '__null__' ? null : value;
+                this.elements.controlDiv?.classList.toggle('hcc-control-nullish', this._value === null || this._value === undefined);
+                this.emit('change', {
+                    value: this._value,
+                    oldValue,
+                    path: this.params.path
+                });
+            });
+        }
+        else {
+            valueDivInner.classList.add('hcc-button-group');
+            options.forEach((option) => {
+                const isActive = this._value !== null &&
+                    this._value !== undefined &&
+                    this._value === option;
+                const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
+                    className: 'hcc-button' + (isActive ? ' active' : ''),
+                    innerText: String(option)
+                }));
+                button.dataset.path = this.params.path;
+                button.dataset.value = String(option);
+                this.buttons.push(button);
+                button.addEventListener('click', () => {
+                    const oldValue = this._value;
+                    const value = button.getAttribute('data-value');
+                    this._value = value;
+                    this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+                    this.emit('change', {
+                        value: this._value,
+                        oldValue,
+                        path: this.params.path
+                    });
+                    this.updateUI();
+                });
+            });
+            if (this.params.nullable) {
+                const isNullActive = this._value === null || this._value === undefined;
+                const nullButton = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
+                    className: 'hcc-button' + (isNullActive ? ' active' : ''),
+                    innerHTML: '⊘'
+                }));
+                nullButton.dataset.path = this.params.path;
+                nullButton.dataset.value = '__null__';
+                this.buttons.push(nullButton);
+                if (isNullActive) {
+                    controlDiv.classList.add('hcc-control-nullish');
+                }
+                nullButton.addEventListener('click', () => {
+                    const oldValue = this._value;
+                    this._value = null;
+                    this.elements.controlDiv?.classList.add('hcc-control-nullish');
+                    this.emit('change', {
+                        value: this._value,
+                        oldValue,
+                        path: this.params.path
+                    });
+                    this.updateUI();
+                });
             }
         }
-        options.forEach((option) => {
-            const isSelected = params.value !== null &&
-                params.value !== undefined &&
-                params.value === option;
-            select.appendChild(Object.assign(document.createElement('option'), {
-                value: option,
-                innerText: option,
-                selected: isSelected
-            }));
-        });
-        select.addEventListener('change', () => {
-            const value = select.value;
-            if (value === '__null__') {
-                controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null);
+        this.updateUI();
+    }
+    /**
+     * Update the UI to reflect the current value
+     */
+    updateUI() {
+        if (this.select) {
+            const value = this._value;
+            const isNull = value === null || value === undefined;
+            if (this.params.nullable && isNull) {
+                this.select.value = '__null__';
+                this.elements.controlDiv?.classList.add('hcc-control-nullish');
             }
             else {
-                controlDiv.classList.remove('hcc-control-nullish');
-                controls.setNestedValue(params.path, value);
+                this.select.value = String(value ?? '');
+                this.elements.controlDiv?.classList.remove('hcc-control-nullish');
             }
-        });
-    }
-    else {
-        // Render as button group
-        valueDivInner.classList.add('hcc-button-group');
-        options.forEach((option) => {
-            const isActive = params.value !== null &&
-                params.value !== undefined &&
-                params.value === option;
-            const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
-                className: 'hcc-button' +
-                    (isActive ? ' active' : ''),
-                innerText: option
-            }));
-            button.dataset.path = params.path;
-            button.dataset.value = option;
-            button.addEventListener('click', () => {
-                controlDiv.classList.remove('hcc-control-nullish');
-                const value = button.getAttribute('data-value');
-                controls.setNestedValue(params.path, value);
-                // Update active state for all buttons in this group
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                allButtons.forEach((b) => b.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
-        // Add null button if nullable (at the end, on the right)
-        if (params.nullable) {
-            const isNullActive = params.value === null || params.value === undefined;
-            const nullButton = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
-                className: 'hcc-button' +
-                    (isNullActive ? ' active' : ''),
-                innerHTML: '⊘'
-            }));
-            nullButton.dataset.path = params.path;
-            nullButton.dataset.value = '__null__';
-            if (isNullActive) {
-                controlDiv.classList.add('hcc-control-nullish');
-            }
-            nullButton.addEventListener('click', () => {
-                controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null);
-                // Update active state for all buttons in this group
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                allButtons.forEach((b) => b.classList.remove('active'));
-                nullButton.classList.add('active');
-            });
         }
+        this.buttons.forEach((button) => {
+            const isActive = this._value !== null &&
+                this._value !== undefined &&
+                this._value === button.getAttribute('data-value');
+            const isNullish = this._value === null || this._value === undefined;
+            const isNullButton = button.getAttribute('data-value') === '__null__';
+            button.classList.toggle('active', isNullButton ? isNullish : isActive);
+        });
     }
 }
+/**
+ * Legacy factory function for backward compatibility
+ * @deprecated Use SelectControl class directly
+ */
+function create$3(controls, params) {
+    const control = new SelectControl(params);
+    control.render(controls.container);
+    control.addEventListener('change', ((e) => {
+        const customEvent = e;
+        controls.setNestedValue(params.path, customEvent.detail.value);
+    }));
+}
+/**
+ * Legacy type guard for backward compatibility
+ * @deprecated Use SelectControl.is() instead
+ */
+function is$3(params) {
+    return SelectControl.is(params);
+}
 
-var SelectControl = /*#__PURE__*/Object.freeze({
+var SelectControl$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    SelectControl: SelectControl,
     create: create$3,
     is: is$3
 });
@@ -1270,7 +1329,7 @@ var TextControl = /*#__PURE__*/Object.freeze({
  * Registry of all control types, in order of priority for type checking
  */
 const controlTypeRegistry = [
-    SelectControl,
+    SelectControl$1,
     BooleanControl$1,
     ColorControl$1,
     NumberControl$1,
@@ -1726,5 +1785,5 @@ Controls.controls = function (container, options) {
 };
 window.HighchartsControls = Controls;
 
-export { BooleanControl, ColorControl, Control, NumberControl, Controls as default };
+export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, Controls as default };
 //# sourceMappingURL=controls.js.map

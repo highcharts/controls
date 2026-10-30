@@ -74,6 +74,16 @@
         </div>
     </div>
 
+    <!-- Select Control Test -->
+    <div class="test-section">
+        <h2>SelectControl Standalone</h2>
+        <div id="select-control-container"></div>
+        <div class="output" id="select-output">Alignment: center</div>
+        <div class="demo-box" id="select-demo-box" style="text-align: center;">
+            Demo Text - alignment controlled by dropdown
+        </div>
+    </div>
+
     <!-- Multiple Controls Test -->
     <div class="test-section">
         <h2>Multiple Controls (No Chart Target)</h2>
@@ -103,7 +113,8 @@
         import Controls, {
             ColorControl,
             BooleanControl,
-            NumberControl
+            NumberControl,
+            SelectControl
         } from '/js/controls.js';
 
         // Store controls globally for testing
@@ -111,6 +122,7 @@
         window.ColorControl = ColorControl;
         window.BooleanControl = BooleanControl;
         window.NumberControl = NumberControl;
+        window.SelectControl = SelectControl;
 
         // 1. ColorControl Standalone
         const colorControl = new ColorControl({
@@ -173,7 +185,23 @@
 
         window.numberControl = numberControl;
 
-        // 4. Multiple Controls without target
+        // 4. SelectControl Standalone
+        const selectControl = new SelectControl({
+            type: 'select',
+            path: 'style.textAlign',
+            label: 'Alignment',
+            value: 'center',
+            options: ['left', 'center', 'right']
+        });
+        selectControl.render(document.getElementById('select-control-container'));
+        selectControl.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('select-output').textContent = `Alignment: ${value}`;
+            document.getElementById('select-demo-box').style.textAlign = value;
+        });
+        window.selectControl = selectControl;
+
+        // 5. Multiple Controls without target
         const multiControls = Controls.controls('multi-controls-container', {
             // NO target specified!
             controls: [

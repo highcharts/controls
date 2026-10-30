@@ -659,6 +659,7 @@ export { Control } from './Control.js';
 export { ColorControl } from './ControlTypes/Color.js';
 export { BooleanControl } from './ControlTypes/Boolean.js';
 export { NumberControl } from './ControlTypes/Number.js';
+export { SelectControl } from './ControlTypes/Select.js';
 
 // Export types
 export type { ControlParams, ColorControlParams, BooleanControlParams, NumberControlParams, SelectControlParams, TextControlParams, SeparatorParams } from './ControlTypes/types.js';
