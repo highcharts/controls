@@ -75,6 +75,39 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0';
 </html>
 ```
 
+#### Standalone Web Component
+
+Standalone controls do not use a `path` and work like native HTML inputs. You can bind to the `change` event and update the value programmatically with the `value` property.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
+</head>
+<body>
+    <highcharts-control
+        id="theme-color"
+        type="color"
+        label="Primary Color"
+        value="#3498db">
+    </highcharts-control>
+
+    <script type="module">
+        const themeColor = document.getElementById('theme-color');
+
+        themeColor.addEventListener('change', (event) => {
+            console.log('Color changed:', event.detail.value);
+            document.body.style.backgroundColor = event.detail.value;
+        });
+
+        // Update the control value programmatically
+        themeColor.value = '#e74c3c';
+    </script>
+</body>
+</html>
+```
+
 ### JavaScript/TypeScript API
 
 ```html
