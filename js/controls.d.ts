@@ -71,7 +71,9 @@ declare abstract class Control<T extends ControlParams = ControlParams> extends 
     protected container?: HTMLElement | undefined;
     protected _value: any;
     protected elements: ControlElements;
+    protected readonly instanceId: string;
     constructor(params: T, container?: HTMLElement | undefined);
+    protected getScopedId(suffix: string): string;
     /**
      * Get the current value of the control
      */

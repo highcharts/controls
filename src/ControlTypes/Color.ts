@@ -47,12 +47,12 @@ export class ColorControl extends Control<ColorControlParams> {
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
 
-        const rid = this.params.path.replace(/[^a-z0-9_-]/gi, '-');
+        const rid = this.getScopedId('color-input');
         keyDiv.appendChild(
             Object.assign(
                 document.createElement('label'),
                 {
-                    htmlFor: `color-input-${rid}`,
+                    htmlFor: rid,
                     innerHTML: this.params.label || `<code>${this.params.path}</code>`,
                     title: this.params.label || this.params.path
                 }
@@ -64,7 +64,7 @@ export class ColorControl extends Control<ColorControlParams> {
                 document.createElement('input'),
                 {
                     type: 'color',
-                    id: `color-input-${rid}`
+                    id: rid
                 }
             )
         );
@@ -73,9 +73,9 @@ export class ColorControl extends Control<ColorControlParams> {
             Object.assign(
                 document.createElement('label'),
                 {
-                    id: `color-value-${rid}`,
+                    id: this.getScopedId('color-value'),
                     className: 'hcc-color-value',
-                    htmlFor: `color-input-${rid}`,
+                    htmlFor: rid,
                     title: this.params.label || this.params.path
                 }
             )
@@ -85,7 +85,7 @@ export class ColorControl extends Control<ColorControlParams> {
             Object.assign(
                 document.createElement('span'),
                 {
-                    id: `opacity-display-${rid}`,
+                    id: this.getScopedId('opacity-display'),
                     className: 'hcc-opacity-display',
                     title: this.params.label || this.params.path
                 }
@@ -117,7 +117,7 @@ export class ColorControl extends Control<ColorControlParams> {
                 document.createElement('input'),
                 {
                     type: 'range',
-                    id: `opacity-input-${rid}`,
+                    id: this.getScopedId('opacity-input'),
                     className: 'hcc-opacity-input',
                     min: '0',
                     max: '100',
@@ -168,18 +168,30 @@ export class ColorControl extends Control<ColorControlParams> {
 
         // Track color picker interaction to distinguish drag preview from single click
         this.colorInput.addEventListener('input', (e) => {
+            if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
             this.handleColorInput(e);
         });
 
-        this.colorInput.addEventListener('change', () => {
+        this.colorInput.addEventListener('change', (e) => {
+            if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
             this.handleColorChange();
         });
 
         this.opacityInput.addEventListener('input', (e) => {
+            if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
             this.handleOpacityInput(e);
         });
 
-        this.opacityInput.addEventListener('change', () => {
+        this.opacityInput.addEventListener('change', (e) => {
+            if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
             this.handleOpacityChange();
         });
 

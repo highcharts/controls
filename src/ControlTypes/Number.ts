@@ -39,7 +39,7 @@ export class NumberControl extends Control<NumberControlParams> {
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
 
-        const rid = this.params.path.replace(/[^a-z0-9_-]/gi, '-');
+        const rid = this.getScopedId('range-input');
         let value = this._value;
 
         // Extract unit from current value if it's a string
@@ -110,7 +110,7 @@ export class NumberControl extends Control<NumberControlParams> {
             Object.assign(
                 document.createElement('label'),
                 {
-                    htmlFor: `range-input-${rid}`,
+                    htmlFor: rid,
                     innerHTML: this.params.label || `<code>${this.params.path}</code>`,
                     title: this.params.label || this.params.path
                 }
@@ -122,7 +122,7 @@ export class NumberControl extends Control<NumberControlParams> {
             Object.assign(
                 document.createElement('span'),
                 {
-                    id: `range-value-${rid}`,
+                    id: this.getScopedId('range-value'),
                     className: 'hcc-range-value',
                     title: this.params.label || this.params.path
                 }
@@ -135,7 +135,7 @@ export class NumberControl extends Control<NumberControlParams> {
                 document.createElement('input'),
                 {
                     type: 'range',
-                    id: `range-input-${rid}`,
+                    id: rid,
                     min: String(this.params.min),
                     max: String(this.params.max),
                     step: strStep,
@@ -176,11 +176,17 @@ export class NumberControl extends Control<NumberControlParams> {
         this.decimals = strStep.indexOf('.') >= 0 ?
             strStep.split('.')[1].length : 0;
 
-        this.input.addEventListener('input', (): void => {
+        this.input.addEventListener('input', (e): void => {
+            if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
             this.handleInputChange(false);
         });
 
-        this.input.addEventListener('change', (): void => {
+        this.input.addEventListener('change', (e): void => {
+            if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
             this.handleInputChange(true);
         });
 

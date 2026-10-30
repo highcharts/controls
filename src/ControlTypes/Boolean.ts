@@ -34,12 +34,12 @@ export class BooleanControl extends Control<BooleanControlParams> {
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
 
-        const rid = this.params.path.replace(/[^a-z0-9_-]/gi, '-');
+        const rid = this.getScopedId('toggle-checkbox');
         keyDiv.appendChild(
             Object.assign(
                 document.createElement('label'),
                 {
-                    htmlFor: `toggle-checkbox-${rid}`,
+                    htmlFor: rid,
                     innerHTML: this.params.label || `<code>${this.params.path}</code>`,
                     title: this.params.label || this.params.path
                 }
@@ -63,7 +63,7 @@ export class BooleanControl extends Control<BooleanControlParams> {
                     document.createElement('input'),
                     {
                         type: 'hidden',
-                        id: `toggle-checkbox-${rid}`
+                        id: rid
                     }
                 )
             );
@@ -97,7 +97,7 @@ export class BooleanControl extends Control<BooleanControlParams> {
                     document.createElement('input'),
                     {
                         type: 'checkbox',
-                        id: `toggle-checkbox-${rid}`
+                        id: rid
                     }
                 )
             );
@@ -112,7 +112,10 @@ export class BooleanControl extends Control<BooleanControlParams> {
                 )
             );
 
-            this.input.addEventListener('change', (): void => {
+            this.input.addEventListener('change', (e): void => {
+                if ((e.target as Element | null)?.closest?.('highcharts-control')) {
+                    e.stopPropagation();
+                }
                 this.handleStandardChange();
             });
 

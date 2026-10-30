@@ -81,4 +81,51 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await page.locator('#set-value-btn').click();
     await expect(page.locator('#programmatic-output')).toHaveText('Value: #e74c3c');
   });
+
+  test('supports standalone web component controls with native input-like value updates', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+
+    const colorControl = page.locator('#wc-color-control');
+    await expect(colorControl.locator('input[type="color"]')).toHaveValue('#3498db');
+
+    await colorControl.evaluate((el: any) => {
+      el.value = '#123456';
+    });
+    await expect(colorControl.locator('input[type="color"]')).toHaveValue('#123456');
+    await expect(page.locator('#wc-color-output')).toHaveText('Color changed to: #123456');
+
+    const colorInput = colorControl.locator('input[type="color"]');
+    await colorInput.evaluate((input: HTMLInputElement) => {
+      input.value = '#ff0000';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await expect(page.locator('#wc-color-output')).toHaveText('Color changed to: #ff0000');
+
+    const booleanControl = page.locator('#wc-boolean-control');
+    await booleanControl.evaluate((el: any) => {
+      el.value = true;
+    });
+    await expect(booleanControl.locator('input[type="checkbox"]')).toBeChecked();
+    await expect(page.locator('#wc-boolean-output')).toHaveText('State: true');
+
+    const numberControl = page.locator('#wc-number-control');
+    await numberControl.evaluate((el: any) => {
+      el.value = 28;
+    });
+    await expect(numberControl.locator('input[type="range"]')).toHaveValue('28');
+    await expect(page.locator('#wc-number-output')).toHaveText('Value: 28px');
+
+    const selectControl = page.locator('#wc-select-control');
+    await selectControl.evaluate((el: any) => {
+      el.value = 'right';
+    });
+    await expect(page.locator('#wc-select-output')).toHaveText('Alignment: right');
+
+    await page.locator('#set-wc-value-btn').click();
+    await expect(page.locator('#wc-color-output')).toHaveText('Color changed to: #e74c3c');
+
+    expect(errors).toEqual([]);
+  });
 });

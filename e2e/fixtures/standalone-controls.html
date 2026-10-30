@@ -282,6 +282,74 @@
         });
 
         window.programmaticControl = programmaticControl;
+
+        // Standalone web component counterparts for the same demos.
+        const wcColor = document.getElementById('wc-color-control');
+        wcColor.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('wc-color-output').textContent = `Color changed to: ${value}`;
+        });
+        wcColor.addEventListener('input', (e) => {
+            const value = e.detail.value;
+            document.getElementById('wc-color-live').textContent = `Live: ${value}`;
+        });
+
+        const wcBoolean = document.getElementById('wc-boolean-control');
+        wcBoolean.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('wc-boolean-output').textContent = `State: ${value}`;
+        });
+
+        const wcNumber = document.getElementById('wc-number-control');
+        wcNumber.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('wc-number-output').textContent = `Value: ${value}px`;
+        });
+
+        const wcSelect = document.getElementById('wc-select-control');
+        wcSelect.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('wc-select-output').textContent = `Alignment: ${value}`;
+        });
+
+        document.getElementById('set-wc-value-btn').addEventListener('click', () => {
+            wcColor.value = '#e74c3c';
+        });
+
+        window.wcColor = wcColor;
+        window.wcBoolean = wcBoolean;
+        window.wcNumber = wcNumber;
+        window.wcSelect = wcSelect;
     </script>
+
+    <div class="test-section">
+        <h2>Standalone Web Component Controls</h2>
+
+        <div class="test-section">
+            <h3>ColorControl Web Component</h3>
+            <highcharts-control id="wc-color-control" type="color" path="theme.primaryColor" label="Primary Color" value="#3498db"></highcharts-control>
+            <div class="output" id="wc-color-output">No color selected</div>
+            <div class="output" id="wc-color-live">Live: #3498db</div>
+            <button id="set-wc-value-btn" style="padding: 8px 16px; margin-top: 10px;">Set Value to #e74c3c</button>
+        </div>
+
+        <div class="test-section">
+            <h3>BooleanControl Web Component</h3>
+            <highcharts-control id="wc-boolean-control" type="boolean" path="feature.enabled" label="Show Demo Box" value="false"></highcharts-control>
+            <div class="output" id="wc-boolean-output">State: false</div>
+        </div>
+
+        <div class="test-section">
+            <h3>NumberControl Web Component</h3>
+            <highcharts-control id="wc-number-control" type="number" path="style.fontSize" label="Font Size" value="16" min="10" max="40" step="2"></highcharts-control>
+            <div class="output" id="wc-number-output">Value: 16px</div>
+        </div>
+
+        <div class="test-section">
+            <h3>SelectControl Web Component</h3>
+            <highcharts-control id="wc-select-control" type="select" path="style.textAlign" label="Alignment" value="center" options="left,center,right"></highcharts-control>
+            <div class="output" id="wc-select-output">Alignment: center</div>
+        </div>
+    </div>
 </body>
 </html>

@@ -24,13 +24,15 @@ export function create(
         controls.container
     );
 
-    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+    const rid = `text-input-${params.path
+        .replace(/[^a-z0-9_-]/gi, '-')
+        .replace(/^-|-$/g, '') || 'control'}`;
 
     keyDiv.appendChild(
         Object.assign(
             document.createElement('label'),
             {
-                htmlFor: `text-input-${rid}`,
+                htmlFor: rid,
                 innerHTML: params.label || `<code>${params.path}</code>`,
                 title: params.label || params.path
             }
@@ -42,7 +44,7 @@ export function create(
             document.createElement('input'),
             {
                 type: 'text',
-                id: `text-input-${rid}`,
+                id: rid,
                 className: 'hcc-text-input',
                 title: params.label || params.path
             }

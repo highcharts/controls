@@ -9,8 +9,20 @@ import type {
     SeparatorParams,
     TextControlParams
 } from './ControlTypes/index.js';
+import { BooleanControl } from './ControlTypes/Boolean.js';
+import { ColorControl } from './ControlTypes/Color.js';
+import { NumberControl } from './ControlTypes/Number.js';
+import { SelectControl } from './ControlTypes/Select.js';
+import type { Control } from './Control.js';
 
 const Product = (window as any).Highcharts || (window as any).Grid;
+
+const StandaloneControlMap: Record<string, new (params: any) => any> = {
+    boolean: BooleanControl,
+    color: ColorControl,
+    number: NumberControl,
+    select: SelectControl
+};
 
 // Create a web component around the Controls class
 // @example
@@ -33,6 +45,135 @@ const Product = (window as any).Highcharts || (window as any).Grid;
 //     ></highcharts-control>
 // </highcharts-controls>
 class HighchartsControlElement extends HTMLElement {
+    private control?: Control<ControlParams>;
+    private _value?: any;
+
+    static get observedAttributes(): string[] {
+        return ['value'];
+    }
+
+    connectedCallback(): void {
+        if (this.closest('highcharts-controls')) {
+            return;
+        }
+
+        if (this.control) {
+            return;
+        }
+
+        const config = this.getConfig();
+
+        if (config.type === 'text') {
+            const input = this.appendChild(Object.assign(
+                document.createElement('input'),
+                {
+                    type: 'text',
+                    value: config.value ?? ''
+                }
+            ));
+
+            const handleValue = (): void => {
+                const value = input.value;
+                this._value = value;
+                this.dispatchEvent(new CustomEvent('input', {
+                    detail: { value },
+                    bubbles: true,
+                    cancelable: true,
+                    composed: true
+                }));
+                this.dispatchEvent(new CustomEvent('change', {
+                    detail: { value },
+                    bubbles: true,
+                    cancelable: true,
+                    composed: true
+                }));
+            };
+
+            input.addEventListener('input', handleValue);
+            input.addEventListener('change', handleValue);
+            return;
+        }
+
+        const ControlCtor = config.type && StandaloneControlMap[config.type];
+        if (!ControlCtor) {
+            return;
+        }
+
+        const control = new ControlCtor(config);
+        this.control = control;
+        control.render(this);
+
+        control.addEventListener('change', (event: Event): void => {
+            const detail = (event as CustomEvent).detail || {};
+            this._value = detail.value;
+            this.dispatchEvent(new CustomEvent('input', {
+                detail,
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
+            this.dispatchEvent(new CustomEvent('change', {
+                detail,
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
+        });
+
+        this.syncValueAttribute();
+    }
+
+    attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
+        if (name !== 'value' || newValue === null) {
+            return;
+        }
+
+        const parsedValue = parseValue(newValue);
+        if (this.control && this._value === parsedValue) {
+            return;
+        }
+
+        this._value = parsedValue;
+
+        if (this.control) {
+            this.control.value = parsedValue;
+        }
+    }
+
+    get value(): any {
+        if (this.control) {
+            return this.control.value;
+        }
+        if (this._value !== undefined) {
+            return this._value;
+        }
+        return parseValue(this.getAttribute('value'));
+    }
+
+    set value(nextValue: any) {
+        this._value = nextValue;
+
+        if (this.control) {
+            this.control.value = nextValue;
+            return;
+        }
+
+        if (nextValue === null || nextValue === undefined) {
+            this.removeAttribute('value');
+        } else {
+            this.setAttribute('value', String(nextValue));
+        }
+    }
+
+    private syncValueAttribute(): void {
+        const value = this.value;
+        if (value === null || value === undefined) {
+            this.removeAttribute('value');
+        } else {
+            this.setAttribute('value', String(value));
+        }
+    }
+
     getConfig(): ControlParams {
         const config: ControlParams = {
             path: this.getAttribute('path') || ''

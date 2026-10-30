@@ -7,6 +7,8 @@
 
 import type { ControlParams } from './ControlTypes/types.js';
 
+const controlIdCounts: Record<string, number> = {};
+
 export interface ControlElements {
     controlDiv?: HTMLElement;
     keyDiv?: HTMLElement;
@@ -17,6 +19,7 @@ export interface ControlElements {
 export abstract class Control<T extends ControlParams = ControlParams> extends EventTarget {
     protected _value: any;
     protected elements: ControlElements = {};
+    protected readonly instanceId: string;
 
     constructor(
         public params: T,
@@ -24,10 +27,15 @@ export abstract class Control<T extends ControlParams = ControlParams> extends E
     ) {
         super();
         this._value = params.value;
+        this.instanceId = createUniqueId(this.params.path || 'control');
 
         if (container) {
             this.render(container);
         }
+    }
+
+    protected getScopedId(suffix: string): string {
+        return `${suffix}-${this.instanceId}`;
     }
 
     /**
@@ -84,4 +92,15 @@ export abstract class Control<T extends ControlParams = ControlParams> extends E
     getElement(): HTMLElement | undefined {
         return this.elements.controlDiv;
     }
+}
+
+function createUniqueId(path: string): string {
+    const normalized = path
+        .replace(/[^a-z0-9_-]/gi, '-')
+        .replace(/^-|-$/g, '') || 'control';
+
+    const count = controlIdCounts[normalized] || 0;
+    controlIdCounts[normalized] = count + 1;
+
+    return count === 0 ? normalized : `${normalized}-${count}`;
 }
