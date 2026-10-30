@@ -11,13 +11,13 @@ reusable standalone UI controls without attaching to a Highcharts target.
 
 Load the [module file](https://github.com/highcharts/controls/blob/main/js/controls.js) from a CDN or your own server
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0"></script>
 ```
 
 Or
 
 ```js
-import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0';
+import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0';
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0';
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -83,7 +83,7 @@ Standalone controls do not use a `path` and work like native HTML inputs. You ca
 <!DOCTYPE html>
 <html>
 <head>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0"></script>
 </head>
 <body>
     <highcharts-control
@@ -115,7 +115,7 @@ Standalone controls do not use a `path` and work like native HTML inputs. You ca
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -484,7 +484,7 @@ Container element for controls.
 
 **Example:**
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0/css/controls.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0/css/controls.css" />
 <highcharts-controls target="#my-chart" inject-css="false">
     <!-- controls here -->
 </highcharts-controls>
