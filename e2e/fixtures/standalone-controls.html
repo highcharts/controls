@@ -38,86 +38,132 @@
             text-align: center;
             transition: all 0.3s ease;
         }
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: start;
+            max-width: 860px;
+        }
+        .api-panel {
+            width: 100%;
+            max-width: 400px;
+            justify-self: center;
+        }
+        .api-panel > .test-section:first-child {
+            margin-top: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+        }
+        .api-panel > .test-section:first-child h2,
+        .api-panel > .test-section:first-child h3 {
+            margin: 0;
+        }
+        @media (max-width: 760px) {
+            body {
+                margin: 16px;
+            }
+            .api-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            .api-panel {
+                order: 0;
+            }
+            .api-panel:first-child {
+                order: 1;
+            }
+            .api-panel:last-child {
+                order: 2;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Standalone Controls Test</h1>
-    <p>Testing controls without Highcharts/Datagrid dependency</p>
+    <p>Testing controls without Highcharts/Grid dependency</p>
 
-    <!-- Color Control Test -->
-    <div class="test-section">
-        <h2>ColorControl Standalone</h2>
-        <div id="color-control-container"></div>
-        <div class="output" id="color-output">No color selected</div>
-        <div class="demo-box" id="color-demo-box" style="background-color: #3498db;">
-            Demo Box - background changes with color
-        </div>
-    </div>
+    <div class="api-grid">
+        <div class="api-panel">
+            <div class="test-section">
+                <h2>JavaScript API</h2>
+            </div>
 
-    <!-- Boolean Control Test -->
-    <div class="test-section">
-        <h2>BooleanControl Standalone</h2>
-        <div id="boolean-control-container"></div>
-        <div class="output" id="boolean-output">State: undefined</div>
-        <div class="demo-box" id="boolean-demo-box" style="display: none;">
-            Demo Box - visibility controlled by toggle
-        </div>
-    </div>
+            <!-- Color Control Test -->
+            <div class="test-section">
+                <h3>ColorControl Standalone</h3>
+                <div id="color-control-container"></div>
+                <div class="output" id="color-output">No color selected</div>
+                <div class="demo-box" id="color-demo-box" style="background-color: #3498db;">
+                    Demo Box - background changes with color
+                </div>
+            </div>
 
-    <!-- Number Control Test -->
-    <div class="test-section">
-        <h2>NumberControl Standalone</h2>
-        <div id="number-control-container"></div>
-        <div class="output" id="number-output">Value: undefined</div>
-        <div class="demo-box" id="number-demo-box" style="font-size: 16px;">
-            Demo Text - size controlled by slider
-        </div>
-    </div>
+            <!-- Boolean Control Test -->
+            <div class="test-section">
+                <h3>BooleanControl Standalone</h3>
+                <div id="boolean-control-container"></div>
+                <div class="output" id="boolean-output">State: undefined</div>
+                <div class="demo-box" id="boolean-demo-box" style="display: none;">
+                    Demo Box - visibility controlled by toggle
+                </div>
+            </div>
 
-    <!-- Select Control Test -->
-    <div class="test-section">
-        <h2>SelectControl Standalone</h2>
-        <div id="select-control-container"></div>
-        <div class="output" id="select-output">Alignment: center</div>
-        <div class="demo-box" id="select-demo-box" style="text-align: center;">
-            Demo Text - alignment controlled by dropdown
-        </div>
-    </div>
+            <!-- Number Control Test -->
+            <div class="test-section">
+                <h3>NumberControl Standalone</h3>
+                <div id="number-control-container"></div>
+                <div class="output" id="number-output">Value: undefined</div>
+                <div class="demo-box" id="number-demo-box" style="font-size: 16px;">
+                    Demo Text - size controlled by slider
+                </div>
+            </div>
 
-    <!-- Text Control Test -->
-    <div class="test-section">
-        <h2>TextControl Standalone</h2>
-        <div id="text-control-container"></div>
-        <div class="output" id="text-output">Title: Default Title</div>
-        <div class="demo-box" id="text-demo-box">
-            Default Title
-        </div>
-    </div>
+            <!-- Select Control Test -->
+            <div class="test-section">
+                <h3>SelectControl Standalone</h3>
+                <div id="select-control-container"></div>
+                <div class="output" id="select-output">Alignment: center</div>
+                <div class="demo-box" id="select-demo-box" style="text-align: center;">
+                    Demo Text - alignment controlled by dropdown
+                </div>
+            </div>
 
-    <!-- Multiple Controls Test -->
-    <div class="test-section">
-        <h2>Multiple Controls (No Chart Target)</h2>
-        <div id="multi-controls-container"></div>
-        <div class="output" id="multi-output">
-            Theme: <span id="theme-bg">—</span>,
-            Dark Mode: <span id="theme-dark">—</span>,
-            Opacity: <span id="theme-opacity">—</span>
-        </div>
-        <div class="demo-box" id="multi-demo-box"
-             style="background-color: #ffffff; opacity: 1;">
-            Theme Demo Box
-        </div>
-    </div>
+            <!-- Text Control Test -->
+            <div class="test-section">
+                <h3>TextControl Standalone</h3>
+                <div id="text-control-container"></div>
+                <div class="output" id="text-output">Title: Default Title</div>
+                <div class="demo-box" id="text-demo-box">
+                    Default Title
+                </div>
+            </div>
 
-    <!-- Programmatic Control Test -->
-    <div class="test-section">
-        <h2>Programmatic Value Updates</h2>
-        <div id="programmatic-control-container"></div>
-        <div class="output" id="programmatic-output">Value: undefined</div>
-        <button id="set-value-btn" style="padding: 8px 16px; margin-top: 10px;">
-            Set Value to #e74c3c
-        </button>
-    </div>
+            <!-- Multiple Controls Test -->
+            <div class="test-section">
+                <h3>Multiple Controls (No Chart Target)</h3>
+                <div id="multi-controls-container"></div>
+                <div class="output" id="multi-output">
+                    Theme: <span id="theme-bg">—</span>,
+                    Dark Mode: <span id="theme-dark">—</span>,
+                    Opacity: <span id="theme-opacity">—</span>
+                </div>
+                <div class="demo-box" id="multi-demo-box"
+                     style="background-color: #ffffff; opacity: 1;">
+                    Theme Demo Box
+                </div>
+            </div>
+
+            <!-- Programmatic Control Test -->
+            <div class="test-section">
+                <h3>Programmatic Value Updates</h3>
+                <div id="programmatic-control-container"></div>
+                <div class="output" id="programmatic-output">Value: undefined</div>
+                <button id="set-value-btn" style="padding: 8px 16px; margin-top: 10px;">
+                    Set Value to #e74c3c
+                </button>
+            </div>
 
     <script type="module">
         import Controls, {
@@ -347,39 +393,44 @@
         window.wcTextControl = wcText;
     </script>
 
-    <div class="test-section">
-        <h2>Standalone Web Component Controls</h2>
-
-        <div class="test-section">
-            <h3>ColorControl Web Component</h3>
-            <highcharts-control id="wc-color-control" type="color" label="Primary Color" value="#3498db"></highcharts-control>
-            <div class="output" id="wc-color-output">No color selected</div>
-            <div class="output" id="wc-color-live">Live: #3498db</div>
-            <button id="set-wc-value-btn" style="padding: 8px 16px; margin-top: 10px;">Set Value to #e74c3c</button>
         </div>
 
-        <div class="test-section">
-            <h3>BooleanControl Web Component</h3>
-            <highcharts-control id="wc-boolean-control" type="boolean" label="Show Demo Box" value="false"></highcharts-control>
-            <div class="output" id="wc-boolean-output">State: false</div>
-        </div>
+        <div class="api-panel">
+            <div class="test-section">
+                <h2>Web Component API</h2>
+            </div>
 
-        <div class="test-section">
-            <h3>NumberControl Web Component</h3>
-            <highcharts-control id="wc-number-control" type="number" label="Font Size" value="16" min="10" max="40" step="2"></highcharts-control>
-            <div class="output" id="wc-number-output">Value: 16px</div>
-        </div>
+            <div class="test-section">
+                <h3>ColorControl Web Component</h3>
+                <highcharts-control id="wc-color-control" type="color" label="Primary Color" value="#3498db"></highcharts-control>
+                <div class="output" id="wc-color-output">No color selected</div>
+                <div class="output" id="wc-color-live">Live: #3498db</div>
+                <button id="set-wc-value-btn" style="padding: 8px 16px; margin-top: 10px;">Set Value to #e74c3c</button>
+            </div>
 
-        <div class="test-section">
-            <h3>SelectControl Web Component</h3>
-            <highcharts-control id="wc-select-control" type="select" label="Alignment" value="center" options="left,center,right"></highcharts-control>
-            <div class="output" id="wc-select-output">Alignment: center</div>
-        </div>
+            <div class="test-section">
+                <h3>BooleanControl Web Component</h3>
+                <highcharts-control id="wc-boolean-control" type="boolean" label="Show Demo Box" value="false"></highcharts-control>
+                <div class="output" id="wc-boolean-output">State: false</div>
+            </div>
 
-        <div class="test-section">
-            <h3>TextControl Web Component</h3>
-            <highcharts-control id="wc-text-control" type="text" label="Demo Title" value="Default Title"></highcharts-control>
-            <div class="output" id="wc-text-output">Title: Default Title</div>
+            <div class="test-section">
+                <h3>NumberControl Web Component</h3>
+                <highcharts-control id="wc-number-control" type="number" label="Font Size" value="16" min="10" max="40" step="2"></highcharts-control>
+                <div class="output" id="wc-number-output">Value: 16px</div>
+            </div>
+
+            <div class="test-section">
+                <h3>SelectControl Web Component</h3>
+                <highcharts-control id="wc-select-control" type="select" label="Alignment" value="center" options="left,center,right"></highcharts-control>
+                <div class="output" id="wc-select-output">Alignment: center</div>
+            </div>
+
+            <div class="test-section">
+                <h3>TextControl Web Component</h3>
+                <highcharts-control id="wc-text-control" type="text" label="Demo Title" value="Default Title"></highcharts-control>
+                <div class="output" id="wc-text-output">Title: Default Title</div>
+            </div>
         </div>
     </div>
 </body>
