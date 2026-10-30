@@ -78,6 +78,16 @@ test.describe('Highcharts Controls - Type Deduction', () => {
     expect(value.toLowerCase()).toBe('#00ff00');
   });
 
+  test('value-inner widths are consistent across number, color and text controls', async ({ page }) => {
+    const numberWidth = await page.locator('.hcc-control-number .hcc-value-inner').first().evaluate((el: HTMLElement) => el.offsetWidth);
+    const colorWidth = await page.locator('.hcc-control-color .hcc-value-inner').first().evaluate((el: HTMLElement) => el.offsetWidth);
+    const textWidth = await page.locator('.hcc-control-text .hcc-value-inner').first().evaluate((el: HTMLElement) => el.offsetWidth);
+
+    expect(Math.abs(numberWidth - colorWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(numberWidth - textWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(colorWidth - textWidth)).toBeLessThanOrEqual(1);
+  });
+
   test('deduces text type from string value without color indication', async ({ page }) => {
     // Should render as text input
     const textInput = page.locator('input.hcc-text-input').first();

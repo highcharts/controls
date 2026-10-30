@@ -614,7 +614,7 @@ highcharts-separator {
 
 .hcc-color-value {
     display: inline-block;
-    min-width: 4.7em;
+    min-width: 5.5em;
     margin: 0 0.2em;
     text-transform: lowercase;
 }
