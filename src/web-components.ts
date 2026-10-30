@@ -127,7 +127,8 @@ class HighchartsControlsElement extends HTMLElement {
             displayAttr = this.getAttribute('display'),
             display = (displayAttr === 'block' || displayAttr === 'inline-block')
                 ? displayAttr
-                : 'inline-block';
+                : 'inline-block',
+            showPreview = this.getAttribute('show-preview') !== 'false';
 
         let target = this.getTarget();
 
@@ -142,6 +143,7 @@ class HighchartsControlsElement extends HTMLElement {
                 target,
                 injectCSS,
                 display: display as 'block' | 'inline-block',
+                showPreview,
                 controls: controls as Array<
                     GroupParams |
                     SelectControlParams |

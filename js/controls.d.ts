@@ -285,6 +285,7 @@ interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
     display?: 'block' | 'inline-block';
+    showPreview?: boolean;
     controls: Array<GroupParams | SelectControlParams | BooleanControlParams | ColorControlParams | NumberControlParams | TextControlParams | SeparatorParams>;
 }
 declare class Controls {

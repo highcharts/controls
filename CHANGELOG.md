@@ -8,6 +8,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **Preview toggle** - Added `showPreview` option to disable the live options preview panel when it is not needed
+  - JavaScript API: Use `showPreview: false` in `ControlsOptionsObject`
+  - Web components: Use `show-preview="false"`
+
 ### Fixed
 - **Color control animation behavior** - Color picker and opacity slider now animate on click-to-jump updates, while drag updates remain non-animated
 - **Sensible default min and max for font size** - Different default range based

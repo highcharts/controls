@@ -86,7 +86,7 @@ class HighchartsControlsElement extends HTMLElement {
     connectedCallback() {
         const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false', displayAttr = this.getAttribute('display'), display = (displayAttr === 'block' || displayAttr === 'inline-block')
             ? displayAttr
-            : 'inline-block';
+            : 'inline-block', showPreview = this.getAttribute('show-preview') !== 'false';
         let target = this.getTarget();
         const Controls = window.HighchartsControls;
         if (!Controls) {
@@ -97,6 +97,7 @@ class HighchartsControlsElement extends HTMLElement {
                 target,
                 injectCSS,
                 display: display,
+                showPreview,
                 controls: controls
             });
         };
@@ -1375,9 +1376,13 @@ class Controls {
                 this.addControl(control);
             }
         });
-        this.addPreview();
+        if (options.showPreview !== false) {
+            this.addPreview();
+        }
         // Keep the options preview updated
-        this.updateOptionsPreview();
+        if (options.showPreview !== false) {
+            this.updateOptionsPreview();
+        }
     }
     /**
      * Set a nested value on the target given a dot-separated path.

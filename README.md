@@ -178,8 +178,21 @@ interface ControlsOptionsObject {
     target?: ControlTarget;      // Target chart/grid (defaults to first chart)
     injectCSS?: boolean;          // Auto-inject CSS (defaults to true)
     display?: 'block' | 'inline-block';  // Display mode (defaults to 'inline-block')
+    showPreview?: boolean;        // Show the live options preview (defaults to true)
     controls: Array<ControlParams | GroupParams>;  // Array of control or group configurations
 }
+```
+
+Set `showPreview: false` to hide the preview toggle and preview panel when you want a cleaner standalone control layout without the live options inspector.
+
+```javascript
+HighchartsControls.controls('controls-container', {
+    showPreview: false,
+    controls: [
+        { path: 'legend.enabled', value: true },
+        { path: 'legend.align', options: ['left', 'center', 'right'], value: 'center' }
+    ]
+});
 ```
 
 #### GroupParams

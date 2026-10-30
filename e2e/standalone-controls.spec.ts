@@ -55,6 +55,8 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
   });
 
   test('supports multi-control rendering without a chart target and programmatic updates', async ({ page }) => {
+    await expect(page.locator('#multi-controls-container .hcc-preview-section')).toHaveCount(0);
+
     const multiColor = page.locator('#multi-controls-container input[type="color"]');
     await multiColor.evaluate((input: HTMLInputElement) => {
       input.value = '#123456';

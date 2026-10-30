@@ -34,6 +34,7 @@ interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
     display?: 'block' | 'inline-block';
+    showPreview?: boolean;
     controls: Array<
         GroupParams|
         SelectControlParams|
@@ -115,10 +116,14 @@ class Controls {
             }
         });
 
-        this.addPreview();
+        if (options.showPreview !== false) {
+            this.addPreview();
+        }
 
         // Keep the options preview updated
-        this.updateOptionsPreview();
+        if (options.showPreview !== false) {
+            this.updateOptionsPreview();
+        }
     }
 
 
