@@ -5,7 +5,7 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await page.goto('http://localhost:8080/e2e/fixtures/standalone-controls.html');
     await page.waitForFunction(() => {
       const w = window as any;
-      return !!w.colorControl && !!w.booleanControl && !!w.numberControl && !!w.selectControl && !!w.programmaticControl;
+      return !!w.colorControl && !!w.booleanControl && !!w.numberControl && !!w.selectControl && !!w.textControl && !!w.programmaticControl;
     });
   });
 
@@ -52,6 +52,17 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await selectButtons.nth(2).click();
     await expect(page.locator('#select-output')).toHaveText('Alignment: right');
     await expect(page.locator('#select-demo-box')).toHaveCSS('text-align', 'right');
+
+    const textInput = page.locator('#text-control-container input[type="text"]');
+    await textInput.fill('Updated Title');
+    await expect(page.locator('#text-output')).toHaveText('Title: Updated Title');
+    await expect(page.locator('#text-demo-box')).toHaveText('Updated Title');
+
+    const wcTextControl = page.locator('#wc-text-control');
+    await wcTextControl.evaluate((el: any) => {
+      el.value = 'WC Title';
+    });
+    await expect(page.locator('#wc-text-output')).toHaveText('Title: WC Title');
   });
 
   test('supports multi-control rendering without a chart target and programmatic updates', async ({ page }) => {

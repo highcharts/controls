@@ -1104,12 +1104,155 @@ var SelectControl$1 = /*#__PURE__*/Object.freeze({
     is: is$2
 });
 
+/**
+ * TextControl class - text input for string values
+ */
+class TextControl extends Control {
+    /**
+     * Type guard for TextControlParams
+     */
+    static is(params) {
+        return params.type === 'text';
+    }
+    /**
+     * Render the text control
+     */
+    render(container) {
+        const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        this.elements.controlDiv = controlDiv;
+        this.elements.keyDiv = keyDiv;
+        this.elements.valueDivInner = valueDivInner;
+        const path = this.params.path || 'control';
+        const rid = this.getScopedId('text-input');
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            htmlFor: rid,
+            innerHTML: this.params.label || `<code>${path}</code>`,
+            title: this.params.label || path
+        }));
+        this.input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
+            type: 'text',
+            id: rid,
+            className: 'hcc-text-input',
+            title: this.params.label || path
+        }));
+        this.input.addEventListener('input', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleInputChange();
+        });
+        this.input.addEventListener('change', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleInputChange();
+        });
+        if (this.params.nullable) {
+            const nullableButton = createNullableButton(this.params, controlDiv, () => {
+                this.value = null;
+            });
+            valueDivInner.appendChild(nullableButton);
+        }
+        this.updateUI();
+    }
+    handleInputChange() {
+        if (!this.input) {
+            return;
+        }
+        const oldValue = this._value;
+        this._value = this.input.value;
+        this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+        this.input.placeholder = '';
+        this.emit('change', {
+            value: this._value,
+            oldValue,
+            path: this.params.path
+        });
+    }
+    updateUI() {
+        if (!this.input) {
+            return;
+        }
+        const isNullish = this._value === null || this._value === undefined;
+        this.input.value = isNullish ? '' : String(this._value ?? '');
+        this.input.placeholder = isNullish ? 'null' : '';
+        if (isNullish) {
+            this.elements.controlDiv?.classList.add('hcc-control-nullish');
+        }
+        else {
+            this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+        }
+    }
+}
+/**
+ * Type guard for TextControlParams
+ */
+function is$1(params) {
+    return params.type === 'text';
+}
+/**
+ * Create a text control with scaffolding
+ */
+function create$1(controls, params) {
+    const path = params.path || 'control';
+    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
+    const rid = `text-input-${path
+        .replace(/[^a-z0-9_-]/gi, '-')
+        .replace(/^-|-$/g, '') || 'control'}`;
+    keyDiv.appendChild(Object.assign(document.createElement('label'), {
+        htmlFor: rid,
+        innerHTML: params.label || `<code>${path}</code>`,
+        title: params.label || path
+    }));
+    const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
+        type: 'text',
+        id: rid,
+        className: 'hcc-text-input',
+        title: params.label || params.path
+    }));
+    const isNullish = params.value === null || params.value === undefined;
+    if (isNullish) {
+        input.value = '';
+        input.placeholder = 'null';
+    }
+    else {
+        input.value = String(params.value || '');
+    }
+    input.addEventListener('input', () => {
+        controlDiv.classList.remove('hcc-control-nullish');
+        input.placeholder = '';
+        const value = input.value;
+        if (params.path) {
+            controls.setNestedValue(params.path, value, true);
+        }
+    });
+    if (params.nullable) {
+        const nullableButton = createNullableButton(params, controlDiv, () => {
+            input.value = '';
+            input.placeholder = 'null';
+            controlDiv.classList.add('hcc-control-nullish');
+            if (params.path) {
+                controls.setNestedValue(params.path, null, true);
+            }
+        });
+        valueDivInner.appendChild(nullableButton);
+    }
+}
+
+var TextControl$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    TextControl: TextControl,
+    create: create$1,
+    is: is$1
+});
+
 const Product$1 = window.Highcharts || window.Grid;
 const StandaloneControlMap = {
     boolean: BooleanControl,
     color: ColorControl,
     number: NumberControl,
-    select: SelectControl
+    select: SelectControl,
+    text: TextControl
 };
 // Create a web component around the Controls class
 // @example
@@ -1144,12 +1287,25 @@ class HighchartsControlElement extends HTMLElement {
         }
         const config = this.getConfig();
         if (config.type === 'text') {
-            const input = this.appendChild(Object.assign(document.createElement('input'), {
-                type: 'text',
-                value: config.value ?? ''
+            const { keyDiv, valueDivInner } = createControlScaffolding(config, this);
+            const rid = `text-input-${(config.path || 'control')
+                .replace(/[^a-z0-9_-]/gi, '-')
+                .replace(/^-|-$/g, '') || 'control'}`;
+            keyDiv.appendChild(Object.assign(document.createElement('label'), {
+                htmlFor: rid,
+                innerHTML: config.label || (config.path ? `<code>${config.path}</code>` : ''),
+                title: config.label || config.path
             }));
+            this.input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
+                type: 'text',
+                id: rid,
+                className: 'hcc-text-input',
+                value: config.value ?? '',
+                title: config.label || config.path
+            }));
+            this._value = config.value ?? '';
             const handleValue = () => {
-                const value = input.value;
+                const value = this.input?.value ?? '';
                 this._value = value;
                 this.dispatchEvent(new CustomEvent('input', {
                     detail: { value },
@@ -1164,8 +1320,9 @@ class HighchartsControlElement extends HTMLElement {
                     composed: true
                 }));
             };
-            input.addEventListener('input', handleValue);
-            input.addEventListener('change', handleValue);
+            this.input.addEventListener('input', handleValue);
+            this.input.addEventListener('change', handleValue);
+            this.syncValueAttribute();
             return;
         }
         const ControlCtor = config.type && StandaloneControlMap[config.type];
@@ -1204,6 +1361,10 @@ class HighchartsControlElement extends HTMLElement {
         this._value = parsedValue;
         if (this.control) {
             this.control.value = parsedValue;
+            return;
+        }
+        if (this.input) {
+            this.input.value = parsedValue ?? '';
         }
     }
     get value() {
@@ -1221,11 +1382,29 @@ class HighchartsControlElement extends HTMLElement {
             this.control.value = nextValue;
             return;
         }
+        if (this.input) {
+            this.input.value = nextValue === null || nextValue === undefined ? '' : String(nextValue);
+        }
         if (nextValue === null || nextValue === undefined) {
             this.removeAttribute('value');
         }
         else {
             this.setAttribute('value', String(nextValue));
+        }
+        if (this.input || this._value !== undefined) {
+            const value = nextValue === null || nextValue === undefined ? '' : String(nextValue);
+            this.dispatchEvent(new CustomEvent('input', {
+                detail: { value },
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
+            this.dispatchEvent(new CustomEvent('change', {
+                detail: { value },
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
         }
     }
     syncValueAttribute() {
@@ -1404,10 +1583,10 @@ function parseOptions(options) {
 /**
  * Type guard for SeparatorParams
  */
-function is$1(params) {
+function is(params) {
     return params.type === 'separator';
 }
-function create$1(controls) {
+function create(controls) {
     if (!controls.container) {
         throw new Error('Container for controls not found');
     }
@@ -1419,67 +1598,6 @@ function create$1(controls) {
 }
 
 var SeparatorControl = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    create: create$1,
-    is: is$1
-});
-
-/**
- * Type guard for TextControlParams
- */
-function is(params) {
-    return params.type === 'text';
-}
-/**
- * Create a text control with scaffolding
- */
-function create(controls, params) {
-    const path = params.path || 'control';
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = `text-input-${path
-        .replace(/[^a-z0-9_-]/gi, '-')
-        .replace(/^-|-$/g, '') || 'control'}`;
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        htmlFor: rid,
-        innerHTML: params.label || `<code>${path}</code>`,
-        title: params.label || path
-    }));
-    const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
-        type: 'text',
-        id: rid,
-        className: 'hcc-text-input',
-        title: params.label || params.path
-    }));
-    const isNullish = params.value === null || params.value === undefined;
-    if (isNullish) {
-        input.value = '';
-        input.placeholder = 'null';
-    }
-    else {
-        input.value = String(params.value || '');
-    }
-    input.addEventListener('input', () => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        input.placeholder = '';
-        const value = input.value;
-        if (params.path) {
-            controls.setNestedValue(params.path, value, true);
-        }
-    });
-    if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, () => {
-            input.value = '';
-            input.placeholder = 'null';
-            controlDiv.classList.add('hcc-control-nullish');
-            if (params.path) {
-                controls.setNestedValue(params.path, null, true);
-            }
-        });
-        valueDivInner.appendChild(nullableButton);
-    }
-}
-
-var TextControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     create: create,
     is: is
@@ -1497,7 +1615,7 @@ const controlTypeRegistry = [
     BooleanControl$1,
     ColorControl$1,
     NumberControl$1,
-    TextControl,
+    TextControl$1,
     SeparatorControl
 ];
 
@@ -1789,7 +1907,7 @@ class Controls {
         }
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
-        if (!is$1(params)) {
+        if (!is(params)) {
             // Only try to get nested value if target exists
             if (this.target?.options && params.path) {
                 params.value ?? (params.value = getNestedValue(this.target.options, params.path));
@@ -1954,5 +2072,5 @@ Controls.controls = function (container, options) {
 };
 window.HighchartsControls = Controls;
 
-export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, Controls as default };
+export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, TextControl, Controls as default };
 //# sourceMappingURL=controls.js.map

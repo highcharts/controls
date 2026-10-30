@@ -84,6 +84,16 @@
         </div>
     </div>
 
+    <!-- Text Control Test -->
+    <div class="test-section">
+        <h2>TextControl Standalone</h2>
+        <div id="text-control-container"></div>
+        <div class="output" id="text-output">Title: Default Title</div>
+        <div class="demo-box" id="text-demo-box">
+            Default Title
+        </div>
+    </div>
+
     <!-- Multiple Controls Test -->
     <div class="test-section">
         <h2>Multiple Controls (No Chart Target)</h2>
@@ -114,7 +124,8 @@
             ColorControl,
             BooleanControl,
             NumberControl,
-            SelectControl
+            SelectControl,
+            TextControl
         } from '/js/controls.js';
 
         // Store controls globally for testing
@@ -123,6 +134,7 @@
         window.BooleanControl = BooleanControl;
         window.NumberControl = NumberControl;
         window.SelectControl = SelectControl;
+        window.TextControl = TextControl;
 
         // 1. ColorControl Standalone
         const colorControl = new ColorControl({
@@ -197,7 +209,21 @@
         });
         window.selectControl = selectControl;
 
-        // 5. Multiple Controls without target
+        // 5. TextControl Standalone
+        const textControl = new TextControl({
+            type: 'text',
+            label: 'Demo Title',
+            value: 'Default Title'
+        });
+        textControl.render(document.getElementById('text-control-container'));
+        textControl.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('text-output').textContent = `Title: ${value}`;
+            document.getElementById('text-demo-box').textContent = value;
+        });
+        window.textControl = textControl;
+
+        // 6. Multiple Controls without target
         const multiControls = Controls.controls('multi-controls-container', {
             // NO target specified!
             showPreview: false,
@@ -304,6 +330,12 @@
             document.getElementById('wc-select-output').textContent = `Alignment: ${value}`;
         });
 
+        const wcText = document.getElementById('wc-text-control');
+        wcText.addEventListener('change', (e) => {
+            const value = e.detail.value;
+            document.getElementById('wc-text-output').textContent = `Title: ${value}`;
+        });
+
         document.getElementById('set-wc-value-btn').addEventListener('click', () => {
             wcColor.value = '#e74c3c';
         });
@@ -312,6 +344,7 @@
         window.wcBoolean = wcBoolean;
         window.wcNumber = wcNumber;
         window.wcSelect = wcSelect;
+        window.wcTextControl = wcText;
     </script>
 
     <div class="test-section">
@@ -341,6 +374,12 @@
             <h3>SelectControl Web Component</h3>
             <highcharts-control id="wc-select-control" type="select" label="Alignment" value="center" options="left,center,right"></highcharts-control>
             <div class="output" id="wc-select-output">Alignment: center</div>
+        </div>
+
+        <div class="test-section">
+            <h3>TextControl Web Component</h3>
+            <highcharts-control id="wc-text-control" type="text" label="Demo Title" value="Default Title"></highcharts-control>
+            <div class="output" id="wc-text-output">Title: Default Title</div>
         </div>
     </div>
 </body>

@@ -275,6 +275,27 @@ declare class SelectControl extends Control<SelectControlParams> {
 }
 
 /**
+ * Text Control Type
+ */
+
+/**
+ * TextControl class - text input for string values
+ */
+declare class TextControl extends Control<TextControlParams> {
+    private input?;
+    /**
+     * Type guard for TextControlParams
+     */
+    static is(params: ControlParams): params is TextControlParams;
+    /**
+     * Render the text control
+     */
+    render(container: HTMLElement): void;
+    private handleInputChange;
+    protected updateUI(): void;
+}
+
+/**
  * Highcharts Controls
  *
  * Provides UI controls to manipulate chart options on the fly.
@@ -337,5 +358,5 @@ declare class Controls {
     private updateOptionsPreview;
 }
 
-export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, Controls as default };
+export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, TextControl, Controls as default };
 export type { BooleanControlParams, ColorControlParams, ControlParams, NumberControlParams, SelectControlParams, SeparatorParams, TextControlParams };

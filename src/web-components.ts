@@ -13,6 +13,8 @@ import { BooleanControl } from './ControlTypes/Boolean.js';
 import { ColorControl } from './ControlTypes/Color.js';
 import { NumberControl } from './ControlTypes/Number.js';
 import { SelectControl } from './ControlTypes/Select.js';
+import { TextControl } from './ControlTypes/Text.js';
+import { createControlScaffolding } from './ControlTypes/utils.js';
 import type { Control } from './Control.js';
 
 const Product = (window as any).Highcharts || (window as any).Grid;
@@ -21,7 +23,8 @@ const StandaloneControlMap: Record<string, new (params: any) => any> = {
     boolean: BooleanControl,
     color: ColorControl,
     number: NumberControl,
-    select: SelectControl
+    select: SelectControl,
+    text: TextControl
 };
 
 // Create a web component around the Controls class
@@ -47,6 +50,7 @@ const StandaloneControlMap: Record<string, new (params: any) => any> = {
 class HighchartsControlElement extends HTMLElement {
     private control?: Control<ControlParams>;
     private _value?: any;
+    private input?: HTMLInputElement;
 
     static get observedAttributes(): string[] {
         return ['value'];
@@ -64,16 +68,38 @@ class HighchartsControlElement extends HTMLElement {
         const config = this.getConfig();
 
         if (config.type === 'text') {
-            const input = this.appendChild(Object.assign(
-                document.createElement('input'),
+            const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
+                config,
+                this
+            );
+
+            const rid = `text-input-${(config.path || 'control')
+                .replace(/[^a-z0-9_-]/gi, '-')
+                .replace(/^-|-$/g, '') || 'control'}`;
+
+            keyDiv.appendChild(Object.assign(
+                document.createElement('label'),
                 {
-                    type: 'text',
-                    value: config.value ?? ''
+                    htmlFor: rid,
+                    innerHTML: config.label || (config.path ? `<code>${config.path}</code>` : ''),
+                    title: config.label || config.path
                 }
             ));
 
+            this.input = valueDivInner.appendChild(Object.assign(
+                document.createElement('input'),
+                {
+                    type: 'text',
+                    id: rid,
+                    className: 'hcc-text-input',
+                    value: config.value ?? '',
+                    title: config.label || config.path
+                }
+            ));
+            this._value = config.value ?? '';
+
             const handleValue = (): void => {
-                const value = input.value;
+                const value = this.input?.value ?? '';
                 this._value = value;
                 this.dispatchEvent(new CustomEvent('input', {
                     detail: { value },
@@ -89,8 +115,9 @@ class HighchartsControlElement extends HTMLElement {
                 }));
             };
 
-            input.addEventListener('input', handleValue);
-            input.addEventListener('change', handleValue);
+            this.input.addEventListener('input', handleValue);
+            this.input.addEventListener('change', handleValue);
+            this.syncValueAttribute();
             return;
         }
 
@@ -137,6 +164,11 @@ class HighchartsControlElement extends HTMLElement {
 
         if (this.control) {
             this.control.value = parsedValue;
+            return;
+        }
+
+        if (this.input) {
+            this.input.value = parsedValue ?? '';
         }
     }
 
@@ -158,10 +190,30 @@ class HighchartsControlElement extends HTMLElement {
             return;
         }
 
+        if (this.input) {
+            this.input.value = nextValue === null || nextValue === undefined ? '' : String(nextValue);
+        }
+
         if (nextValue === null || nextValue === undefined) {
             this.removeAttribute('value');
         } else {
             this.setAttribute('value', String(nextValue));
+        }
+
+        if (this.input || this._value !== undefined) {
+            const value = nextValue === null || nextValue === undefined ? '' : String(nextValue);
+            this.dispatchEvent(new CustomEvent('input', {
+                detail: { value },
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
+            this.dispatchEvent(new CustomEvent('change', {
+                detail: { value },
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
         }
     }
 
