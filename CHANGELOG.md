@@ -9,6 +9,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Standalone controls** - Added support for creating individual controls
+  without a chart or grid target
+  - JavaScript API: Instantiate classes such as `ColorControl`, `BooleanControl`, `NumberControl`, and `SelectControl` directly
+  - Web components: Render standalone control instances or use the control classes in custom UI layouts
 - **Preview toggle** - Added `showPreview` option to disable the live options preview panel when it is not needed
   - JavaScript API: Use `showPreview: false` in `ControlsOptionsObject`
   - Web components: Use `show-preview="false"`

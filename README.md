@@ -1,7 +1,8 @@
 # Highcharts Controls
 
 GUI controls for manipulating Highcharts charts, Grid, and Dashboards options on
-the fly.
+the fly. The control library can be used both as chart-bound controls and as
+reusable standalone UI controls without attaching to a Highcharts target.
 
 ## Example
 * See [live demo with web component on jsFiddle](https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/legend/align)
@@ -523,7 +524,7 @@ Insert a horizontal separator line between controls. Must be a child of `<highch
 
 #### `<highcharts-control>`
 
-Individual control element. Must be a child of `<highcharts-controls>`.
+Individual control element.
 
 **Attributes:**
 - `type` (required) - Control type: `"boolean"`, `"select"`, `"number"`, `"color"`, or `"text"`
@@ -611,6 +612,7 @@ Individual control element. Must be a child of `<highcharts-controls>`.
 
 - **Live Preview** - See chart options update in real-time
 - **Options Inspector** - View current chart configuration as JSON
+- **Standalone Controls** - Use individual controls independently without a target chart or grid
 - **Type Safety** - Full TypeScript support with type definitions
 - **Auto-injection** - Optionally inject CSS automatically
 - **Flexible Targeting** - Target specific charts or use defaults
@@ -694,22 +696,6 @@ darkModeToggle.render(document.getElementById('theme-toggle'));
 
 darkModeToggle.addEventListener('change', (e) => {
     document.body.classList.toggle('dark-mode', e.detail.value);
-});
-```
-
-## Using with Highcharts (Traditional Way)
-
-The traditional collection-based approach still works:
-
-```typescript
-import Controls from '@highcharts/controls';
-
-const controls = new Controls('#controls-container', {
-    target: chart, // Still supported, but now optional!
-    controls: [
-        { type: 'color', path: 'chart.backgroundColor' },
-        { type: 'boolean', path: 'legend.enabled' }
-    ]
 });
 ```
 
