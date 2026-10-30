@@ -35,6 +35,8 @@ export class NumberControl extends Control<NumberControlParams> {
             container
         );
 
+        const path = this.params.path || '';
+
         this.elements.controlDiv = controlDiv;
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
@@ -57,23 +59,23 @@ export class NumberControl extends Control<NumberControlParams> {
 
         // Set default min/max if not provided
         if (this.params.min === void 0 || this.params.max === void 0) {
-            if (/(lineWidth|borderWidth)$/i.test(this.params.path)) {
+            if (/(lineWidth|borderWidth)$/i.test(path)) {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 5;
-            } else if (/(borderRadius)$/i.test(this.params.path)) {
+            } else if (/(borderRadius)$/i.test(path)) {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 10;
-            } else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(this.params.path)) {
+            } else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(path)) {
                 this.params.min = this.params.min ?? -100;
                 this.params.max = this.params.max ?? 100;
-            } else if (/opacity$/i.test(this.params.path)) {
+            } else if (/opacity$/i.test(path)) {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 1;
                 this.params.step ??= 0.01;
-            } else if (/rotation$/i.test(this.params.path)) {
+            } else if (/rotation$/i.test(path)) {
                 this.params.min = this.params.min ?? -90;
                 this.params.max = this.params.max ?? 90;
-            } else if (/fontSize$/i.test(this.params.path)) {
+            } else if (/fontSize$/i.test(path)) {
                 if (this.unit === 'em') {
                     this.params.min ?? (this.params.min = 0.6);
                     this.params.max ?? (this.params.max = 2);
@@ -111,8 +113,8 @@ export class NumberControl extends Control<NumberControlParams> {
                 document.createElement('label'),
                 {
                     htmlFor: rid,
-                    innerHTML: this.params.label || `<code>${this.params.path}</code>`,
-                    title: this.params.label || this.params.path
+                    innerHTML: this.params.label || `<code>${path}</code>`,
+                    title: this.params.label || path
                 }
             )
         );
@@ -124,7 +126,7 @@ export class NumberControl extends Control<NumberControlParams> {
                 {
                     id: this.getScopedId('range-value'),
                     className: 'hcc-range-value',
-                    title: this.params.label || this.params.path
+                    title: this.params.label || path
                 }
             )
         );
@@ -139,7 +141,7 @@ export class NumberControl extends Control<NumberControlParams> {
                     min: String(this.params.min),
                     max: String(this.params.max),
                     step: strStep,
-                    title: this.params.label || this.params.path
+                    title: this.params.label || path
                 }
             )
         );
@@ -308,11 +310,13 @@ export function create(
     // Bind to target if it exists
     control.addEventListener('change', ((e: Event) => {
         const customEvent = e as CustomEvent;
-        controls.setNestedValue(
-            params.path,
-            customEvent.detail.value,
-            customEvent.detail.animation
-        );
+        if (params.path) {
+            controls.setNestedValue(
+                params.path,
+                customEvent.detail.value,
+                customEvent.detail.animation
+            );
+        }
     }) as EventListener);
 }
 

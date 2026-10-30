@@ -127,7 +127,6 @@
         // 1. ColorControl Standalone
         const colorControl = new ColorControl({
             type: 'color',
-            path: 'theme.primaryColor',
             label: 'Primary Color',
             value: '#3498db'
         });
@@ -147,7 +146,6 @@
         // 2. BooleanControl Standalone
         const booleanControl = new BooleanControl({
             type: 'boolean',
-            path: 'feature.enabled',
             label: 'Show Demo Box',
             value: false
         });
@@ -166,7 +164,6 @@
         // 3. NumberControl Standalone
         const numberControl = new NumberControl({
             type: 'number',
-            path: 'style.fontSize',
             label: 'Font Size',
             value: 16,
             min: 10,
@@ -188,7 +185,6 @@
         // 4. SelectControl Standalone
         const selectControl = new SelectControl({
             type: 'select',
-            path: 'style.textAlign',
             label: 'Alignment',
             value: 'center',
             options: ['left', 'center', 'right']
@@ -208,19 +204,16 @@
             controls: [
                 {
                     type: 'color',
-                    path: 'theme.background',
                     label: 'Background',
                     value: '#ffffff'
                 },
                 {
                     type: 'boolean',
-                    path: 'theme.darkMode',
                     label: 'Dark Mode',
                     value: false
                 },
                 {
                     type: 'number',
-                    path: 'theme.opacity',
                     label: 'Opacity',
                     value: 100,
                     min: 0,
@@ -265,7 +258,6 @@
         // 5. Programmatic Control
         const programmaticControl = new ColorControl({
             type: 'color',
-            path: 'app.accentColor',
             label: 'Accent Color',
             value: '#9b59b6'
         });
@@ -327,7 +319,7 @@
 
         <div class="test-section">
             <h3>ColorControl Web Component</h3>
-            <highcharts-control id="wc-color-control" type="color" path="theme.primaryColor" label="Primary Color" value="#3498db"></highcharts-control>
+            <highcharts-control id="wc-color-control" type="color" label="Primary Color" value="#3498db"></highcharts-control>
             <div class="output" id="wc-color-output">No color selected</div>
             <div class="output" id="wc-color-live">Live: #3498db</div>
             <button id="set-wc-value-btn" style="padding: 8px 16px; margin-top: 10px;">Set Value to #e74c3c</button>
@@ -335,19 +327,19 @@
 
         <div class="test-section">
             <h3>BooleanControl Web Component</h3>
-            <highcharts-control id="wc-boolean-control" type="boolean" path="feature.enabled" label="Show Demo Box" value="false"></highcharts-control>
+            <highcharts-control id="wc-boolean-control" type="boolean" label="Show Demo Box" value="false"></highcharts-control>
             <div class="output" id="wc-boolean-output">State: false</div>
         </div>
 
         <div class="test-section">
             <h3>NumberControl Web Component</h3>
-            <highcharts-control id="wc-number-control" type="number" path="style.fontSize" label="Font Size" value="16" min="10" max="40" step="2"></highcharts-control>
+            <highcharts-control id="wc-number-control" type="number" label="Font Size" value="16" min="10" max="40" step="2"></highcharts-control>
             <div class="output" id="wc-number-output">Value: 16px</div>
         </div>
 
         <div class="test-section">
             <h3>SelectControl Web Component</h3>
-            <highcharts-control id="wc-select-control" type="select" path="style.textAlign" label="Alignment" value="center" options="left,center,right"></highcharts-control>
+            <highcharts-control id="wc-select-control" type="select" label="Alignment" value="center" options="left,center,right"></highcharts-control>
             <div class="output" id="wc-select-output">Alignment: center</div>
         </div>
     </div>

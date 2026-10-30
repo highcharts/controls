@@ -259,7 +259,9 @@ function create$5(controls, params) {
     // Bind to target if it exists
     control.addEventListener('change', ((e) => {
         const customEvent = e;
-        controls.setNestedValue(params.path, customEvent.detail.value);
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value);
+        }
     }));
 }
 /**
@@ -604,7 +606,9 @@ function create$4(controls, params) {
     // Bind to target if it exists
     control.addEventListener('change', ((e) => {
         const customEvent = e;
-        controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
+        }
     }));
 }
 /**
@@ -645,6 +649,7 @@ class NumberControl extends Control {
     render(container) {
         var _a;
         const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        const path = this.params.path || '';
         this.elements.controlDiv = controlDiv;
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
@@ -664,28 +669,28 @@ class NumberControl extends Control {
         }
         // Set default min/max if not provided
         if (this.params.min === void 0 || this.params.max === void 0) {
-            if (/(lineWidth|borderWidth)$/i.test(this.params.path)) {
+            if (/(lineWidth|borderWidth)$/i.test(path)) {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 5;
             }
-            else if (/(borderRadius)$/i.test(this.params.path)) {
+            else if (/(borderRadius)$/i.test(path)) {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 10;
             }
-            else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(this.params.path)) {
+            else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(path)) {
                 this.params.min = this.params.min ?? -100;
                 this.params.max = this.params.max ?? 100;
             }
-            else if (/opacity$/i.test(this.params.path)) {
+            else if (/opacity$/i.test(path)) {
                 this.params.min = this.params.min ?? 0;
                 this.params.max = this.params.max ?? 1;
                 (_a = this.params).step ?? (_a.step = 0.01);
             }
-            else if (/rotation$/i.test(this.params.path)) {
+            else if (/rotation$/i.test(path)) {
                 this.params.min = this.params.min ?? -90;
                 this.params.max = this.params.max ?? 90;
             }
-            else if (/fontSize$/i.test(this.params.path)) {
+            else if (/fontSize$/i.test(path)) {
                 if (this.unit === 'em') {
                     this.params.min ?? (this.params.min = 0.6);
                     this.params.max ?? (this.params.max = 2);
@@ -718,14 +723,14 @@ class NumberControl extends Control {
         }
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
             htmlFor: rid,
-            innerHTML: this.params.label || `<code>${this.params.path}</code>`,
-            title: this.params.label || this.params.path
+            innerHTML: this.params.label || `<code>${path}</code>`,
+            title: this.params.label || path
         }));
         const isNullish = numericValue === null || numericValue === undefined;
         this.valueEl = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
             id: this.getScopedId('range-value'),
             className: 'hcc-range-value',
-            title: this.params.label || this.params.path
+            title: this.params.label || path
         }));
         const strStep = String(this.params.step || 1);
         this.input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
@@ -734,7 +739,7 @@ class NumberControl extends Control {
             min: String(this.params.min),
             max: String(this.params.max),
             step: strStep,
-            title: this.params.label || this.params.path
+            title: this.params.label || path
         }));
         if (isNullish) {
             // Set to middle of range for nullish state
@@ -879,7 +884,9 @@ function create$3(controls, params) {
     // Bind to target if it exists
     control.addEventListener('change', ((e) => {
         const customEvent = e;
-        controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
+        }
     }));
 }
 /**
@@ -917,29 +924,30 @@ class SelectControl extends Control {
     render(container) {
         var _a, _b, _c, _d;
         const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        const path = this.params.path || '';
         this.elements.controlDiv = controlDiv;
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
         keyDiv.appendChild(Object.assign(document.createElement('label'), {
-            innerHTML: this.params.label || `<code>${this.params.path}</code>`,
-            title: this.params.label || this.params.path
+            innerHTML: this.params.label || `<code>${path}</code>`,
+            title: this.params.label || path
         }));
         // Deduce options
-        if (this.params.path.endsWith('.align') ||
-            this.params.path.endsWith('.textAlign')) {
+        if (path.endsWith('.align') ||
+            path.endsWith('.textAlign')) {
             (_a = this.params).options || (_a.options = ['left', 'center', 'right']);
         }
-        if (this.params.path.toLowerCase().endsWith('dashstyle')) {
+        if (path.toLowerCase().endsWith('dashstyle')) {
             (_b = this.params).options || (_b.options = [
                 'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
                 'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
                 'DashDot', 'LongDashDot', 'LongDashDotDot'
             ]);
         }
-        if (this.params.path.endsWith('.fontWeight')) {
+        if (path.endsWith('.fontWeight')) {
             (_c = this.params).options || (_c.options = ['normal', 'bold', 'lighter']);
         }
-        if (this.params.path.endsWith('.verticalAlign')) {
+        if (path.endsWith('.verticalAlign')) {
             (_d = this.params).options || (_d.options = ['top', 'middle', 'bottom']);
         }
         const options = this.params.options || [];
@@ -998,7 +1006,7 @@ class SelectControl extends Control {
                     className: 'hcc-button' + (isActive ? ' active' : ''),
                     innerText: String(option)
                 }));
-                button.dataset.path = this.params.path;
+                button.dataset.path = path;
                 button.dataset.value = String(option);
                 this.buttons.push(button);
                 button.addEventListener('click', () => {
@@ -1020,7 +1028,7 @@ class SelectControl extends Control {
                     className: 'hcc-button' + (isNullActive ? ' active' : ''),
                     innerHTML: '⊘'
                 }));
-                nullButton.dataset.path = this.params.path;
+                nullButton.dataset.path = path;
                 nullButton.dataset.value = '__null__';
                 this.buttons.push(nullButton);
                 if (isNullActive) {
@@ -1076,7 +1084,9 @@ function create$2(controls, params) {
     control.render(controls.container);
     control.addEventListener('change', ((e) => {
         const customEvent = e;
-        controls.setNestedValue(params.path, customEvent.detail.value);
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value);
+        }
     }));
 }
 /**
@@ -1228,9 +1238,10 @@ class HighchartsControlElement extends HTMLElement {
         }
     }
     getConfig() {
-        const config = {
-            path: this.getAttribute('path') || ''
-        };
+        const config = {};
+        if (this.hasAttribute('path')) {
+            config.path = this.getAttribute('path') || undefined;
+        }
         if (this.hasAttribute('label')) {
             config.label = this.getAttribute('label') || undefined;
         }
@@ -1423,14 +1434,15 @@ function is(params) {
  * Create a text control with scaffolding
  */
 function create(controls, params) {
+    const path = params.path || 'control';
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = `text-input-${params.path
+    const rid = `text-input-${path
         .replace(/[^a-z0-9_-]/gi, '-')
         .replace(/^-|-$/g, '') || 'control'}`;
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
         htmlFor: rid,
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
+        innerHTML: params.label || `<code>${path}</code>`,
+        title: params.label || path
     }));
     const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
         type: 'text',
@@ -1450,14 +1462,18 @@ function create(controls, params) {
         controlDiv.classList.remove('hcc-control-nullish');
         input.placeholder = '';
         const value = input.value;
-        controls.setNestedValue(params.path, value, true);
+        if (params.path) {
+            controls.setNestedValue(params.path, value, true);
+        }
     });
     if (params.nullable) {
         const nullableButton = createNullableButton(params, controlDiv, () => {
             input.value = '';
             input.placeholder = 'null';
             controlDiv.classList.add('hcc-control-nullish');
-            controls.setNestedValue(params.path, null, true);
+            if (params.path) {
+                controls.setNestedValue(params.path, null, true);
+            }
         });
         valueDivInner.appendChild(nullableButton);
     }
@@ -1728,7 +1744,8 @@ class Controls {
      * Deduce control type based on the params
      */
     deduceControlType(params) {
-        const { path, value } = params;
+        const { value } = params;
+        const path = params.path || '';
         if (typeof value === 'boolean') {
             return 'boolean';
         }
@@ -1774,7 +1791,7 @@ class Controls {
         // influence type deduction.
         if (!is$1(params)) {
             // Only try to get nested value if target exists
-            if (this.target?.options) {
+            if (this.target?.options && params.path) {
                 params.value ?? (params.value = getNestedValue(this.target.options, params.path));
             }
             params.type || (params.type = this.deduceControlType(params));

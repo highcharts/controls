@@ -427,7 +427,9 @@ class Controls {
      * Deduce control type based on the params
      */
     private deduceControlType(params: ControlParams): ControlTypes {
-        const { path, value } = params;
+        const { value } = params;
+        const path = params.path || '';
+
         if (typeof value === 'boolean') {
             return 'boolean';
         }
@@ -482,7 +484,7 @@ class Controls {
         // influence type deduction.
         if (!SeparatorControl.is(params)) {
             // Only try to get nested value if target exists
-            if (this.target?.options) {
+            if (this.target?.options && params.path) {
                 params.value ??= getNestedValue(this.target.options, params.path);
             }
             params.type ||= this.deduceControlType(params);

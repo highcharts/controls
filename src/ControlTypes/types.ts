@@ -21,7 +21,7 @@ export type ControlTypes = 'boolean'|'color'|'number'|'select'|'text'|'separator
 
 export interface ControlParams {
     type?: ControlTypes;
-    path: string;
+    path?: string;
     label?: string;
     value?: any;
     nullable?: boolean;

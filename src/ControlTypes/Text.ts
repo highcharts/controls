@@ -19,12 +19,13 @@ export function create(
     controls: ControlsInstance,
     params: TextControlParams
 ): void {
+    const path = params.path || 'control';
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
         params,
         controls.container
     );
 
-    const rid = `text-input-${params.path
+    const rid = `text-input-${path
         .replace(/[^a-z0-9_-]/gi, '-')
         .replace(/^-|-$/g, '') || 'control'}`;
 
@@ -33,8 +34,8 @@ export function create(
             document.createElement('label'),
             {
                 htmlFor: rid,
-                innerHTML: params.label || `<code>${params.path}</code>`,
-                title: params.label || params.path
+                innerHTML: params.label || `<code>${path}</code>`,
+                title: params.label || path
             }
         )
     );
@@ -64,7 +65,9 @@ export function create(
         controlDiv.classList.remove('hcc-control-nullish');
         input.placeholder = '';
         const value = input.value;
-        controls.setNestedValue(params.path, value, true);
+        if (params.path) {
+            controls.setNestedValue(params.path, value, true);
+        }
     });
 
     if (params.nullable) {
@@ -75,7 +78,9 @@ export function create(
                 input.value = '';
                 input.placeholder = 'null';
                 controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null, true);
+                if (params.path) {
+                    controls.setNestedValue(params.path, null, true);
+                }
             }
         );
         valueDivInner.appendChild(nullableButton);

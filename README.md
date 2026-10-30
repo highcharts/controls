@@ -632,6 +632,8 @@ The Highcharts Controls support using individual controls standalone, without re
 
 ## Basic Usage
 
+For standalone controls, omit `path` and treat the control like a native HTML input: the value is managed directly by the control instance.
+
 ### Standalone Color Picker
 
 ```typescript
@@ -640,7 +642,6 @@ import { ColorControl } from '@highcharts/controls';
 // Create a standalone color picker
 const colorPicker = new ColorControl({
     type: 'color',
-    path: 'theme.primaryColor', // logical path, not bound to chart
     label: 'Primary Color',
     value: '#3498db'
 });
@@ -665,7 +666,6 @@ import { NumberControl } from '@highcharts/controls';
 
 const volumeSlider = new NumberControl({
     type: 'number',
-    path: 'audio.volume',
     label: 'Volume',
     value: 50,
     min: 0,
@@ -687,7 +687,6 @@ import { BooleanControl } from '@highcharts/controls';
 
 const darkModeToggle = new BooleanControl({
     type: 'boolean',
-    path: 'settings.darkMode',
     label: 'Dark Mode',
     value: false
 });

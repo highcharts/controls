@@ -200,10 +200,12 @@ export function create(
     // Bind to target if it exists
     control.addEventListener('change', ((e: Event) => {
         const customEvent = e as CustomEvent;
-        controls.setNestedValue(
-            params.path,
-            customEvent.detail.value
-        );
+        if (params.path) {
+            controls.setNestedValue(
+                params.path,
+                customEvent.detail.value
+            );
+        }
     }) as EventListener);
 }
 

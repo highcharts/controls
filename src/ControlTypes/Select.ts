@@ -29,6 +29,8 @@ export class SelectControl extends Control<SelectControlParams> {
             container
         );
 
+        const path = this.params.path || '';
+
         this.elements.controlDiv = controlDiv;
         this.elements.keyDiv = keyDiv;
         this.elements.valueDivInner = valueDivInner;
@@ -37,30 +39,30 @@ export class SelectControl extends Control<SelectControlParams> {
             Object.assign(
                 document.createElement('label'),
                 {
-                    innerHTML: this.params.label || `<code>${this.params.path}</code>`,
-                    title: this.params.label || this.params.path
+                    innerHTML: this.params.label || `<code>${path}</code>`,
+                    title: this.params.label || path
                 }
             )
         );
 
         // Deduce options
         if (
-            this.params.path.endsWith('.align') ||
-            this.params.path.endsWith('.textAlign')
+            path.endsWith('.align') ||
+            path.endsWith('.textAlign')
         ) {
             this.params.options ||= ['left', 'center', 'right'];
         }
-        if (this.params.path.toLowerCase().endsWith('dashstyle')) {
+        if (path.toLowerCase().endsWith('dashstyle')) {
             this.params.options ||= [
                 'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
                 'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
                 'DashDot', 'LongDashDot', 'LongDashDotDot'
             ];
         }
-        if (this.params.path.endsWith('.fontWeight')) {
+        if (path.endsWith('.fontWeight')) {
             this.params.options ||= ['normal', 'bold', 'lighter'];
         }
-        if (this.params.path.endsWith('.verticalAlign')) {
+        if (path.endsWith('.verticalAlign')) {
             this.params.options ||= ['top', 'middle', 'bottom'];
         }
 
@@ -151,7 +153,7 @@ export class SelectControl extends Control<SelectControlParams> {
                         }
                     )
                 );
-                button.dataset.path = this.params.path;
+                button.dataset.path = path;
                 button.dataset.value = String(option);
                 this.buttons.push(button);
 
@@ -180,7 +182,7 @@ export class SelectControl extends Control<SelectControlParams> {
                         }
                     )
                 );
-                nullButton.dataset.path = this.params.path;
+                nullButton.dataset.path = path;
                 nullButton.dataset.value = '__null__';
                 this.buttons.push(nullButton);
 
@@ -245,10 +247,12 @@ export function create(
 
     control.addEventListener('change', ((e: Event) => {
         const customEvent = e as CustomEvent;
-        controls.setNestedValue(
-            params.path,
-            customEvent.detail.value
-        );
+        if (params.path) {
+            controls.setNestedValue(
+                params.path,
+                customEvent.detail.value
+            );
+        }
     }) as EventListener);
 }
 

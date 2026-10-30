@@ -175,9 +175,11 @@ class HighchartsControlElement extends HTMLElement {
     }
 
     getConfig(): ControlParams {
-        const config: ControlParams = {
-            path: this.getAttribute('path') || ''
-        };
+        const config: ControlParams = {};
+
+        if (this.hasAttribute('path')) {
+            config.path = this.getAttribute('path') || undefined;
+        }
 
         if (this.hasAttribute('label')) {
             config.label = this.getAttribute('label') || undefined;

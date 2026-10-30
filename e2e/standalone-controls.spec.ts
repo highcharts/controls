@@ -70,7 +70,7 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await expect(page.locator('#multi-controls-container input[type="checkbox"]')).toBeChecked();
     await expect(page.locator('#theme-dark')).toHaveText('true');
 
-    const multiRange = page.locator('#range-input-theme-opacity');
+    const multiRange = page.locator('#multi-controls-container input[type="range"][title="Opacity"]');
     await multiRange.evaluate((input: HTMLInputElement) => {
       input.value = '70';
       input.dispatchEvent(new Event('input', { bubbles: true }));
