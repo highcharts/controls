@@ -1,3 +1,187 @@
+const Product$2 = window.Highcharts || window.Grid;
+// Create a web component around the Controls class
+// @example
+// <highcharts-controls target="#container">
+//     <highcharts-control
+//         type="color"
+//         path="chart.backgroundColor"
+//         value="#ff0000"
+//     ></highcharts-control>
+//     <highcharts-control
+//         type="boolean"
+//         path="legend.enabled"
+//         value="true"
+//     ></highcharts-control>
+//     <highcharts-control
+//         type="select"
+//         path="legend.align"
+//         options="left,center,right"
+//         value="right"
+//     ></highcharts-control>
+// </highcharts-controls>
+class HighchartsControlElement extends HTMLElement {
+    getConfig() {
+        const config = {
+            path: this.getAttribute('path') || ''
+        };
+        if (this.hasAttribute('label')) {
+            config.label = this.getAttribute('label') || undefined;
+        }
+        if (this.hasAttribute('type')) {
+            config.type = this.getAttribute('type');
+        }
+        if (this.hasAttribute('value')) {
+            config.value = parseValue(this.getAttribute('value'));
+        }
+        if (this.hasAttribute('options')) {
+            config.options = parseOptions(this.getAttribute('options'));
+        }
+        if (this.hasAttribute('min')) {
+            config.min = parseFloat(this.getAttribute('min') || '0');
+        }
+        if (this.hasAttribute('max')) {
+            config.max = parseFloat(this.getAttribute('max') || '100');
+        }
+        if (this.hasAttribute('step')) {
+            config.step = parseFloat(this.getAttribute('step') || '1');
+        }
+        if (this.hasAttribute('nullable')) {
+            config.nullable = true;
+        }
+        return config;
+    }
+}
+class HighchartsGroupElement extends HTMLElement {
+    getConfig() {
+        const controls = [];
+        let description;
+        const descriptionEl = this.querySelector(':scope > highcharts-group-description');
+        if (descriptionEl) {
+            description = descriptionEl.innerHTML?.trim() || undefined;
+        }
+        this.querySelectorAll(':scope > highcharts-control, :scope > highcharts-separator').forEach((controlEl) => {
+            if (controlEl.tagName.toLowerCase() === 'highcharts-separator') {
+                controls.push({ type: 'separator' });
+            }
+            else if (controlEl.tagName.toLowerCase() === 'highcharts-control') {
+                const control = controlEl.getConfig();
+                if (control.path) {
+                    controls.push(control);
+                }
+            }
+        });
+        return {
+            group: this.getAttribute('header') || 'Group',
+            description,
+            collapsed: this.hasAttribute('collapsed') &&
+                this.getAttribute('collapsed') !== 'false',
+            collapsible: this.hasAttribute('collapsible') &&
+                this.getAttribute('collapsible') !== 'false',
+            className: this.getAttribute('class') || undefined,
+            controls
+        };
+    }
+}
+class HighchartsControlsElement extends HTMLElement {
+    connectedCallback() {
+        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false', displayAttr = this.getAttribute('display'), display = (displayAttr === 'block' || displayAttr === 'inline-block')
+            ? displayAttr
+            : 'inline-block';
+        let target = this.getTarget();
+        const Controls = window.HighchartsControls;
+        if (!Controls) {
+            return;
+        }
+        const init = (target) => {
+            Controls.controls(this, {
+                target,
+                injectCSS,
+                display: display,
+                controls: controls
+            });
+        };
+        Array.from(this.children).forEach((child) => {
+            if (child.tagName.toLowerCase() === 'highcharts-group') {
+                const groupConfig = child.getConfig();
+                controls.push(groupConfig);
+            }
+            else if (child.tagName.toLowerCase() === 'highcharts-separator') {
+                controls.push({ type: 'separator' });
+            }
+            else if (child.tagName.toLowerCase() === 'highcharts-control') {
+                const control = child.getConfig();
+                if (control.path) {
+                    controls.push(control);
+                }
+            }
+        });
+        if (target) {
+            init(target);
+        }
+        else {
+            const observer = new MutationObserver(() => {
+                target = this.getTarget();
+                if (target) {
+                    observer.disconnect();
+                    init(target);
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+    getTarget() {
+        const targetAttr = this.getAttribute('target');
+        if (targetAttr) {
+            const el = document.querySelector(targetAttr);
+            const target = el?.chart || el?.grid;
+            if (target) {
+                return target;
+            }
+        }
+        return Product$2?.charts?.[0] || Product$2?.grids?.[0];
+    }
+}
+queueMicrotask(() => {
+    if (!window.HighchartsControls) {
+        return;
+    }
+    if (!customElements.get('highcharts-control')) {
+        customElements.define('highcharts-control', HighchartsControlElement);
+    }
+    if (!customElements.get('highcharts-group')) {
+        customElements.define('highcharts-group', HighchartsGroupElement);
+    }
+    if (!customElements.get('highcharts-group-description')) {
+        customElements.define('highcharts-group-description', class extends HTMLElement {
+        });
+    }
+    if (!customElements.get('highcharts-separator')) {
+        customElements.define('highcharts-separator', class extends HTMLElement {
+        });
+    }
+    if (!customElements.get('highcharts-controls')) {
+        customElements.define('highcharts-controls', HighchartsControlsElement);
+    }
+});
+function parseValue(value) {
+    if (value === 'true') {
+        return true;
+    }
+    if (value === 'false') {
+        return false;
+    }
+    if (!isNaN(Number(value))) {
+        return Number(value);
+    }
+    return value;
+}
+function parseOptions(options) {
+    if (options) {
+        return options.split(',').map((s) => s.trim());
+    }
+    return [];
+}
+
 /**
  * Type guard for SeparatorParams
  */
@@ -1541,173 +1725,6 @@ Controls.controls = function (container, options) {
     return new Controls(container, options);
 };
 window.HighchartsControls = Controls;
-// Create a web component around the Controls class
-// @example
-// <highcharts-controls target="#container">
-//     <highcharts-control
-//         type="color"
-//         path="chart.backgroundColor"
-//         value="#ff0000"
-//     ></highcharts-control>
-//     <highcharts-control
-//         type="boolean"
-//         path="legend.enabled"
-//         value="true"
-//     ></highcharts-control>
-//     <highcharts-control
-//         type="select"
-//         path="legend.align"
-//         options="left,center,right"
-//         value="right"
-//     ></highcharts-control>
-// </highcharts-controls>
-class HighchartsControlElement extends HTMLElement {
-    getConfig() {
-        const config = {
-            path: this.getAttribute('path') || ''
-        };
-        if (this.hasAttribute('label')) {
-            config.label = this.getAttribute('label') || undefined;
-        }
-        if (this.hasAttribute('type')) {
-            config.type = this.getAttribute('type');
-        }
-        if (this.hasAttribute('value')) {
-            config.value = parseValue(this.getAttribute('value'));
-        }
-        if (this.hasAttribute('options')) {
-            config.options = parseOptions(this.getAttribute('options'));
-        }
-        if (this.hasAttribute('min')) {
-            config.min = parseFloat(this.getAttribute('min') || '0');
-        }
-        if (this.hasAttribute('max')) {
-            config.max = parseFloat(this.getAttribute('max') || '100');
-        }
-        if (this.hasAttribute('step')) {
-            config.step = parseFloat(this.getAttribute('step') || '1');
-        }
-        if (this.hasAttribute('nullable')) {
-            config.nullable = true;
-        }
-        return config;
-    }
-}
-class HighchartsGroupElement extends HTMLElement {
-    getConfig() {
-        const controls = [];
-        let description;
-        // Extract description from highcharts-group-description element
-        const descriptionEl = this.querySelector(':scope > highcharts-group-description');
-        if (descriptionEl) {
-            description = descriptionEl.innerHTML?.trim() || undefined;
-        }
-        this.querySelectorAll(':scope > highcharts-control, :scope > highcharts-separator').forEach((controlEl) => {
-            if (controlEl.tagName.toLowerCase() === 'highcharts-separator') {
-                controls.push({ type: 'separator' });
-            }
-            else if (controlEl.tagName.toLowerCase() === 'highcharts-control') {
-                const control = controlEl.getConfig();
-                if (control.path) {
-                    controls.push(control);
-                }
-            }
-        });
-        return {
-            group: this.getAttribute('header') || 'Group',
-            description,
-            collapsed: this.hasAttribute('collapsed') &&
-                this.getAttribute('collapsed') !== 'false',
-            collapsible: this.hasAttribute('collapsible') &&
-                this.getAttribute('collapsible') !== 'false',
-            className: this.getAttribute('class') || undefined,
-            controls
-        };
-    }
-}
-class HighchartsControlsElement extends HTMLElement {
-    connectedCallback() {
-        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false', displayAttr = this.getAttribute('display'), display = (displayAttr === 'block' || displayAttr === 'inline-block')
-            ? displayAttr
-            : 'inline-block';
-        let target = this.getTarget();
-        const init = (target) => {
-            Controls.controls(this, {
-                target,
-                injectCSS,
-                display: display,
-                controls: controls
-            });
-        };
-        // Process direct children (both controls and groups)
-        Array.from(this.children).forEach((child) => {
-            if (child.tagName.toLowerCase() === 'highcharts-group') {
-                const groupConfig = child.getConfig();
-                controls.push(groupConfig);
-            }
-            else if (child.tagName.toLowerCase() === 'highcharts-separator') {
-                controls.push({ type: 'separator' });
-            }
-            else if (child.tagName.toLowerCase() === 'highcharts-control') {
-                const control = child.getConfig();
-                if (control.path) {
-                    controls.push(control);
-                }
-            }
-        });
-        // Initialize if target is found
-        if (target) {
-            init(target);
-        }
-        else {
-            // Listen for DOM update to retry initialization
-            const observer = new MutationObserver(() => {
-                target = this.getTarget();
-                if (target) {
-                    observer.disconnect();
-                    init(target);
-                }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-    getTarget() {
-        const targetAttr = this.getAttribute('target');
-        if (targetAttr) {
-            const el = document.querySelector(targetAttr);
-            const target = el?.chart || el?.grid;
-            if (target) {
-                return target;
-            }
-        }
-        return Product?.charts?.[0] || Product?.grids?.[0];
-    }
-}
-customElements.define('highcharts-control', HighchartsControlElement);
-customElements.define('highcharts-group', HighchartsGroupElement);
-customElements.define('highcharts-group-description', class extends HTMLElement {
-});
-customElements.define('highcharts-separator', class extends HTMLElement {
-});
-customElements.define('highcharts-controls', HighchartsControlsElement);
-function parseValue(value) {
-    if (value === 'true') {
-        return true;
-    }
-    if (value === 'false') {
-        return false;
-    }
-    if (!isNaN(Number(value))) {
-        return Number(value);
-    }
-    return value;
-}
-function parseOptions(options) {
-    if (options) {
-        return options.split(',').map((s) => s.trim());
-    }
-    return [];
-}
 
 export { BooleanControl, ColorControl, Control, NumberControl, Controls as default };
 //# sourceMappingURL=controls.js.map
