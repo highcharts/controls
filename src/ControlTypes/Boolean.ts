@@ -186,33 +186,3 @@ export class BooleanControl extends Control<BooleanControlParams> {
     }
 }
 
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use BooleanControl class directly
- */
-export function create(
-    controls: ControlsInstance,
-    params: BooleanControlParams
-): void {
-    const control = new BooleanControl(params);
-    control.render(controls.container);
-
-    // Bind to target if it exists
-    control.addEventListener('change', ((e: Event) => {
-        const customEvent = e as CustomEvent;
-        if (params.path) {
-            controls.setNestedValue(
-                params.path,
-                customEvent.detail.value
-            );
-        }
-    }) as EventListener);
-}
-
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use BooleanControl.is() instead
- */
-export function is(params: ControlParams): params is BooleanControlParams {
-    return BooleanControl.is(params);
-}

@@ -2,16 +2,14 @@
  * Index file for Control Types
  * Exports all control types and their type guards
  */
-export * as SeparatorControl from './Separator.js';
 export * from './types.js';
 export * from './utils.js';
 
-import * as BooleanControl from './Boolean.js';
-import * as SelectControl from './Select.js';
-import * as ColorControl from './Color.js';
-import * as NumberControl from './Number.js';
-import * as TextControl from './Text.js';
-import * as SeparatorControl from './Separator.js';
+import { BooleanControl } from './Boolean.js';
+import { SelectControl } from './Select.js';
+import { ColorControl } from './Color.js';
+import { NumberControl } from './Number.js';
+import { TextControl } from './Text.js';
 import type { ControlParams, SeparatorParams } from './types.js';
 
 // Forward declaration for Controls type
@@ -21,21 +19,49 @@ export interface ControlsInstance {
     setNestedValue(path: string, value: any, animation?: boolean): void;
 }
 
-/**
- * Base interface for control type implementations
- */
-interface ControlTypeImplementation<T extends ControlParams> {
-    is(params: ControlParams | SeparatorParams): params is T;
-    create(
-        controls: ControlsInstance,
-        params: T
-    ): void;
-}
+export const SeparatorControl = {
+    is(params: any): params is SeparatorParams {
+        return params.type === 'separator';
+    },
+    create(controls: ControlsInstance): void {
+        if (!controls.container) {
+            throw new Error('Container for controls not found');
+        }
+
+        const row = controls.container.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                { className: 'hcc-separator-row' }
+            )
+        );
+
+        const cell1 = row.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                { className: 'hcc-separator-cell' }
+            )
+        );
+
+        row.appendChild(
+            Object.assign(
+                document.createElement('div'),
+                { className: 'hcc-separator-cell' }
+            )
+        );
+
+        cell1.appendChild(
+            Object.assign(
+                document.createElement('hr'),
+                { className: 'hcc-separator' }
+            )
+        );
+    }
+};
 
 /**
  * Registry of all control types, in order of priority for type checking
  */
-export const controlTypeRegistry: Array<ControlTypeImplementation<any>> = [
+export const controlTypeRegistry: Array<any> = [
     SelectControl,
     BooleanControl,
     ColorControl,

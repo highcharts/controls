@@ -426,34 +426,3 @@ export class ColorControl extends Control<ColorControlParams> {
     }
 }
 
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use ColorControl class directly
- */
-export function create(
-    controls: ControlsInstance,
-    params: ColorControlParams
-): void {
-    const control = new ColorControl(params);
-    control.render(controls.container);
-
-    // Bind to target if it exists
-    control.addEventListener('change', ((e: Event) => {
-        const customEvent = e as CustomEvent;
-        if (params.path) {
-            controls.setNestedValue(
-                params.path,
-                customEvent.detail.value,
-                customEvent.detail.animation
-            );
-        }
-    }) as EventListener);
-}
-
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use ColorControl.is() instead
- */
-export function is(params: ControlParams): params is ColorControlParams {
-    return ColorControl.is(params);
-}

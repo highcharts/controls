@@ -234,32 +234,3 @@ export class SelectControl extends Control<SelectControlParams> {
     }
 }
 
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use SelectControl class directly
- */
-export function create(
-    controls: ControlsInstance,
-    params: SelectControlParams
-): void {
-    const control = new SelectControl(params);
-    control.render(controls.container);
-
-    control.addEventListener('change', ((e: Event) => {
-        const customEvent = e as CustomEvent;
-        if (params.path) {
-            controls.setNestedValue(
-                params.path,
-                customEvent.detail.value
-            );
-        }
-    }) as EventListener);
-}
-
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use SelectControl.is() instead
- */
-export function is(params: ControlParams): params is SelectControlParams {
-    return SelectControl.is(params);
-}

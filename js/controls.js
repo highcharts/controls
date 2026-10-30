@@ -249,35 +249,6 @@ class BooleanControl extends Control {
         }
     }
 }
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use BooleanControl class directly
- */
-function create$5(controls, params) {
-    const control = new BooleanControl(params);
-    control.render(controls.container);
-    // Bind to target if it exists
-    control.addEventListener('change', ((e) => {
-        const customEvent = e;
-        if (params.path) {
-            controls.setNestedValue(params.path, customEvent.detail.value);
-        }
-    }));
-}
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use BooleanControl.is() instead
- */
-function is$5(params) {
-    return BooleanControl.is(params);
-}
-
-var BooleanControl$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    BooleanControl: BooleanControl,
-    create: create$5,
-    is: is$5
-});
 
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product$2 = window.Highcharts || window.Grid;
@@ -596,35 +567,6 @@ class ColorControl extends Control {
         super.destroy();
     }
 }
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use ColorControl class directly
- */
-function create$4(controls, params) {
-    const control = new ColorControl(params);
-    control.render(controls.container);
-    // Bind to target if it exists
-    control.addEventListener('change', ((e) => {
-        const customEvent = e;
-        if (params.path) {
-            controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
-        }
-    }));
-}
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use ColorControl.is() instead
- */
-function is$4(params) {
-    return ColorControl.is(params);
-}
-
-var ColorControl$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    ColorControl: ColorControl,
-    create: create$4,
-    is: is$4
-});
 
 /**
  * NumberControl class - range slider for numeric values
@@ -874,35 +816,6 @@ class NumberControl extends Control {
         super.destroy();
     }
 }
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use NumberControl class directly
- */
-function create$3(controls, params) {
-    const control = new NumberControl(params);
-    control.render(controls.container);
-    // Bind to target if it exists
-    control.addEventListener('change', ((e) => {
-        const customEvent = e;
-        if (params.path) {
-            controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
-        }
-    }));
-}
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use NumberControl.is() instead
- */
-function is$3(params) {
-    return NumberControl.is(params);
-}
-
-var NumberControl$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    NumberControl: NumberControl,
-    create: create$3,
-    is: is$3
-});
 
 /**
  * SelectControl class - dropdown or button-group selector for string values
@@ -1075,34 +988,6 @@ class SelectControl extends Control {
         });
     }
 }
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use SelectControl class directly
- */
-function create$2(controls, params) {
-    const control = new SelectControl(params);
-    control.render(controls.container);
-    control.addEventListener('change', ((e) => {
-        const customEvent = e;
-        if (params.path) {
-            controls.setNestedValue(params.path, customEvent.detail.value);
-        }
-    }));
-}
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use SelectControl.is() instead
- */
-function is$2(params) {
-    return SelectControl.is(params);
-}
-
-var SelectControl$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    SelectControl: SelectControl,
-    create: create$2,
-    is: is$2
-});
 
 /**
  * TextControl class - text input for string values
@@ -1184,67 +1069,6 @@ class TextControl extends Control {
         }
     }
 }
-/**
- * Type guard for TextControlParams
- */
-function is$1(params) {
-    return params.type === 'text';
-}
-/**
- * Create a text control with scaffolding
- */
-function create$1(controls, params) {
-    const path = params.path || 'control';
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = `text-input-${path
-        .replace(/[^a-z0-9_-]/gi, '-')
-        .replace(/^-|-$/g, '') || 'control'}`;
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        htmlFor: rid,
-        innerHTML: params.label || `<code>${path}</code>`,
-        title: params.label || path
-    }));
-    const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
-        type: 'text',
-        id: rid,
-        className: 'hcc-text-input',
-        title: params.label || params.path
-    }));
-    const isNullish = params.value === null || params.value === undefined;
-    if (isNullish) {
-        input.value = '';
-        input.placeholder = 'null';
-    }
-    else {
-        input.value = String(params.value || '');
-    }
-    input.addEventListener('input', () => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        input.placeholder = '';
-        const value = input.value;
-        if (params.path) {
-            controls.setNestedValue(params.path, value, true);
-        }
-    });
-    if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, () => {
-            input.value = '';
-            input.placeholder = 'null';
-            controlDiv.classList.add('hcc-control-nullish');
-            if (params.path) {
-                controls.setNestedValue(params.path, null, true);
-            }
-        });
-        valueDivInner.appendChild(nullableButton);
-    }
-}
-
-var TextControl$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    TextControl: TextControl,
-    create: create$1,
-    is: is$1
-});
 
 const Product$1 = window.Highcharts || window.Grid;
 const StandaloneControlMap = {
@@ -1581,41 +1405,32 @@ function parseOptions(options) {
 }
 
 /**
- * Type guard for SeparatorParams
- */
-function is(params) {
-    return params.type === 'separator';
-}
-function create(controls) {
-    if (!controls.container) {
-        throw new Error('Container for controls not found');
-    }
-    const row = controls.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
-    const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
-    // Add second cell to match the two-column layout
-    row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
-    cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
-}
-
-var SeparatorControl = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    create: create,
-    is: is
-});
-
-/**
  * Index file for Control Types
  * Exports all control types and their type guards
  */
+const SeparatorControl = {
+    is(params) {
+        return params.type === 'separator';
+    },
+    create(controls) {
+        if (!controls.container) {
+            throw new Error('Container for controls not found');
+        }
+        const row = controls.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
+        const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+        row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+        cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
+    }
+};
 /**
  * Registry of all control types, in order of priority for type checking
  */
 const controlTypeRegistry = [
-    SelectControl$1,
-    BooleanControl$1,
-    ColorControl$1,
-    NumberControl$1,
-    TextControl$1,
+    SelectControl,
+    BooleanControl,
+    ColorControl,
+    NumberControl,
+    TextControl,
     SeparatorControl
 ];
 
@@ -1907,19 +1722,36 @@ class Controls {
         }
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
-        if (!is(params)) {
+        if (!SeparatorControl.is(params)) {
+            const controlParams = params;
             // Only try to get nested value if target exists
-            if (this.target?.options && params.path) {
-                params.value ?? (params.value = getNestedValue(this.target.options, params.path));
+            if (this.target?.options && controlParams.path) {
+                controlParams.value ?? (controlParams.value = getNestedValue(this.target.options, controlParams.path));
             }
-            params.type || (params.type = this.deduceControlType(params));
+            controlParams.type || (controlParams.type = this.deduceControlType(controlParams));
         }
         // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
-            if (controlType.is(params)) {
-                controlType.create(this, params);
-                break;
+            if (!controlType.is(params)) {
+                continue;
             }
+            if (typeof controlType.create === 'function') {
+                controlType.create(this, params);
+            }
+            else {
+                const controlParams = params;
+                const control = new controlType(controlParams);
+                control.render(this.container);
+                control.addEventListener('change', ((e) => {
+                    const customEvent = e;
+                    const value = customEvent.detail?.value;
+                    const animation = customEvent.detail?.animation;
+                    if (controlParams.path) {
+                        this.setNestedValue(controlParams.path, value, animation);
+                    }
+                }));
+            }
+            break;
         }
     }
     /**

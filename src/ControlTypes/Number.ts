@@ -296,35 +296,4 @@ export class NumberControl extends Control<NumberControlParams> {
     }
 }
 
-/**
- * Legacy factory function for backward compatibility
- * @deprecated Use NumberControl class directly
- */
-export function create(
-    controls: ControlsInstance,
-    params: NumberControlParams
-): void {
-    const control = new NumberControl(params);
-    control.render(controls.container);
-
-    // Bind to target if it exists
-    control.addEventListener('change', ((e: Event) => {
-        const customEvent = e as CustomEvent;
-        if (params.path) {
-            controls.setNestedValue(
-                params.path,
-                customEvent.detail.value,
-                customEvent.detail.animation
-            );
-        }
-    }) as EventListener);
-}
-
-/**
- * Legacy type guard for backward compatibility
- * @deprecated Use NumberControl.is() instead
- */
-export function is(params: ControlParams): params is NumberControlParams {
-    return NumberControl.is(params);
-}
 

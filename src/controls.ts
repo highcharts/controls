@@ -483,19 +483,42 @@ class Controls {
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
         if (!SeparatorControl.is(params)) {
+            const controlParams = params as ControlParams;
+
             // Only try to get nested value if target exists
-            if (this.target?.options && params.path) {
-                params.value ??= getNestedValue(this.target.options, params.path);
+            if (this.target?.options && controlParams.path) {
+                controlParams.value ??= getNestedValue(this.target.options, controlParams.path);
             }
-            params.type ||= this.deduceControlType(params);
+            controlParams.type ||= this.deduceControlType(controlParams);
         }
 
         // Find and instantiate the appropriate control type
         for (const controlType of controlTypeRegistry) {
-            if (controlType.is(params)) {
-                controlType.create(this, params);
-                break;
+            if (!controlType.is(params)) {
+                continue;
             }
+
+            if (typeof controlType.create === 'function') {
+                controlType.create(this, params);
+            } else {
+                const controlParams = params as ControlParams;
+                const control = new controlType(controlParams);
+                control.render(this.container);
+
+                control.addEventListener('change', ((e: Event) => {
+                    const customEvent = e as CustomEvent;
+                    const value = customEvent.detail?.value;
+                    const animation = customEvent.detail?.animation;
+                    if (controlParams.path) {
+                        this.setNestedValue(
+                            controlParams.path,
+                            value,
+                            animation
+                        );
+                    }
+                }) as EventListener);
+            }
+            break;
         }
     }
 
