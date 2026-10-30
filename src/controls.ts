@@ -8,6 +8,8 @@
  */
 
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
+import './web-components.js';
+
 const Product = (window as any).Highcharts || (window as any).Grid;
 
 import {
@@ -32,6 +34,7 @@ interface ControlsOptionsObject {
     target?: ControlTarget;
     injectCSS?: boolean;
     display?: 'block' | 'inline-block';
+    showPreview?: boolean;
     controls: Array<
         GroupParams|
         SelectControlParams|
@@ -59,7 +62,7 @@ class Controls {
     };
 
     public container: HTMLElement;
-    public target: ControlTarget;
+    public target?: ControlTarget;
 
     constructor(renderTo: string|HTMLElement, options: ControlsOptionsObject) {
         renderTo = (
@@ -95,10 +98,9 @@ class Controls {
             options.target ||
             Product?.charts?.[0] ||
             Product?.grids?.[0]
-        ) as ControlTarget;
-        if (!this.target) {
-            throw new Error('No target chart found for Highcharts Controls');
-        }
+        ) as ControlTarget | undefined;
+
+        // Target is now optional - controls can work standalone
 
         // Inject CSS if requested
         if (options.injectCSS !== false) {
@@ -114,10 +116,14 @@ class Controls {
             }
         });
 
-        this.addPreview();
+        if (options.showPreview !== false) {
+            this.addPreview();
+        }
 
         // Keep the options preview updated
-        this.updateOptionsPreview();
+        if (options.showPreview !== false) {
+            this.updateOptionsPreview();
+        }
     }
 
 
@@ -131,6 +137,11 @@ class Controls {
         value: any,
         animation?: boolean
     ): void {
+        // If no target, skip updating the chart
+        if (!this.target) {
+            return;
+        }
+
         // Split path into segments, handling array notation
         // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
         const keys = path.split(/\.|\[|\]/).filter(s => s !== '');
@@ -416,7 +427,9 @@ class Controls {
      * Deduce control type based on the params
      */
     private deduceControlType(params: ControlParams): ControlTypes {
-        const { path, value } = params;
+        const { value } = params;
+        const path = params.path || '';
+
         if (typeof value === 'boolean') {
             return 'boolean';
         }
@@ -458,6 +471,9 @@ class Controls {
     /**
      * Add a control
      */
+    /**
+     * Add a control
+     */
     public addControl(params: ControlParams | SeparatorParams): void {
 
         if (!this.container) {
@@ -467,7 +483,10 @@ class Controls {
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
         if (!SeparatorControl.is(params)) {
-            params.value ??= getNestedValue(this.target.options, params.path);
+            // Only try to get nested value if target exists
+            if (this.target?.options && params.path) {
+                params.value ??= getNestedValue(this.target.options, params.path);
+            }
             params.type ||= this.deduceControlType(params);
         }
 
@@ -568,7 +587,7 @@ class Controls {
     private updateOptionsPreview(): void {
         const previewEl = this.container.parentElement
             ?.querySelector('.hcc-options-preview');
-        if (previewEl) {
+        if (previewEl && this.target) {
             const options = this.target.getOptions() || {};
             // Empty xAxis and yAxis structures
             Object.keys(options).forEach((key): void => {
@@ -642,210 +661,14 @@ class Controls {
 
 (window as any).HighchartsControls = Controls;
 
-// Create a web component around the Controls class
-// @example
-// <highcharts-controls target="#container">
-//     <highcharts-control
-//         type="color"
-//         path="chart.backgroundColor"
-//         value="#ff0000"
-//     ></highcharts-control>
-//     <highcharts-control
-//         type="boolean"
-//         path="legend.enabled"
-//         value="true"
-//     ></highcharts-control>
-//     <highcharts-control
-//         type="select"
-//         path="legend.align"
-//         options="left,center,right"
-//         value="right"
-//     ></highcharts-control>
-// </highcharts-controls>
-class HighchartsControlElement extends HTMLElement {
-  getConfig() {
-    const config: ControlParams = {
-      path: this.getAttribute('path') || ''
-    };
+// Export Control base class and class-based control types for standalone usage
+export { Control } from './Control.js';
+export { ColorControl } from './ControlTypes/Color.js';
+export { BooleanControl } from './ControlTypes/Boolean.js';
+export { NumberControl } from './ControlTypes/Number.js';
+export { SelectControl } from './ControlTypes/Select.js';
 
-    if (this.hasAttribute('label')) {
-        config.label = this.getAttribute('label') || undefined;
-    }
-
-    if (this.hasAttribute('type')) {
-        config.type = this.getAttribute('type') as ControlTypes;
-    }
-
-    if (this.hasAttribute('value')) {
-        config.value = parseValue(this.getAttribute('value'));
-    }
-
-    if (this.hasAttribute('options')) {
-        (config as SelectControlParams).options = parseOptions(
-            this.getAttribute('options')
-        );
-    }
-
-    if (this.hasAttribute('min')) {
-        (config as NumberControlParams).min = parseFloat(
-            this.getAttribute('min') || '0'
-        );
-    }
-
-    if (this.hasAttribute('max')) {
-        (config as NumberControlParams).max = parseFloat(
-            this.getAttribute('max') || '100'
-        );
-    }
-
-    if (this.hasAttribute('step')) {
-        (config as NumberControlParams).step = parseFloat(
-            this.getAttribute('step') || '1'
-        );
-    }
-
-    if (this.hasAttribute('nullable')) {
-        config.nullable = true;
-    }
-
-    return config;
-  }
-}
-
-class HighchartsGroupElement extends HTMLElement {
-  getConfig(): GroupParams {
-    const controls: (ControlParams | SeparatorParams)[] = [];
-    let description: string | undefined;
-
-    // Extract description from highcharts-group-description element
-    const descriptionEl = this.querySelector(':scope > highcharts-group-description');
-    if (descriptionEl) {
-      description = descriptionEl.innerHTML?.trim() || undefined;
-    }
-
-    this.querySelectorAll(
-      ':scope > highcharts-control, :scope > highcharts-separator'
-    ).forEach(
-      (controlEl): void => {
-        if (controlEl.tagName.toLowerCase() === 'highcharts-separator') {
-          controls.push({ type: 'separator' });
-        } else if (controlEl.tagName.toLowerCase() === 'highcharts-control') {
-          const control = (controlEl as HighchartsControlElement).getConfig();
-          if (control.path) {
-            controls.push(control as ControlParams);
-          }
-        }
-      }
-    );
-
-    return {
-      group: this.getAttribute('header') || 'Group',
-      description,
-      collapsed: this.hasAttribute('collapsed') &&
-        this.getAttribute('collapsed') !== 'false',
-      collapsible: this.hasAttribute('collapsible') &&
-        this.getAttribute('collapsible') !== 'false',
-      className: this.getAttribute('class') || undefined,
-      controls
-    };
-  }
-}
-
-class HighchartsControlsElement extends HTMLElement {
-    connectedCallback() {
-        const controls: Array<ControlParams | GroupParams | SeparatorParams> = [],
-            injectCSS = this.getAttribute('inject-css') !== 'false',
-            displayAttr = this.getAttribute('display'),
-            display = (displayAttr === 'block' || displayAttr === 'inline-block')
-                ? displayAttr
-                : 'inline-block';
-
-        let target = this.getTarget();
-
-        const init = (target: ControlTarget): void => {
-            Controls.controls(this, {
-                target,
-                injectCSS,
-                display: display as 'block' | 'inline-block',
-                controls: controls as Array<
-                    GroupParams|
-                    SelectControlParams|
-                    BooleanControlParams|
-                    ColorControlParams|
-                    NumberControlParams|
-                    TextControlParams|
-                    SeparatorParams
-                >
-            });
-        };
-
-        // Process direct children (both controls and groups)
-        Array.from(this.children).forEach((child): void => {
-            if (child.tagName.toLowerCase() === 'highcharts-group') {
-                const groupConfig = (child as HighchartsGroupElement).getConfig();
-                controls.push(groupConfig);
-            } else if (child.tagName.toLowerCase() === 'highcharts-separator') {
-                controls.push({ type: 'separator' });
-            } else if (child.tagName.toLowerCase() === 'highcharts-control') {
-                const control = (child as HighchartsControlElement).getConfig();
-                if (control.path) {
-                    controls.push(control as ControlParams);
-                }
-            }
-        });
-
-        // Initialize if target is found
-        if (target) {
-            init(target);
-        } else {
-            // Listen for DOM update to retry initialization
-            const observer = new MutationObserver((): void => {
-                target = this.getTarget();
-                if (target) {
-                    observer.disconnect();
-                    init(target);
-                }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-
-    private getTarget(): ControlTarget | undefined {
-        const targetAttr = this.getAttribute('target');
-        if (targetAttr) {
-            const el = document.querySelector(targetAttr) as any;
-            const target = el?.chart || el?.grid;
-            if (target) {
-                return target;
-            }
-        }
-        return Product?.charts?.[0] || Product?.grids?.[0];
-    }
-}
-customElements.define('highcharts-control', HighchartsControlElement);
-customElements.define('highcharts-group', HighchartsGroupElement);
-customElements.define('highcharts-group-description', class extends HTMLElement {});
-customElements.define('highcharts-separator', class extends HTMLElement {});
-customElements.define('highcharts-controls', HighchartsControlsElement);
-
-function parseValue(value: string | null): any {
-    if (value === 'true') {
-        return true;
-    }
-    if (value === 'false') {
-        return false;
-    }
-    if (!isNaN(Number(value))) {
-        return Number(value);
-    }
-    return value;
-}
-
-function parseOptions(options: string | null): string[] {
-    if (options) {
-        return options.split(',').map((s): string => s.trim());
-    }
-    return [];
-}
+// Export types
+export type { ControlParams, ColorControlParams, BooleanControlParams, NumberControlParams, SelectControlParams, TextControlParams, SeparatorParams } from './ControlTypes/types.js';
 
 export default Controls;

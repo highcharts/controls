@@ -1,7 +1,8 @@
 # Highcharts Controls
 
 GUI controls for manipulating Highcharts charts, Grid, and Dashboards options on
-the fly.
+the fly. The control library can be used both as chart-bound controls and as
+reusable standalone UI controls without attaching to a Highcharts target.
 
 ## Example
 * See [live demo with web component on jsFiddle](https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/legend/align)
@@ -10,13 +11,13 @@ the fly.
 
 Load the [module file](https://github.com/highcharts/controls/blob/main/js/controls.js) from a CDN or your own server
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
 ```
 
 Or
 
 ```js
-import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0';
+import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0';
 ```
 
 ## Usage
@@ -28,7 +29,7 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0';
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -65,10 +66,44 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0';
             <highcharts-control
                 type="color"
                 path="legend.backgroundColor"
+                nullable
                 value="#FFEEAA">
             </highcharts-control>
         </highcharts-group>
     </highcharts-controls>
+</body>
+</html>
+```
+
+#### Standalone Web Component
+
+Standalone controls do not use a `path` and work like native HTML inputs. You can bind to the `change` event and update the value programmatically with the `value` property.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
+</head>
+<body>
+    <highcharts-control
+        id="theme-color"
+        type="color"
+        label="Primary Color"
+        value="#3498db">
+    </highcharts-control>
+
+    <script type="module">
+        const themeColor = document.getElementById('theme-color');
+
+        themeColor.addEventListener('change', (event) => {
+            console.log('Color changed:', event.detail.value);
+            document.body.style.backgroundColor = event.detail.value;
+        });
+
+        // Update the control value programmatically
+        themeColor.value = '#e74c3c';
+    </script>
 </body>
 </html>
 ```
@@ -80,7 +115,7 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0';
 <html>
 <head>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0"></script>
 </head>
 <body>
     <div id="container"></div>
@@ -121,6 +156,7 @@ import Controls from 'https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0';
                         },
                         {
                             path: 'legend.backgroundColor',
+                            nullable: true,
                             value: '#FFEEAA'
                         }
                     ]
@@ -176,8 +212,21 @@ interface ControlsOptionsObject {
     target?: ControlTarget;      // Target chart/grid (defaults to first chart)
     injectCSS?: boolean;          // Auto-inject CSS (defaults to true)
     display?: 'block' | 'inline-block';  // Display mode (defaults to 'inline-block')
+    showPreview?: boolean;        // Show the live options preview (defaults to true)
     controls: Array<ControlParams | GroupParams>;  // Array of control or group configurations
 }
+```
+
+Set `showPreview: false` to hide the preview toggle and preview panel when you want a cleaner standalone control layout without the live options inspector.
+
+```javascript
+HighchartsControls.controls('controls-container', {
+    showPreview: false,
+    controls: [
+        { path: 'legend.enabled', value: true },
+        { path: 'legend.align', options: ['left', 'center', 'right'], value: 'center' }
+    ]
+});
 ```
 
 #### GroupParams
@@ -435,7 +484,7 @@ Container element for controls.
 
 **Example:**
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.7.0/css/controls.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/controls@0.8.0/css/controls.css" />
 <highcharts-controls target="#my-chart" inject-css="false">
     <!-- controls here -->
 </highcharts-controls>
@@ -508,7 +557,7 @@ Insert a horizontal separator line between controls. Must be a child of `<highch
 
 #### `<highcharts-control>`
 
-Individual control element. Must be a child of `<highcharts-controls>`.
+Individual control element.
 
 **Attributes:**
 - `type` (required) - Control type: `"boolean"`, `"select"`, `"number"`, `"color"`, or `"text"`
@@ -596,10 +645,164 @@ Individual control element. Must be a child of `<highcharts-controls>`.
 
 - **Live Preview** - See chart options update in real-time
 - **Options Inspector** - View current chart configuration as JSON
+- **Standalone Controls** - Use individual controls independently without a target chart or grid
 - **Type Safety** - Full TypeScript support with type definitions
 - **Auto-injection** - Optionally inject CSS automatically
 - **Flexible Targeting** - Target specific charts or use defaults
 - **Modern UI** - Clean, styled controls with smooth animations
+
+# Standalone Control Usage
+
+The Highcharts Controls support using individual controls standalone, without requiring a Highcharts/Grid target. This makes controls reusable as general-purpose UI components.
+
+## Features
+
+✅ **Standalone Controls** - Use controls independently without a target chart
+✅ **Event-Driven** - Standard DOM EventTarget-based event handling
+✅ **Modular** - Import only the controls you need
+✅ **Type-Safe** - Full TypeScript support
+✅ **Backward Compatible** - Existing API continues to work
+
+## Basic Usage
+
+For standalone controls, omit `path` and treat the control like a native HTML input: the value is managed directly by the control instance.
+
+### Standalone Color Picker
+
+```typescript
+import { ColorControl } from '@highcharts/controls';
+
+// Create a standalone color picker
+const colorPicker = new ColorControl({
+    type: 'color',
+    label: 'Primary Color',
+    value: '#3498db'
+});
+
+// Render it anywhere in your UI
+colorPicker.render(document.getElementById('my-container'));
+
+// Listen for changes
+colorPicker.addEventListener('change', (e) => {
+    console.log('Color changed:', e.detail.value);
+    document.body.style.backgroundColor = e.detail.value;
+});
+
+// Programmatically update the value
+colorPicker.value = '#e74c3c';
+```
+
+### Standalone Number Slider
+
+```typescript
+import { NumberControl } from '@highcharts/controls';
+
+const volumeSlider = new NumberControl({
+    type: 'number',
+    label: 'Volume',
+    value: 50,
+    min: 0,
+    max: 100,
+    step: 1
+});
+
+volumeSlider.render(document.getElementById('volume-control'));
+
+volumeSlider.addEventListener('change', (e) => {
+    audioElement.volume = e.detail.value / 100;
+});
+```
+
+### Standalone Boolean Toggle
+
+```typescript
+import { BooleanControl } from '@highcharts/controls';
+
+const darkModeToggle = new BooleanControl({
+    type: 'boolean',
+    label: 'Dark Mode',
+    value: false
+});
+
+darkModeToggle.render(document.getElementById('theme-toggle'));
+
+darkModeToggle.addEventListener('change', (e) => {
+    document.body.classList.toggle('dark-mode', e.detail.value);
+});
+```
+
+## Mixed Usage
+
+You can also pre-create controls with custom behavior, then pass them to the Controls collection:
+
+```typescript
+import Controls, { ColorControl } from '@highcharts/controls';
+
+// Create a control with custom logic
+const customColor = new ColorControl({
+    label: 'Chart Background',
+    value: '#fff'
+});
+
+customColor.addEventListener('change', (e) => {
+    // Custom validation or transformation
+    if (isValidColor(e.detail.value)) {
+        console.log('Valid color selected');
+    }
+});
+
+// Use it in the collection
+const controls = new Controls(container, {
+    target: chart,
+    controls: [
+        customColor, // Pass the instance directly
+        { type: 'boolean', path: 'legend.enabled' } // Or use config
+    ]
+});
+```
+
+## Available Control Classes
+
+- `Control` - Base class for all controls
+- `ColorControl` - Color picker with opacity slider
+- `BooleanControl` - Toggle switch (supports tri-state nullable)
+- `NumberControl` - Range slider with unit support
+- `SelectControl` - Dropdown or button group (function-based, to be refactored)
+- `TextControl` - Text input (function-based, to be refactored)
+
+## Events
+
+All controls emit a `'change'` event with the following detail:
+
+```typescript
+{
+    value: any,          // New value
+    oldValue: any,       // Previous value
+    path: string,        // Control path
+    animation?: boolean  // Animation flag (NumberControl only)
+}
+```
+
+## Methods
+
+All control instances have these methods:
+
+- `render(container: HTMLElement)` - Render the control into a container
+- `destroy()` - Clean up event listeners and remove from DOM
+- `getElement()` - Get the control's root DOM element
+
+And these properties:
+
+- `value` - Get or set the control's value programmatically
+- `params` - Access the control's configuration parameters
+
+## Architecture Benefits
+
+1. **Decoupled** - Controls no longer require Highcharts/Datagrid
+2. **Reusable** - Use anywhere in your application
+3. **Testable** - Each control can be unit tested in isolation
+4. **Flexible** - Compose controls however you want
+5. **Progressive Enhancement** - Add chart binding only when needed
 
 ## License
 

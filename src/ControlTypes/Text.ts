@@ -19,20 +19,23 @@ export function create(
     controls: ControlsInstance,
     params: TextControlParams
 ): void {
+    const path = params.path || 'control';
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(
         params,
         controls.container
     );
 
-    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+    const rid = `text-input-${path
+        .replace(/[^a-z0-9_-]/gi, '-')
+        .replace(/^-|-$/g, '') || 'control'}`;
 
     keyDiv.appendChild(
         Object.assign(
             document.createElement('label'),
             {
-                htmlFor: `text-input-${rid}`,
-                innerHTML: params.label || `<code>${params.path}</code>`,
-                title: params.label || params.path
+                htmlFor: rid,
+                innerHTML: params.label || `<code>${path}</code>`,
+                title: params.label || path
             }
         )
     );
@@ -42,7 +45,7 @@ export function create(
             document.createElement('input'),
             {
                 type: 'text',
-                id: `text-input-${rid}`,
+                id: rid,
                 className: 'hcc-text-input',
                 title: params.label || params.path
             }
@@ -62,7 +65,9 @@ export function create(
         controlDiv.classList.remove('hcc-control-nullish');
         input.placeholder = '';
         const value = input.value;
-        controls.setNestedValue(params.path, value, false);
+        if (params.path) {
+            controls.setNestedValue(params.path, value, true);
+        }
     });
 
     if (params.nullable) {
@@ -73,7 +78,9 @@ export function create(
                 input.value = '';
                 input.placeholder = 'null';
                 controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null, false);
+                if (params.path) {
+                    controls.setNestedValue(params.path, null, true);
+                }
             }
         );
         valueDivInner.appendChild(nullableButton);

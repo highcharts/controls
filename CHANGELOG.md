@@ -9,6 +9,22 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Standalone controls** - Added support for creating individual controls
+  without a chart or grid target
+  - JavaScript API: Instantiate classes such as `ColorControl`, `BooleanControl`, `NumberControl`, and `SelectControl` directly
+  - Web components: Render standalone control instances or use the control classes in custom UI layouts
+- **Preview toggle** - Added `showPreview` option to disable the live options preview panel when it is not needed
+  - JavaScript API: Use `showPreview: false` in `ControlsOptionsObject`
+  - Web components: Use `show-preview="false"`
+
+### Fixed
+- **Color control animation behavior** - Color picker and opacity slider now animate on click-to-jump updates, while drag updates remain non-animated
+- **Sensible default min and max for font size** - Different default range based
+  on the unit
+
+## [0.8.0] - 2026-04-14
+
+### Added
 - **Nullable option** - Added `nullable` option to allow controls to explicitly set null values
   - JavaScript API: Use `nullable: true` in control configuration
   - Web Components: Use `nullable` attribute (e.g., `<highcharts-control nullable>`)

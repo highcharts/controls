@@ -1,27 +1,4 @@
 /**
- * Type guard for SeparatorParams
- */
-function is$5(params) {
-    return params.type === 'separator';
-}
-function create$5(controls) {
-    if (!controls.container) {
-        throw new Error('Container for controls not found');
-    }
-    const row = controls.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
-    const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
-    // Add second cell to match the two-column layout
-    row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
-    cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
-}
-
-var SeparatorControl = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    create: create$5,
-    is: is$5
-});
-
-/**
  * Utility functions for Highcharts Controls
  */
 /**
@@ -76,282 +53,507 @@ function createNullableButton(params, controlDiv, onToggle) {
 }
 
 /**
- * Type guard for BooleanControlParams
+ * Base Control Class
+ *
+ * Provides a standalone control that can be used independently or as part
+ * of the Controls collection. Extends EventTarget for native event handling.
  */
-function is$4(params) {
-    return params.type === 'boolean';
+const controlIdCounts = {};
+class Control extends EventTarget {
+    constructor(params, container) {
+        super();
+        this.params = params;
+        this.container = container;
+        this.elements = {};
+        this._value = params.value;
+        this.instanceId = createUniqueId(this.params.path || 'control');
+        if (container) {
+            this.render(container);
+        }
+    }
+    getScopedId(suffix) {
+        return `${suffix}-${this.instanceId}`;
+    }
+    /**
+     * Get the current value of the control
+     */
+    get value() {
+        return this._value;
+    }
+    /**
+     * Set the value of the control programmatically
+     */
+    set value(newValue) {
+        if (this._value !== newValue) {
+            const oldValue = this._value;
+            this._value = newValue;
+            this.updateUI();
+            this.emit('change', { value: newValue, oldValue, path: this.params.path });
+        }
+    }
+    /**
+     * Emit a custom event
+     */
+    emit(eventName, detail) {
+        this.dispatchEvent(new CustomEvent(eventName, {
+            detail,
+            bubbles: true,
+            cancelable: true
+        }));
+    }
+    /**
+     * Destroy the control and clean up
+     */
+    destroy() {
+        this.elements.controlDiv?.remove();
+        // Subclasses can override to add more cleanup
+    }
+    /**
+     * Get the control's DOM element
+     */
+    getElement() {
+        return this.elements.controlDiv;
+    }
 }
+function createUniqueId(path) {
+    const normalized = path
+        .replace(/[^a-z0-9_-]/gi, '-')
+        .replace(/^-|-$/g, '') || 'control';
+    const count = controlIdCounts[normalized] || 0;
+    controlIdCounts[normalized] = count + 1;
+    return count === 0 ? normalized : `${normalized}-${count}`;
+}
+
 /**
- * Create a boolean control with scaffolding
+ * BooleanControl class - toggle switch for boolean values
  */
-function create$4(controls, params) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        htmlFor: `toggle-checkbox-${rid}`,
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
-    }));
-    if (params.nullable) {
-        // Nullable tri-state toggle: false (left), null (middle), true (right)
-        const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle hcc-toggle-nullable' }));
-        let currentState = params.value === null || params.value === undefined ? null : Boolean(params.value);
-        // Create a hidden input to store state (not used for interaction)
-        labelToggle.appendChild(Object.assign(document.createElement('input'), {
-            type: 'hidden',
-            id: `toggle-checkbox-${rid}`
+class BooleanControl extends Control {
+    /**
+     * Type guard for BooleanControlParams
+     */
+    static is(params) {
+        return params.type === 'boolean';
+    }
+    /**
+     * Render the boolean control
+     */
+    render(container) {
+        const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        this.elements.controlDiv = controlDiv;
+        this.elements.keyDiv = keyDiv;
+        this.elements.valueDivInner = valueDivInner;
+        const rid = this.getScopedId('toggle-checkbox');
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            htmlFor: rid,
+            innerHTML: this.params.label || `<code>${this.params.path}</code>`,
+            title: this.params.label || this.params.path
         }));
-        const slider = labelToggle.appendChild(Object.assign(document.createElement('span'), {
-            className: 'hcc-toggle-slider',
-            'aria-hidden': 'true'
-        }));
-        const updateTogglePosition = () => {
+        if (this.params.nullable) {
+            // Nullable tri-state toggle: false (left), null (middle), true (right)
+            const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle hcc-toggle-nullable' }));
+            this.currentState = this._value === null || this._value === undefined ? null : Boolean(this._value);
+            // Create a hidden input to store state (not used for interaction)
+            this.input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
+                type: 'hidden',
+                id: rid
+            }));
+            this.slider = labelToggle.appendChild(Object.assign(document.createElement('span'), {
+                className: 'hcc-toggle-slider',
+                'aria-hidden': 'true'
+            }));
+            this.slider.addEventListener('click', () => {
+                this.handleNullableClick();
+            });
+            this.updateUI();
+        }
+        else {
+            // Standard two-state toggle
+            const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
+            this.input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
+                type: 'checkbox',
+                id: rid
+            }));
+            this.slider = labelToggle.appendChild(Object.assign(document.createElement('span'), {
+                className: 'hcc-toggle-slider',
+                'aria-hidden': 'true'
+            }));
+            this.input.addEventListener('change', (e) => {
+                if (e.target?.closest?.('highcharts-control')) {
+                    e.stopPropagation();
+                }
+                this.handleStandardChange();
+            });
+            this.updateUI();
+        }
+    }
+    /**
+     * Handle click on nullable toggle
+     */
+    handleNullableClick() {
+        // Cycle: false -> null -> true -> false
+        if (this.currentState === false) {
+            this.currentState = null;
+        }
+        else if (this.currentState === null) {
+            this.currentState = true;
+        }
+        else {
+            this.currentState = false;
+        }
+        const oldValue = this._value;
+        this._value = this.currentState;
+        this.updateUI();
+        this.emit('change', {
+            value: this.currentState,
+            oldValue,
+            path: this.params.path
+        });
+    }
+    /**
+     * Handle change on standard toggle
+     */
+    handleStandardChange() {
+        if (!this.input)
+            return;
+        const oldValue = this._value;
+        this._value = this.input.checked;
+        this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+        this.emit('change', {
+            value: this._value,
+            oldValue,
+            path: this.params.path
+        });
+    }
+    /**
+     * Update UI to reflect current value
+     */
+    updateUI() {
+        if (this.params.nullable && this.slider) {
             // Remove all state classes
-            slider.classList.remove('hcc-toggle-slider-false', 'hcc-toggle-slider-null', 'hcc-toggle-slider-true');
-            if (currentState === null) {
-                slider.classList.add('hcc-toggle-slider-null');
-                controlDiv.classList.add('hcc-control-nullish');
+            this.slider.classList.remove('hcc-toggle-slider-false', 'hcc-toggle-slider-null', 'hcc-toggle-slider-true');
+            if (this.currentState === null) {
+                this.slider.classList.add('hcc-toggle-slider-null');
+                this.elements.controlDiv?.classList.add('hcc-control-nullish');
             }
-            else if (currentState === false) {
-                slider.classList.add('hcc-toggle-slider-false');
-                controlDiv.classList.remove('hcc-control-nullish');
-            }
-            else {
-                slider.classList.add('hcc-toggle-slider-true');
-                controlDiv.classList.remove('hcc-control-nullish');
-            }
-        };
-        updateTogglePosition();
-        slider.addEventListener('click', () => {
-            // Cycle: false -> null -> true -> false
-            if (currentState === false) {
-                currentState = null;
-            }
-            else if (currentState === null) {
-                currentState = true;
+            else if (this.currentState === false) {
+                this.slider.classList.add('hcc-toggle-slider-false');
+                this.elements.controlDiv?.classList.remove('hcc-control-nullish');
             }
             else {
-                currentState = false;
+                this.slider.classList.add('hcc-toggle-slider-true');
+                this.elements.controlDiv?.classList.remove('hcc-control-nullish');
             }
-            updateTogglePosition();
-            controls.setNestedValue(params.path, currentState);
-        });
-    }
-    else {
-        // Standard two-state toggle
-        const labelToggle = valueDivInner.appendChild(Object.assign(document.createElement('label'), { className: 'hcc-toggle' }));
-        const input = labelToggle.appendChild(Object.assign(document.createElement('input'), {
-            type: 'checkbox',
-            id: `toggle-checkbox-${rid}`
-        }));
-        labelToggle.appendChild(Object.assign(document.createElement('span'), {
-            className: 'hcc-toggle-slider',
-            'aria-hidden': 'true'
-        }));
-        input.checked = Boolean(params.value);
-        input.addEventListener('change', () => {
-            controlDiv.classList.remove('hcc-control-nullish');
-            const value = input.checked;
-            controls.setNestedValue(params.path, value);
-        });
+        }
+        else if (this.input && this.input.type === 'checkbox') {
+            this.input.checked = Boolean(this._value);
+        }
     }
 }
-
-var BooleanControl = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    create: create$4,
-    is: is$4
-});
-
 /**
- * Type guard for SelectControlParams
+ * Legacy factory function for backward compatibility
+ * @deprecated Use BooleanControl class directly
  */
-function is$3(params) {
-    return params.type === 'select';
-}
-/**
- * Create a select control with scaffolding
- */
-function create$3(controls, params) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
+function create$5(controls, params) {
+    const control = new BooleanControl(params);
+    control.render(controls.container);
+    // Bind to target if it exists
+    control.addEventListener('change', ((e) => {
+        const customEvent = e;
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value);
+        }
     }));
-    // Deduce options
-    if (params.path.endsWith('.align') ||
-        params.path.endsWith('.textAlign')) {
-        params.options || (params.options = ['left', 'center', 'right']);
-    }
-    if (params.path.toLowerCase().endsWith('dashstyle')) {
-        params.options || (params.options = [
-            'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
-            'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
-            'DashDot', 'LongDashDot', 'LongDashDotDot'
-        ]);
-    }
-    if (params.path.endsWith('.fontWeight')) {
-        params.options || (params.options = ['normal', 'bold', 'lighter']);
-    }
-    if (params.path.endsWith('.verticalAlign')) {
-        params.options || (params.options = ['top', 'middle', 'bottom']);
-    }
-    // Ensure current value is in options
-    const options = params.options || [];
-    if (params.value !== null &&
-        params.value !== undefined &&
-        !options.includes(params.value)) {
-        options.unshift(params.value);
-    }
-    // Determine whether to use select dropdown or button group
-    const totalLength = options.reduce((sum, opt) => sum + opt.length, 0);
-    const useDropdown = options.length > 3 || totalLength > 24;
-    if (useDropdown) {
-        // Render as select dropdown
-        valueDivInner.classList.add('hcc-select-control');
-        const select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
-            className: 'hcc-select-dropdown'
-        }));
-        // Add null option if nullable
-        if (params.nullable) {
-            const isNullSelected = params.value === null || params.value === undefined;
-            select.appendChild(Object.assign(document.createElement('option'), {
-                value: '__null__',
-                innerText: '—',
-                selected: isNullSelected
-            }));
-            if (isNullSelected) {
-                controlDiv.classList.add('hcc-control-nullish');
-            }
-        }
-        options.forEach((option) => {
-            const isSelected = params.value !== null &&
-                params.value !== undefined &&
-                params.value === option;
-            select.appendChild(Object.assign(document.createElement('option'), {
-                value: option,
-                innerText: option,
-                selected: isSelected
-            }));
-        });
-        select.addEventListener('change', () => {
-            const value = select.value;
-            if (value === '__null__') {
-                controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null);
-            }
-            else {
-                controlDiv.classList.remove('hcc-control-nullish');
-                controls.setNestedValue(params.path, value);
-            }
-        });
-    }
-    else {
-        // Render as button group
-        valueDivInner.classList.add('hcc-button-group');
-        options.forEach((option) => {
-            const isActive = params.value !== null &&
-                params.value !== undefined &&
-                params.value === option;
-            const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
-                className: 'hcc-button' +
-                    (isActive ? ' active' : ''),
-                innerText: option
-            }));
-            button.dataset.path = params.path;
-            button.dataset.value = option;
-            button.addEventListener('click', () => {
-                controlDiv.classList.remove('hcc-control-nullish');
-                const value = button.getAttribute('data-value');
-                controls.setNestedValue(params.path, value);
-                // Update active state for all buttons in this group
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                allButtons.forEach((b) => b.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
-        // Add null button if nullable (at the end, on the right)
-        if (params.nullable) {
-            const isNullActive = params.value === null || params.value === undefined;
-            const nullButton = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
-                className: 'hcc-button' +
-                    (isNullActive ? ' active' : ''),
-                innerHTML: '⊘'
-            }));
-            nullButton.dataset.path = params.path;
-            nullButton.dataset.value = '__null__';
-            if (isNullActive) {
-                controlDiv.classList.add('hcc-control-nullish');
-            }
-            nullButton.addEventListener('click', () => {
-                controlDiv.classList.add('hcc-control-nullish');
-                controls.setNestedValue(params.path, null);
-                // Update active state for all buttons in this group
-                const allButtons = document.querySelectorAll(`[data-path="${params.path}"]`);
-                allButtons.forEach((b) => b.classList.remove('active'));
-                nullButton.classList.add('active');
-            });
-        }
-    }
+}
+/**
+ * Legacy type guard for backward compatibility
+ * @deprecated Use BooleanControl.is() instead
+ */
+function is$5(params) {
+    return BooleanControl.is(params);
 }
 
-var SelectControl = /*#__PURE__*/Object.freeze({
+var BooleanControl$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    create: create$3,
-    is: is$3
+    BooleanControl: BooleanControl,
+    create: create$5,
+    is: is$5
 });
 
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
-const Product$1 = window.Highcharts || window.Grid;
+const Product$2 = window.Highcharts || window.Grid;
 /**
- * Type guard for ColorControlParams
+ * ColorControl class - standalone color picker with opacity
  */
-function is$2(params) {
-    return params.type === 'color';
-}
-/**
- * Create a color control with scaffolding
- */
-function create$2(controls, params) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        htmlFor: `color-input-${rid}`,
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
-    }));
-    const colorInput = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
-        type: 'color',
-        id: `color-input-${rid}`
-    }));
-    const valueEl = valueDivInner.appendChild(Object.assign(document.createElement('label'), {
-        id: `color-value-${rid}`,
-        className: 'hcc-color-value',
-        htmlFor: `color-input-${rid}`,
-        title: params.label || params.path
-    }));
-    const opacityDisplay = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
-        id: `opacity-display-${rid}`,
-        className: 'hcc-opacity-display',
-        title: params.label || params.path
-    }));
-    valueDivInner.appendChild(Object.assign(document.createElement('span'), {
-        textContent: '%',
-        className: 'hcc-opacity-input-label'
-    }));
-    // Container for the range slider popup
-    const opacityRangeContainer = valueDivInner.appendChild(Object.assign(document.createElement('div'), {
-        className: 'hcc-opacity-range-container hcc-hidden'
-    }));
-    const opacityInput = opacityRangeContainer.appendChild(Object.assign(document.createElement('input'), {
-        type: 'range',
-        id: `opacity-input-${rid}`,
-        className: 'hcc-opacity-input',
-        min: '0',
-        max: '100',
-        step: '1'
-    }));
-    const getHex = (color, includeAlpha) => {
+class ColorControl extends Control {
+    constructor() {
+        super(...arguments);
+        this.colorInputCount = 0;
+        this.lastColorInputAt = 0;
+        this.opacityIsDragging = false;
+        this.opacityMouseIsDown = false;
+    }
+    /**
+     * Type guard for ColorControlParams
+     */
+    static is(params) {
+        return params.type === 'color';
+    }
+    /**
+     * Render the color control
+     */
+    render(container) {
+        const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        this.elements.controlDiv = controlDiv;
+        this.elements.keyDiv = keyDiv;
+        this.elements.valueDivInner = valueDivInner;
+        const rid = this.getScopedId('color-input');
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            htmlFor: rid,
+            innerHTML: this.params.label || `<code>${this.params.path}</code>`,
+            title: this.params.label || this.params.path
+        }));
+        this.colorInput = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
+            type: 'color',
+            id: rid
+        }));
+        this.valueEl = valueDivInner.appendChild(Object.assign(document.createElement('label'), {
+            id: this.getScopedId('color-value'),
+            className: 'hcc-color-value',
+            htmlFor: rid,
+            title: this.params.label || this.params.path
+        }));
+        this.opacityDisplay = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
+            id: this.getScopedId('opacity-display'),
+            className: 'hcc-opacity-display',
+            title: this.params.label || this.params.path
+        }));
+        valueDivInner.appendChild(Object.assign(document.createElement('span'), {
+            textContent: '%',
+            className: 'hcc-opacity-input-label'
+        }));
+        // Container for the range slider popup
+        this.opacityRangeContainer = valueDivInner.appendChild(Object.assign(document.createElement('div'), {
+            className: 'hcc-opacity-range-container hcc-hidden'
+        }));
+        this.opacityInput = this.opacityRangeContainer.appendChild(Object.assign(document.createElement('input'), {
+            type: 'range',
+            id: this.getScopedId('opacity-input'),
+            className: 'hcc-opacity-input',
+            min: '0',
+            max: '100',
+            step: '1'
+        }));
+        this.opacityInput.addEventListener('mousedown', () => {
+            this.opacityMouseIsDown = true;
+            this.opacityIsDragging = false;
+        });
+        this.onOpacityMouseMove = () => {
+            if (this.opacityMouseIsDown) {
+                this.opacityIsDragging = true;
+            }
+        };
+        document.addEventListener('mousemove', this.onOpacityMouseMove);
+        this.onOpacityMouseUp = () => {
+            this.opacityMouseIsDown = false;
+        };
+        document.addEventListener('mouseup', this.onOpacityMouseUp);
+        // Show/hide range slider on opacity display click
+        this.opacityDisplay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.opacityRangeContainer.classList.remove('hcc-hidden');
+            this.opacityInput.focus();
+        });
+        // Hide range slider on Enter key
+        this.opacityInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.opacityRangeContainer.classList.add('hcc-hidden');
+            }
+        });
+        // Hide range slider when clicking outside
+        this.hideRangeHandler = (e) => {
+            if (!this.opacityRangeContainer.contains(e.target) &&
+                !this.opacityDisplay.contains(e.target)) {
+                this.opacityRangeContainer.classList.add('hcc-hidden');
+            }
+        };
+        document.addEventListener('click', this.hideRangeHandler);
+        // Track color picker interaction to distinguish drag preview from single click
+        this.colorInput.addEventListener('input', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleColorInput(e);
+        });
+        this.colorInput.addEventListener('change', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleColorChange();
+        });
+        this.opacityInput.addEventListener('input', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleOpacityInput(e);
+        });
+        this.opacityInput.addEventListener('change', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleOpacityChange();
+        });
+        // Add nullable button if needed
+        if (this.params.nullable) {
+            const nullableButton = createNullableButton(this.params, controlDiv, () => {
+                this.value = null;
+            });
+            valueDivInner.appendChild(nullableButton);
+        }
+        // Initialize UI
+        this.updateUI();
+    }
+    /**
+     * Handle input changes from color picker or opacity slider
+     */
+    handleColorInput(event) {
+        if (!this.colorInput || !this.opacityInput)
+            return;
+        // Programmatic updates (tests/scripts) usually only trigger input.
+        if (!event.isTrusted) {
+            this.resetColorInputSession();
+            this.applyInputsAndEmit(false);
+            return;
+        }
+        const now = Date.now();
+        // New interaction session (first click or after a short idle gap)
+        if (this.colorInputCount > 0 && now - this.lastColorInputAt > 250) {
+            this.colorInputCount = 0;
+        }
+        this.colorInputCount += 1;
+        this.lastColorInputAt = now;
+        // First color pick in a session behaves like a click jump (animate).
+        // Follow-up picks in same session are treated like dragging (no animation).
+        this.applyInputsAndEmit(this.colorInputCount === 1);
+        if (this.colorInputResetTimer) {
+            window.clearTimeout(this.colorInputResetTimer);
+        }
+        this.colorInputResetTimer = window.setTimeout(() => {
+            this.resetColorInputSession();
+        }, 300);
+    }
+    /**
+     * Handle color picker commit
+     */
+    handleColorChange() {
+        if (!this.colorInput)
+            return;
+        // Fallback for browsers that only emit change from the native picker
+        if (this.colorInputCount === 0) {
+            this.applyInputsAndEmit(true);
+        }
+        this.resetColorInputSession();
+    }
+    /**
+     * Handle opacity slider input
+     */
+    handleOpacityInput(event) {
+        // Programmatic updates (tests/scripts) usually only trigger input.
+        if (!event.isTrusted) {
+            this.applyInputsAndEmit(false);
+            return;
+        }
+        if (this.opacityIsDragging) {
+            this.applyInputsAndEmit(false);
+        }
+    }
+    /**
+     * Handle opacity slider commit
+     */
+    handleOpacityChange() {
+        if (!this.opacityIsDragging) {
+            this.applyInputsAndEmit(true);
+        }
+        this.opacityIsDragging = false;
+    }
+    /**
+     * Reset color interaction tracking
+     */
+    resetColorInputSession() {
+        if (this.colorInputResetTimer) {
+            window.clearTimeout(this.colorInputResetTimer);
+            this.colorInputResetTimer = undefined;
+        }
+        this.colorInputCount = 0;
+        this.lastColorInputAt = 0;
+    }
+    /**
+     * Update from current inputs and emit change
+     */
+    applyInputsAndEmit(animation) {
+        if (!this.colorInput || !this.opacityInput)
+            return;
+        this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+        const rgba = this.colorInput.value; // E.g. #RRGGBB
+        const opacity = parseFloat(this.opacityInput.value) / 100;
+        // Use Highcharts.color to apply opacity and produce rgba()/hex
+        const hcColor = Product$2.color(rgba).setOpacity(opacity);
+        const newValue = this.getHex(hcColor, true);
+        // Update internal value and emit event
+        const oldValue = this._value;
+        this._value = newValue;
+        // Update display elements
+        this.valueEl.textContent = this.getHex(hcColor);
+        this.opacityDisplay.textContent = this.opacityInput.value;
+        this.updateOpacityGradient(hcColor);
+        // Emit change event
+        this.emit('change', {
+            value: newValue,
+            oldValue,
+            path: this.params.path,
+            animation
+        });
+    }
+    /**
+     * Update UI to reflect current value
+     */
+    updateUI() {
+        if (!this.colorInput || !this.opacityInput || !this.valueEl || !this.opacityDisplay) {
+            return;
+        }
+        const isNullish = this._value === null || this._value === undefined;
+        let hcColor = isNullish ? Product$2.color('#808080') : Product$2.color(this._value);
+        if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
+            console.warn(`Highcharts Controls: Invalid color value for path "${this.params.path}": ${this._value}`);
+            // Treat invalid color as nullish
+            this.elements.controlDiv?.classList.add('hcc-control-nullish');
+            this.valueEl.textContent = '—';
+            this.colorInput.value = '#808080';
+            this.opacityInput.value = '100';
+            this.opacityDisplay.textContent = '100';
+        }
+        else if (isNullish) {
+            this.elements.controlDiv?.classList.add('hcc-control-nullish');
+            this.valueEl.textContent = '—';
+            this.colorInput.value = '#808080';
+            this.opacityInput.value = '100';
+            this.opacityDisplay.textContent = '100';
+        }
+        else {
+            this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+            const hex = this.getHex(hcColor);
+            const opacity = (hcColor.rgba[3] || 1) * 100;
+            this.colorInput.value = hex;
+            this.valueEl.textContent = hex;
+            this.opacityInput.value = String(Math.round(opacity));
+            this.opacityDisplay.textContent = String(Math.round(opacity));
+        }
+        // Initialize opacity slider gradient
+        this.updateOpacityGradient(hcColor);
+    }
+    /**
+     * Convert color to hex string
+     */
+    getHex(color, includeAlpha) {
         const rgba = color.rgba;
         let hex = `#${(((1 << 24) +
             (rgba[0] << 16) +
@@ -364,231 +566,859 @@ function create$2(controls, params) {
             hex += ((1 << 8) + alpha).toString(16).slice(1).toLowerCase();
         }
         return hex;
-    };
-    // Show/hide range slider on opacity display click
-    opacityDisplay.addEventListener('click', (e) => {
-        e.stopPropagation();
-        opacityRangeContainer.classList.remove('hcc-hidden');
-        opacityInput.focus();
-    });
-    // Hide range slider on Enter key
-    opacityInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            opacityRangeContainer.classList.add('hcc-hidden');
-        }
-    });
-    // Hide range slider when clicking outside
-    const hideRangeOnClickOutside = (e) => {
-        if (!opacityRangeContainer.contains(e.target) &&
-            !opacityDisplay.contains(e.target)) {
-            opacityRangeContainer.classList.add('hcc-hidden');
-        }
-    };
-    document.addEventListener('click', hideRangeOnClickOutside);
-    // Update opacity slider gradient based on color
-    const updateOpacityGradient = (color) => {
+    }
+    /**
+     * Update opacity slider gradient based on color
+     */
+    updateOpacityGradient(color) {
+        if (!this.opacityInput)
+            return;
         const r = color.rgba[0];
         const g = color.rgba[1];
         const b = color.rgba[2];
-        opacityInput.style.setProperty('--hcc-opacity-gradient-start', `rgba(${r}, ${g}, ${b}, 0)`);
-        opacityInput.style.setProperty('--hcc-opacity-gradient-end', `rgba(${r}, ${g}, ${b}, 1)`);
-    };
-    const isNullish = params.value === null || params.value === undefined;
-    let hcColor = isNullish ? Product$1.color('#808080') : Product$1.color(params.value);
-    if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
-        console.warn(`Highcharts Controls: Invalid color value for path "${params.path}": ${params.value}`);
-        // Treat invalid color as nullish
-        controlDiv.classList.add('hcc-control-nullish');
-        valueEl.textContent = '—';
-        colorInput.value = '#808080';
-        opacityInput.value = '100';
-        opacityDisplay.textContent = '100';
+        this.opacityInput.style.setProperty('--hcc-opacity-gradient-start', `rgba(${r}, ${g}, ${b}, 0)`);
+        this.opacityInput.style.setProperty('--hcc-opacity-gradient-end', `rgba(${r}, ${g}, ${b}, 1)`);
     }
-    else if (isNullish) {
-        valueEl.textContent = '—';
-        colorInput.value = '#808080';
-        opacityInput.value = '100';
-        opacityDisplay.textContent = '100';
-    }
-    else {
-        const hex = getHex(hcColor), opacity = (hcColor.rgba[3] || 1) * 100;
-        colorInput.value = hex;
-        valueEl.textContent = hex;
-        opacityInput.value = String(Math.round(opacity));
-        opacityDisplay.textContent = String(Math.round(opacity));
-    }
-    // Initialize opacity slider gradient
-    updateOpacityGradient(hcColor);
-    const update = () => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        const rgba = colorInput.value; // E.g. #RRGGBB
-        const opacity = parseFloat(opacityInput.value) / 100;
-        // Use Highcharts.color to apply opacity and produce rgba()/hex
-        const hcColor = Product$1.color(rgba)
-            .setOpacity(opacity);
-        controls.setNestedValue(params.path, getHex(hcColor, true), false);
-        valueEl.textContent = getHex(hcColor);
-        opacityDisplay.textContent = opacityInput.value;
-        // Update opacity slider gradient based on current color
-        updateOpacityGradient(hcColor);
-    };
-    colorInput.addEventListener('input', update);
-    opacityInput.addEventListener('input', update);
-    if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, () => {
-            valueEl.textContent = '—';
-            controlDiv.classList.add('hcc-control-nullish');
-            controls.setNestedValue(params.path, null, false);
-        });
-        valueDivInner.appendChild(nullableButton);
+    /**
+     * Clean up event listeners
+     */
+    destroy() {
+        this.resetColorInputSession();
+        if (this.hideRangeHandler) {
+            document.removeEventListener('click', this.hideRangeHandler);
+        }
+        if (this.onOpacityMouseMove) {
+            document.removeEventListener('mousemove', this.onOpacityMouseMove);
+        }
+        if (this.onOpacityMouseUp) {
+            document.removeEventListener('mouseup', this.onOpacityMouseUp);
+        }
+        super.destroy();
     }
 }
+/**
+ * Legacy factory function for backward compatibility
+ * @deprecated Use ColorControl class directly
+ */
+function create$4(controls, params) {
+    const control = new ColorControl(params);
+    control.render(controls.container);
+    // Bind to target if it exists
+    control.addEventListener('change', ((e) => {
+        const customEvent = e;
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
+        }
+    }));
+}
+/**
+ * Legacy type guard for backward compatibility
+ * @deprecated Use ColorControl.is() instead
+ */
+function is$4(params) {
+    return ColorControl.is(params);
+}
 
-var ColorControl = /*#__PURE__*/Object.freeze({
+var ColorControl$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    ColorControl: ColorControl,
+    create: create$4,
+    is: is$4
+});
+
+/**
+ * NumberControl class - range slider for numeric values
+ */
+class NumberControl extends Control {
+    constructor() {
+        super(...arguments);
+        this.unit = '';
+        this.isDragging = false;
+        this.mouseIsDown = false;
+        this.decimals = 0;
+    }
+    /**
+     * Type guard for NumberControlParams
+     */
+    static is(params) {
+        return params.type === 'number';
+    }
+    /**
+     * Render the number control
+     */
+    render(container) {
+        var _a;
+        const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        const path = this.params.path || '';
+        this.elements.controlDiv = controlDiv;
+        this.elements.keyDiv = keyDiv;
+        this.elements.valueDivInner = valueDivInner;
+        const rid = this.getScopedId('range-input');
+        let value = this._value;
+        // Extract unit from current value if it's a string
+        let numericValue;
+        if (typeof value === 'string') {
+            const match = value.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
+            if (match) {
+                numericValue = parseFloat(match[1]);
+                this.unit = match[2] || this.unit;
+            }
+        }
+        else {
+            numericValue = value;
+        }
+        // Set default min/max if not provided
+        if (this.params.min === void 0 || this.params.max === void 0) {
+            if (/(lineWidth|borderWidth)$/i.test(path)) {
+                this.params.min = this.params.min ?? 0;
+                this.params.max = this.params.max ?? 5;
+            }
+            else if (/(borderRadius)$/i.test(path)) {
+                this.params.min = this.params.min ?? 0;
+                this.params.max = this.params.max ?? 10;
+            }
+            else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(path)) {
+                this.params.min = this.params.min ?? -100;
+                this.params.max = this.params.max ?? 100;
+            }
+            else if (/opacity$/i.test(path)) {
+                this.params.min = this.params.min ?? 0;
+                this.params.max = this.params.max ?? 1;
+                (_a = this.params).step ?? (_a.step = 0.01);
+            }
+            else if (/rotation$/i.test(path)) {
+                this.params.min = this.params.min ?? -90;
+                this.params.max = this.params.max ?? 90;
+            }
+            else if (/fontSize$/i.test(path)) {
+                if (this.unit === 'em') {
+                    this.params.min ?? (this.params.min = 0.6);
+                    this.params.max ?? (this.params.max = 2);
+                }
+                else if (this.unit === 'rem') {
+                    this.params.min ?? (this.params.min = 0.6);
+                    this.params.max ?? (this.params.max = 2);
+                }
+                else {
+                    this.params.min ?? (this.params.min = 6);
+                    this.params.max ?? (this.params.max = 32);
+                }
+            }
+            else {
+                this.params.min = this.params.min ?? 0;
+                this.params.max = this.params.max ?? 100;
+            }
+        }
+        if (typeof numericValue === 'number') {
+            if (this.params.min > numericValue) {
+                this.params.min = numericValue;
+            }
+            if (this.params.max < numericValue) {
+                this.params.max = numericValue;
+            }
+        }
+        // Set default step for em/rem units
+        if (!this.params.step && (this.unit === 'em' || this.unit === 'rem')) {
+            this.params.step = 0.1;
+        }
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            htmlFor: rid,
+            innerHTML: this.params.label || `<code>${path}</code>`,
+            title: this.params.label || path
+        }));
+        const isNullish = numericValue === null || numericValue === undefined;
+        this.valueEl = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
+            id: this.getScopedId('range-value'),
+            className: 'hcc-range-value',
+            title: this.params.label || path
+        }));
+        const strStep = String(this.params.step || 1);
+        this.input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
+            type: 'range',
+            id: rid,
+            min: String(this.params.min),
+            max: String(this.params.max),
+            step: strStep,
+            title: this.params.label || path
+        }));
+        if (isNullish) {
+            // Set to middle of range for nullish state
+            this.input.value = String((this.params.min + this.params.max) / 2);
+            this.valueEl.textContent = '';
+        }
+        else {
+            this.input.value = String(numericValue);
+            this.valueEl.textContent = this.unit ? `${numericValue}${this.unit}` : String(numericValue);
+        }
+        // Track if user is actively dragging vs clicking to jump
+        this.input.addEventListener('mousedown', () => {
+            this.mouseIsDown = true;
+            this.isDragging = false;
+        });
+        // Detect actual dragging by tracking mouse movement
+        this.onMouseMove = () => {
+            if (this.mouseIsDown) {
+                this.isDragging = true;
+            }
+        };
+        document.addEventListener('mousemove', this.onMouseMove);
+        this.onMouseUp = () => {
+            this.mouseIsDown = false;
+        };
+        document.addEventListener('mouseup', this.onMouseUp);
+        // Keep a fixed number of decimals to avoid jumping (#7)
+        this.decimals = strStep.indexOf('.') >= 0 ?
+            strStep.split('.')[1].length : 0;
+        this.input.addEventListener('input', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleInputChange(false);
+        });
+        this.input.addEventListener('change', (e) => {
+            if (e.target?.closest?.('highcharts-control')) {
+                e.stopPropagation();
+            }
+            this.handleInputChange(true);
+        });
+        // Add nullable button if needed
+        if (this.params.nullable) {
+            const nullableButton = createNullableButton(this.params, controlDiv, () => {
+                this.value = null;
+            });
+            valueDivInner.appendChild(nullableButton);
+        }
+    }
+    /**
+     * Handle input changes
+     */
+    handleInputChange(isChangeEvent) {
+        if (!this.input || !this.valueEl)
+            return;
+        this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+        if (isChangeEvent) {
+            // Only emit/animate if user clicked to jump, not after dragging
+            if (!this.isDragging) {
+                this.emitValue(true);
+            }
+            this.isDragging = false;
+        }
+        else {
+            // During dragging
+            if (this.isDragging) {
+                this.emitValue(false);
+            }
+        }
+    }
+    /**
+     * Emit value change event
+     */
+    emitValue(animation) {
+        if (!this.input || !this.valueEl)
+            return;
+        const numValue = parseFloat(this.input.value);
+        const sValue = numValue.toFixed(this.decimals);
+        const displayValue = this.unit ? `${sValue}${this.unit}` : sValue;
+        const chartValue = this.unit ? `${numValue}${this.unit}` : numValue;
+        this.valueEl.textContent = displayValue;
+        const oldValue = this._value;
+        this._value = chartValue;
+        this.emit('change', {
+            value: chartValue,
+            oldValue,
+            path: this.params.path,
+            animation
+        });
+    }
+    /**
+     * Update UI to reflect current value
+     */
+    updateUI() {
+        if (!this.input || !this.valueEl)
+            return;
+        if (this._value === null || this._value === undefined) {
+            this.input.value = String((this.params.min + this.params.max) / 2);
+            this.valueEl.textContent = '';
+            this.elements.controlDiv?.classList.add('hcc-control-nullish');
+        }
+        else {
+            let numericValue;
+            if (typeof this._value === 'string') {
+                const match = this._value.match(/^([+-]?\d+\.?\d*)/);
+                if (match) {
+                    numericValue = parseFloat(match[1]);
+                }
+            }
+            else {
+                numericValue = this._value;
+            }
+            if (numericValue !== undefined) {
+                this.input.value = String(numericValue);
+                this.valueEl.textContent = this.unit ?
+                    `${numericValue}${this.unit}` :
+                    String(numericValue);
+            }
+            this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+        }
+    }
+    /**
+     * Clean up event listeners
+     */
+    destroy() {
+        if (this.onMouseMove) {
+            document.removeEventListener('mousemove', this.onMouseMove);
+        }
+        if (this.onMouseUp) {
+            document.removeEventListener('mouseup', this.onMouseUp);
+        }
+        super.destroy();
+    }
+}
+/**
+ * Legacy factory function for backward compatibility
+ * @deprecated Use NumberControl class directly
+ */
+function create$3(controls, params) {
+    const control = new NumberControl(params);
+    control.render(controls.container);
+    // Bind to target if it exists
+    control.addEventListener('change', ((e) => {
+        const customEvent = e;
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value, customEvent.detail.animation);
+        }
+    }));
+}
+/**
+ * Legacy type guard for backward compatibility
+ * @deprecated Use NumberControl.is() instead
+ */
+function is$3(params) {
+    return NumberControl.is(params);
+}
+
+var NumberControl$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    NumberControl: NumberControl,
+    create: create$3,
+    is: is$3
+});
+
+/**
+ * SelectControl class - dropdown or button-group selector for string values
+ */
+class SelectControl extends Control {
+    constructor() {
+        super(...arguments);
+        this.buttons = [];
+    }
+    /**
+     * Type guard for SelectControlParams
+     */
+    static is(params) {
+        return params.type === 'select';
+    }
+    /**
+     * Render the select control
+     */
+    render(container) {
+        var _a, _b, _c, _d;
+        const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(this.params, container);
+        const path = this.params.path || '';
+        this.elements.controlDiv = controlDiv;
+        this.elements.keyDiv = keyDiv;
+        this.elements.valueDivInner = valueDivInner;
+        keyDiv.appendChild(Object.assign(document.createElement('label'), {
+            innerHTML: this.params.label || `<code>${path}</code>`,
+            title: this.params.label || path
+        }));
+        // Deduce options
+        if (path.endsWith('.align') ||
+            path.endsWith('.textAlign')) {
+            (_a = this.params).options || (_a.options = ['left', 'center', 'right']);
+        }
+        if (path.toLowerCase().endsWith('dashstyle')) {
+            (_b = this.params).options || (_b.options = [
+                'Solid', 'ShortDash', 'ShortDot', 'ShortDashDot',
+                'ShortDashDotDot', 'Dot', 'Dash', 'LongDash',
+                'DashDot', 'LongDashDot', 'LongDashDotDot'
+            ]);
+        }
+        if (path.endsWith('.fontWeight')) {
+            (_c = this.params).options || (_c.options = ['normal', 'bold', 'lighter']);
+        }
+        if (path.endsWith('.verticalAlign')) {
+            (_d = this.params).options || (_d.options = ['top', 'middle', 'bottom']);
+        }
+        const options = this.params.options || [];
+        if (this._value !== null &&
+            this._value !== undefined &&
+            !options.includes(this._value)) {
+            options.unshift(String(this._value));
+        }
+        const totalLength = options.reduce((sum, opt) => sum + String(opt).length, 0);
+        const useDropdown = options.length > 3 || totalLength > 24;
+        if (useDropdown) {
+            valueDivInner.classList.add('hcc-select-control');
+            this.select = valueDivInner.appendChild(Object.assign(document.createElement('select'), {
+                className: 'hcc-select-dropdown'
+            }));
+            if (this.params.nullable) {
+                const isNullSelected = this._value === null || this._value === undefined;
+                this.select.appendChild(Object.assign(document.createElement('option'), {
+                    value: '__null__',
+                    innerText: '—',
+                    selected: isNullSelected
+                }));
+                if (isNullSelected) {
+                    controlDiv.classList.add('hcc-control-nullish');
+                }
+            }
+            options.forEach((option) => {
+                const isSelected = this._value !== null &&
+                    this._value !== undefined &&
+                    this._value === option;
+                this.select.appendChild(Object.assign(document.createElement('option'), {
+                    value: String(option),
+                    innerText: String(option),
+                    selected: isSelected
+                }));
+            });
+            this.select.addEventListener('change', () => {
+                const oldValue = this._value;
+                const value = this.select.value;
+                this._value = value === '__null__' ? null : value;
+                this.elements.controlDiv?.classList.toggle('hcc-control-nullish', this._value === null || this._value === undefined);
+                this.emit('change', {
+                    value: this._value,
+                    oldValue,
+                    path: this.params.path
+                });
+            });
+        }
+        else {
+            valueDivInner.classList.add('hcc-button-group');
+            options.forEach((option) => {
+                const isActive = this._value !== null &&
+                    this._value !== undefined &&
+                    this._value === option;
+                const button = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
+                    className: 'hcc-button' + (isActive ? ' active' : ''),
+                    innerText: String(option)
+                }));
+                button.dataset.path = path;
+                button.dataset.value = String(option);
+                this.buttons.push(button);
+                button.addEventListener('click', () => {
+                    const oldValue = this._value;
+                    const value = button.getAttribute('data-value');
+                    this._value = value;
+                    this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+                    this.emit('change', {
+                        value: this._value,
+                        oldValue,
+                        path: this.params.path
+                    });
+                    this.updateUI();
+                });
+            });
+            if (this.params.nullable) {
+                const isNullActive = this._value === null || this._value === undefined;
+                const nullButton = valueDivInner.appendChild(Object.assign(document.createElement('button'), {
+                    className: 'hcc-button' + (isNullActive ? ' active' : ''),
+                    innerHTML: '⊘'
+                }));
+                nullButton.dataset.path = path;
+                nullButton.dataset.value = '__null__';
+                this.buttons.push(nullButton);
+                if (isNullActive) {
+                    controlDiv.classList.add('hcc-control-nullish');
+                }
+                nullButton.addEventListener('click', () => {
+                    const oldValue = this._value;
+                    this._value = null;
+                    this.elements.controlDiv?.classList.add('hcc-control-nullish');
+                    this.emit('change', {
+                        value: this._value,
+                        oldValue,
+                        path: this.params.path
+                    });
+                    this.updateUI();
+                });
+            }
+        }
+        this.updateUI();
+    }
+    /**
+     * Update the UI to reflect the current value
+     */
+    updateUI() {
+        if (this.select) {
+            const value = this._value;
+            const isNull = value === null || value === undefined;
+            if (this.params.nullable && isNull) {
+                this.select.value = '__null__';
+                this.elements.controlDiv?.classList.add('hcc-control-nullish');
+            }
+            else {
+                this.select.value = String(value ?? '');
+                this.elements.controlDiv?.classList.remove('hcc-control-nullish');
+            }
+        }
+        this.buttons.forEach((button) => {
+            const isActive = this._value !== null &&
+                this._value !== undefined &&
+                this._value === button.getAttribute('data-value');
+            const isNullish = this._value === null || this._value === undefined;
+            const isNullButton = button.getAttribute('data-value') === '__null__';
+            button.classList.toggle('active', isNullButton ? isNullish : isActive);
+        });
+    }
+}
+/**
+ * Legacy factory function for backward compatibility
+ * @deprecated Use SelectControl class directly
+ */
+function create$2(controls, params) {
+    const control = new SelectControl(params);
+    control.render(controls.container);
+    control.addEventListener('change', ((e) => {
+        const customEvent = e;
+        if (params.path) {
+            controls.setNestedValue(params.path, customEvent.detail.value);
+        }
+    }));
+}
+/**
+ * Legacy type guard for backward compatibility
+ * @deprecated Use SelectControl.is() instead
+ */
+function is$2(params) {
+    return SelectControl.is(params);
+}
+
+var SelectControl$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    SelectControl: SelectControl,
     create: create$2,
     is: is$2
 });
 
-/**
- * Type guard for NumberControlParams
- */
-function is$1(params) {
-    return params.type === 'number';
-}
-/**
- * Create a number control with scaffolding
- */
-function create$1(controls, params) {
-    const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-'), value = params.value;
-    // Extract unit from current value if it's a string
-    let unit = '';
-    let numericValue;
-    if (typeof value === 'string') {
-        const match = value.match(/^([+-]?\d+\.?\d*)\s*(.*)$/);
-        if (match) {
-            numericValue = parseFloat(match[1]);
-            unit = match[2] || unit;
+const Product$1 = window.Highcharts || window.Grid;
+const StandaloneControlMap = {
+    boolean: BooleanControl,
+    color: ColorControl,
+    number: NumberControl,
+    select: SelectControl
+};
+// Create a web component around the Controls class
+// @example
+// <highcharts-controls target="#container">
+//     <highcharts-control
+//         type="color"
+//         path="chart.backgroundColor"
+//         value="#ff0000"
+//     ></highcharts-control>
+//     <highcharts-control
+//         type="boolean"
+//         path="legend.enabled"
+//         value="true"
+//     ></highcharts-control>
+//     <highcharts-control
+//         type="select"
+//         path="legend.align"
+//         options="left,center,right"
+//         value="right"
+//     ></highcharts-control>
+// </highcharts-controls>
+class HighchartsControlElement extends HTMLElement {
+    static get observedAttributes() {
+        return ['value'];
+    }
+    connectedCallback() {
+        if (this.closest('highcharts-controls')) {
+            return;
+        }
+        if (this.control) {
+            return;
+        }
+        const config = this.getConfig();
+        if (config.type === 'text') {
+            const input = this.appendChild(Object.assign(document.createElement('input'), {
+                type: 'text',
+                value: config.value ?? ''
+            }));
+            const handleValue = () => {
+                const value = input.value;
+                this._value = value;
+                this.dispatchEvent(new CustomEvent('input', {
+                    detail: { value },
+                    bubbles: true,
+                    cancelable: true,
+                    composed: true
+                }));
+                this.dispatchEvent(new CustomEvent('change', {
+                    detail: { value },
+                    bubbles: true,
+                    cancelable: true,
+                    composed: true
+                }));
+            };
+            input.addEventListener('input', handleValue);
+            input.addEventListener('change', handleValue);
+            return;
+        }
+        const ControlCtor = config.type && StandaloneControlMap[config.type];
+        if (!ControlCtor) {
+            return;
+        }
+        const control = new ControlCtor(config);
+        this.control = control;
+        control.render(this);
+        control.addEventListener('change', (event) => {
+            const detail = event.detail || {};
+            this._value = detail.value;
+            this.dispatchEvent(new CustomEvent('input', {
+                detail,
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
+            this.dispatchEvent(new CustomEvent('change', {
+                detail,
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }));
+        });
+        this.syncValueAttribute();
+    }
+    attributeChangedCallback(name, _oldValue, newValue) {
+        if (name !== 'value' || newValue === null) {
+            return;
+        }
+        const parsedValue = parseValue(newValue);
+        if (this.control && this._value === parsedValue) {
+            return;
+        }
+        this._value = parsedValue;
+        if (this.control) {
+            this.control.value = parsedValue;
         }
     }
-    else {
-        numericValue = value;
+    get value() {
+        if (this.control) {
+            return this.control.value;
+        }
+        if (this._value !== undefined) {
+            return this._value;
+        }
+        return parseValue(this.getAttribute('value'));
     }
-    // Set default min/max if not provided
-    if (params.min === void 0 || params.max === void 0) {
-        if (/(lineWidth|borderWidth)$/i.test(params.path)) {
-            params.min = params.min ?? 0;
-            params.max = params.max ?? 5;
+    set value(nextValue) {
+        this._value = nextValue;
+        if (this.control) {
+            this.control.value = nextValue;
+            return;
         }
-        else if (/(borderRadius)$/i.test(params.path)) {
-            params.min = params.min ?? 0;
-            params.max = params.max ?? 10;
-        }
-        else if (/\.(x|y|offsetX|offsetY|offset)$/i.test(params.path)) {
-            params.min = params.min ?? -100;
-            params.max = params.max ?? 100;
-        }
-        else if (/rotation$/i.test(params.path)) {
-            params.min = params.min ?? -90;
-            params.max = params.max ?? 90;
+        if (nextValue === null || nextValue === undefined) {
+            this.removeAttribute('value');
         }
         else {
-            params.min = params.min ?? 0;
-            params.max = params.max ?? 100;
+            this.setAttribute('value', String(nextValue));
         }
     }
-    if (typeof numericValue === 'number') {
-        if (params.min > numericValue) {
-            params.min = numericValue;
+    syncValueAttribute() {
+        const value = this.value;
+        if (value === null || value === undefined) {
+            this.removeAttribute('value');
         }
-        if (params.max < numericValue) {
-            params.max = numericValue;
+        else {
+            this.setAttribute('value', String(value));
         }
     }
-    // Set default step for em/rem units
-    if (!params.step && (unit === 'em' || unit === 'rem')) {
-        params.step = 0.1;
-    }
-    keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        htmlFor: `range-input-${rid}`,
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
-    }));
-    const isNullish = numericValue === null || numericValue === undefined;
-    const valueEl = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
-        id: `range-value-${rid}`,
-        className: 'hcc-range-value',
-        title: params.label || params.path
-    }));
-    const strStep = String(params.step || 1);
-    const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
-        type: 'range',
-        id: `range-input-${rid}`,
-        min: String(params.min),
-        max: String(params.max),
-        step: strStep,
-        title: params.label || params.path
-    }));
-    if (isNullish) {
-        // Set to middle of range for nullish state
-        input.value = String((params.min + params.max) / 2);
-        valueEl.textContent = '';
-    }
-    else {
-        input.value = String(numericValue);
-        valueEl.textContent = unit ? `${numericValue}${unit}` : String(numericValue);
-    }
-    // Track if user is actively dragging vs clicking to jump
-    let isDragging = false;
-    let mouseIsDown = false;
-    input.addEventListener('mousedown', () => {
-        mouseIsDown = true;
-        isDragging = false;
-    });
-    // Detect actual dragging by tracking mouse movement
-    const onMouseMove = () => {
-        if (mouseIsDown) {
-            isDragging = true;
+    getConfig() {
+        const config = {};
+        if (this.hasAttribute('path')) {
+            config.path = this.getAttribute('path') || undefined;
         }
-    };
-    document.addEventListener('mousemove', onMouseMove);
-    const onMouseUp = () => {
-        mouseIsDown = false;
-    };
-    document.addEventListener('mouseup', onMouseUp);
-    // Keep a fixed number of decimals to avoid jumping (#7)
-    const decimals = strStep.indexOf('.') >= 0 ?
-        strStep.split('.')[1].length : 0;
-    const setNestedValueWrapper = (animation) => {
-        const numValue = parseFloat(input.value), sValue = numValue.toFixed(decimals), displayValue = unit ? `${sValue}${unit}` : sValue, chartValue = unit ? `${numValue}${unit}` : numValue;
-        valueEl.textContent = displayValue;
-        controls.setNestedValue(params.path, chartValue, animation);
-    };
-    input.addEventListener('input', () => {
-        controlDiv.classList.remove('hcc-control-nullish');
-        if (isDragging) {
-            setNestedValueWrapper(false);
+        if (this.hasAttribute('label')) {
+            config.label = this.getAttribute('label') || undefined;
         }
-    });
-    input.addEventListener('change', () => {
-        // Only animate if user clicked to jump, not after dragging
-        if (!isDragging) {
-            setNestedValueWrapper(true);
+        if (this.hasAttribute('type')) {
+            config.type = this.getAttribute('type');
         }
-        isDragging = false;
-    });
-    if (params.nullable) {
-        const nullableButton = createNullableButton(params, controlDiv, () => {
-            valueEl.textContent = '';
-            controlDiv.classList.add('hcc-control-nullish');
-            controls.setNestedValue(params.path, null);
-        });
-        valueDivInner.appendChild(nullableButton);
+        if (this.hasAttribute('value')) {
+            config.value = parseValue(this.getAttribute('value'));
+        }
+        if (this.hasAttribute('options')) {
+            config.options = parseOptions(this.getAttribute('options'));
+        }
+        if (this.hasAttribute('min')) {
+            config.min = parseFloat(this.getAttribute('min') || '0');
+        }
+        if (this.hasAttribute('max')) {
+            config.max = parseFloat(this.getAttribute('max') || '100');
+        }
+        if (this.hasAttribute('step')) {
+            config.step = parseFloat(this.getAttribute('step') || '1');
+        }
+        if (this.hasAttribute('nullable')) {
+            config.nullable = true;
+        }
+        return config;
     }
 }
+class HighchartsGroupElement extends HTMLElement {
+    getConfig() {
+        const controls = [];
+        let description;
+        const descriptionEl = this.querySelector(':scope > highcharts-group-description');
+        if (descriptionEl) {
+            description = descriptionEl.innerHTML?.trim() || undefined;
+        }
+        this.querySelectorAll(':scope > highcharts-control, :scope > highcharts-separator').forEach((controlEl) => {
+            if (controlEl.tagName.toLowerCase() === 'highcharts-separator') {
+                controls.push({ type: 'separator' });
+            }
+            else if (controlEl.tagName.toLowerCase() === 'highcharts-control') {
+                const control = controlEl.getConfig();
+                if (control.path) {
+                    controls.push(control);
+                }
+            }
+        });
+        return {
+            group: this.getAttribute('header') || 'Group',
+            description,
+            collapsed: this.hasAttribute('collapsed') &&
+                this.getAttribute('collapsed') !== 'false',
+            collapsible: this.hasAttribute('collapsible') &&
+                this.getAttribute('collapsible') !== 'false',
+            className: this.getAttribute('class') || undefined,
+            controls
+        };
+    }
+}
+class HighchartsControlsElement extends HTMLElement {
+    connectedCallback() {
+        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false', displayAttr = this.getAttribute('display'), display = (displayAttr === 'block' || displayAttr === 'inline-block')
+            ? displayAttr
+            : 'inline-block', showPreview = this.getAttribute('show-preview') !== 'false';
+        let target = this.getTarget();
+        const Controls = window.HighchartsControls;
+        if (!Controls) {
+            return;
+        }
+        const init = (target) => {
+            Controls.controls(this, {
+                target,
+                injectCSS,
+                display: display,
+                showPreview,
+                controls: controls
+            });
+        };
+        Array.from(this.children).forEach((child) => {
+            if (child.tagName.toLowerCase() === 'highcharts-group') {
+                const groupConfig = child.getConfig();
+                controls.push(groupConfig);
+            }
+            else if (child.tagName.toLowerCase() === 'highcharts-separator') {
+                controls.push({ type: 'separator' });
+            }
+            else if (child.tagName.toLowerCase() === 'highcharts-control') {
+                const control = child.getConfig();
+                if (control.path) {
+                    controls.push(control);
+                }
+            }
+        });
+        if (target) {
+            init(target);
+        }
+        else {
+            const observer = new MutationObserver(() => {
+                target = this.getTarget();
+                if (target) {
+                    observer.disconnect();
+                    init(target);
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+    getTarget() {
+        const targetAttr = this.getAttribute('target');
+        if (targetAttr) {
+            const el = document.querySelector(targetAttr);
+            const target = el?.chart || el?.grid;
+            if (target) {
+                return target;
+            }
+        }
+        return Product$1?.charts?.[0] || Product$1?.grids?.[0];
+    }
+}
+queueMicrotask(() => {
+    if (!window.HighchartsControls) {
+        return;
+    }
+    if (!customElements.get('highcharts-control')) {
+        customElements.define('highcharts-control', HighchartsControlElement);
+    }
+    if (!customElements.get('highcharts-group')) {
+        customElements.define('highcharts-group', HighchartsGroupElement);
+    }
+    if (!customElements.get('highcharts-group-description')) {
+        customElements.define('highcharts-group-description', class extends HTMLElement {
+        });
+    }
+    if (!customElements.get('highcharts-separator')) {
+        customElements.define('highcharts-separator', class extends HTMLElement {
+        });
+    }
+    if (!customElements.get('highcharts-controls')) {
+        customElements.define('highcharts-controls', HighchartsControlsElement);
+    }
+});
+function parseValue(value) {
+    if (value === 'true') {
+        return true;
+    }
+    if (value === 'false') {
+        return false;
+    }
+    if (!isNaN(Number(value))) {
+        return Number(value);
+    }
+    return value;
+}
+function parseOptions(options) {
+    if (options) {
+        return options.split(',').map((s) => s.trim());
+    }
+    return [];
+}
 
-var NumberControl = /*#__PURE__*/Object.freeze({
+/**
+ * Type guard for SeparatorParams
+ */
+function is$1(params) {
+    return params.type === 'separator';
+}
+function create$1(controls) {
+    if (!controls.container) {
+        throw new Error('Container for controls not found');
+    }
+    const row = controls.container.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-row' }));
+    const cell1 = row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+    // Add second cell to match the two-column layout
+    row.appendChild(Object.assign(document.createElement('div'), { className: 'hcc-separator-cell' }));
+    cell1.appendChild(Object.assign(document.createElement('hr'), { className: 'hcc-separator' }));
+}
+
+var SeparatorControl = /*#__PURE__*/Object.freeze({
     __proto__: null,
     create: create$1,
     is: is$1
@@ -604,16 +1434,19 @@ function is(params) {
  * Create a text control with scaffolding
  */
 function create(controls, params) {
+    const path = params.path || 'control';
     const { controlDiv, keyDiv, valueDivInner } = createControlScaffolding(params, controls.container);
-    const rid = params.path.replace(/[^a-z0-9_-]/gi, '-');
+    const rid = `text-input-${path
+        .replace(/[^a-z0-9_-]/gi, '-')
+        .replace(/^-|-$/g, '') || 'control'}`;
     keyDiv.appendChild(Object.assign(document.createElement('label'), {
-        htmlFor: `text-input-${rid}`,
-        innerHTML: params.label || `<code>${params.path}</code>`,
-        title: params.label || params.path
+        htmlFor: rid,
+        innerHTML: params.label || `<code>${path}</code>`,
+        title: params.label || path
     }));
     const input = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
         type: 'text',
-        id: `text-input-${rid}`,
+        id: rid,
         className: 'hcc-text-input',
         title: params.label || params.path
     }));
@@ -629,14 +1462,18 @@ function create(controls, params) {
         controlDiv.classList.remove('hcc-control-nullish');
         input.placeholder = '';
         const value = input.value;
-        controls.setNestedValue(params.path, value, false);
+        if (params.path) {
+            controls.setNestedValue(params.path, value, true);
+        }
     });
     if (params.nullable) {
         const nullableButton = createNullableButton(params, controlDiv, () => {
             input.value = '';
             input.placeholder = 'null';
             controlDiv.classList.add('hcc-control-nullish');
-            controls.setNestedValue(params.path, null, false);
+            if (params.path) {
+                controls.setNestedValue(params.path, null, true);
+            }
         });
         valueDivInner.appendChild(nullableButton);
     }
@@ -656,10 +1493,10 @@ var TextControl = /*#__PURE__*/Object.freeze({
  * Registry of all control types, in order of priority for type checking
  */
 const controlTypeRegistry = [
-    SelectControl,
-    BooleanControl,
-    ColorControl,
-    NumberControl,
+    SelectControl$1,
+    BooleanControl$1,
+    ColorControl$1,
+    NumberControl$1,
     TextControl,
     SeparatorControl
 ];
@@ -688,9 +1525,7 @@ class Controls {
         this.target = (options.target ||
             Product?.charts?.[0] ||
             Product?.grids?.[0]);
-        if (!this.target) {
-            throw new Error('No target chart found for Highcharts Controls');
-        }
+        // Target is now optional - controls can work standalone
         // Inject CSS if requested
         if (options.injectCSS !== false) {
             this.injectCSS();
@@ -704,15 +1539,23 @@ class Controls {
                 this.addControl(control);
             }
         });
-        this.addPreview();
+        if (options.showPreview !== false) {
+            this.addPreview();
+        }
         // Keep the options preview updated
-        this.updateOptionsPreview();
+        if (options.showPreview !== false) {
+            this.updateOptionsPreview();
+        }
     }
     /**
      * Set a nested value on the target given a dot-separated path.
      * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
     setNestedValue(path, value, animation) {
+        // If no target, skip updating the chart
+        if (!this.target) {
+            return;
+        }
         // Split path into segments, handling array notation
         // e.g., 'series[0].data[1]' becomes ['series', '0', 'data', '1']
         const keys = path.split(/\.|\[|\]/).filter(s => s !== '');
@@ -901,7 +1744,8 @@ class Controls {
      * Deduce control type based on the params
      */
     deduceControlType(params) {
-        const { path, value } = params;
+        const { value } = params;
+        const path = params.path || '';
         if (typeof value === 'boolean') {
             return 'boolean';
         }
@@ -936,14 +1780,20 @@ class Controls {
     /**
      * Add a control
      */
+    /**
+     * Add a control
+     */
     addControl(params) {
         if (!this.container) {
             throw new Error('Container for controls not found');
         }
         // Infer value and type if not provided. Value comes first as it may
         // influence type deduction.
-        if (!is$5(params)) {
-            params.value ?? (params.value = getNestedValue(this.target.options, params.path));
+        if (!is$1(params)) {
+            // Only try to get nested value if target exists
+            if (this.target?.options && params.path) {
+                params.value ?? (params.value = getNestedValue(this.target.options, params.path));
+            }
             params.type || (params.type = this.deduceControlType(params));
         }
         // Find and instantiate the appropriate control type
@@ -1029,7 +1879,7 @@ class Controls {
     updateOptionsPreview() {
         const previewEl = this.container.parentElement
             ?.querySelector('.hcc-options-preview');
-        if (previewEl) {
+        if (previewEl && this.target) {
             const options = this.target.getOptions() || {};
             // Empty xAxis and yAxis structures
             Object.keys(options).forEach((key) => {
@@ -1103,173 +1953,6 @@ Controls.controls = function (container, options) {
     return new Controls(container, options);
 };
 window.HighchartsControls = Controls;
-// Create a web component around the Controls class
-// @example
-// <highcharts-controls target="#container">
-//     <highcharts-control
-//         type="color"
-//         path="chart.backgroundColor"
-//         value="#ff0000"
-//     ></highcharts-control>
-//     <highcharts-control
-//         type="boolean"
-//         path="legend.enabled"
-//         value="true"
-//     ></highcharts-control>
-//     <highcharts-control
-//         type="select"
-//         path="legend.align"
-//         options="left,center,right"
-//         value="right"
-//     ></highcharts-control>
-// </highcharts-controls>
-class HighchartsControlElement extends HTMLElement {
-    getConfig() {
-        const config = {
-            path: this.getAttribute('path') || ''
-        };
-        if (this.hasAttribute('label')) {
-            config.label = this.getAttribute('label') || undefined;
-        }
-        if (this.hasAttribute('type')) {
-            config.type = this.getAttribute('type');
-        }
-        if (this.hasAttribute('value')) {
-            config.value = parseValue(this.getAttribute('value'));
-        }
-        if (this.hasAttribute('options')) {
-            config.options = parseOptions(this.getAttribute('options'));
-        }
-        if (this.hasAttribute('min')) {
-            config.min = parseFloat(this.getAttribute('min') || '0');
-        }
-        if (this.hasAttribute('max')) {
-            config.max = parseFloat(this.getAttribute('max') || '100');
-        }
-        if (this.hasAttribute('step')) {
-            config.step = parseFloat(this.getAttribute('step') || '1');
-        }
-        if (this.hasAttribute('nullable')) {
-            config.nullable = true;
-        }
-        return config;
-    }
-}
-class HighchartsGroupElement extends HTMLElement {
-    getConfig() {
-        const controls = [];
-        let description;
-        // Extract description from highcharts-group-description element
-        const descriptionEl = this.querySelector(':scope > highcharts-group-description');
-        if (descriptionEl) {
-            description = descriptionEl.innerHTML?.trim() || undefined;
-        }
-        this.querySelectorAll(':scope > highcharts-control, :scope > highcharts-separator').forEach((controlEl) => {
-            if (controlEl.tagName.toLowerCase() === 'highcharts-separator') {
-                controls.push({ type: 'separator' });
-            }
-            else if (controlEl.tagName.toLowerCase() === 'highcharts-control') {
-                const control = controlEl.getConfig();
-                if (control.path) {
-                    controls.push(control);
-                }
-            }
-        });
-        return {
-            group: this.getAttribute('header') || 'Group',
-            description,
-            collapsed: this.hasAttribute('collapsed') &&
-                this.getAttribute('collapsed') !== 'false',
-            collapsible: this.hasAttribute('collapsible') &&
-                this.getAttribute('collapsible') !== 'false',
-            className: this.getAttribute('class') || undefined,
-            controls
-        };
-    }
-}
-class HighchartsControlsElement extends HTMLElement {
-    connectedCallback() {
-        const controls = [], injectCSS = this.getAttribute('inject-css') !== 'false', displayAttr = this.getAttribute('display'), display = (displayAttr === 'block' || displayAttr === 'inline-block')
-            ? displayAttr
-            : 'inline-block';
-        let target = this.getTarget();
-        const init = (target) => {
-            Controls.controls(this, {
-                target,
-                injectCSS,
-                display: display,
-                controls: controls
-            });
-        };
-        // Process direct children (both controls and groups)
-        Array.from(this.children).forEach((child) => {
-            if (child.tagName.toLowerCase() === 'highcharts-group') {
-                const groupConfig = child.getConfig();
-                controls.push(groupConfig);
-            }
-            else if (child.tagName.toLowerCase() === 'highcharts-separator') {
-                controls.push({ type: 'separator' });
-            }
-            else if (child.tagName.toLowerCase() === 'highcharts-control') {
-                const control = child.getConfig();
-                if (control.path) {
-                    controls.push(control);
-                }
-            }
-        });
-        // Initialize if target is found
-        if (target) {
-            init(target);
-        }
-        else {
-            // Listen for DOM update to retry initialization
-            const observer = new MutationObserver(() => {
-                target = this.getTarget();
-                if (target) {
-                    observer.disconnect();
-                    init(target);
-                }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-    getTarget() {
-        const targetAttr = this.getAttribute('target');
-        if (targetAttr) {
-            const el = document.querySelector(targetAttr);
-            const target = el?.chart || el?.grid;
-            if (target) {
-                return target;
-            }
-        }
-        return Product?.charts?.[0] || Product?.grids?.[0];
-    }
-}
-customElements.define('highcharts-control', HighchartsControlElement);
-customElements.define('highcharts-group', HighchartsGroupElement);
-customElements.define('highcharts-group-description', class extends HTMLElement {
-});
-customElements.define('highcharts-separator', class extends HTMLElement {
-});
-customElements.define('highcharts-controls', HighchartsControlsElement);
-function parseValue(value) {
-    if (value === 'true') {
-        return true;
-    }
-    if (value === 'false') {
-        return false;
-    }
-    if (!isNaN(Number(value))) {
-        return Number(value);
-    }
-    return value;
-}
-function parseOptions(options) {
-    if (options) {
-        return options.split(',').map((s) => s.trim());
-    }
-    return [];
-}
 
-export { Controls as default };
+export { BooleanControl, ColorControl, Control, NumberControl, SelectControl, Controls as default };
 //# sourceMappingURL=controls.js.map

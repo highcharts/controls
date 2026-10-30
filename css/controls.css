@@ -69,821 +69,831 @@ highcharts-separator {
         font-size: 13px;
         font-style: normal;
     }
+}
+
+.hcc-control div,
+.hcc-control input,
+.hcc-control label,
+.hcc-control select {
+    color: light-dark(#000000, #ffffff);
+    font-family: "IBM Plex Sans Var", sans-serif;
+    font-size: 13px;
+    font-style: normal;
+}
+
+.hcc-container {
+    display: inline-table;
+    width: 100%;
+    position: relative;
+}
+
+.hcc-control {
+    display: table-row;
+    align-items: center;
+}
+
+.hcc-key,
+.hcc-value {
+    display: table-cell;
+    line-height: 2em;
+    padding: 0.3em 0;
+}
+
+.hcc-key {
+    text-align: left;
+    white-space: nowrap;
+    padding-right: 1em;
+}
+
+.hcc-value {
+    text-align: right;
+    padding-right: 3px;
+}
+
+.hcc-value-inner {
+    border: 1px solid light-dark(#dddddd, #555555);
+    border-radius: 7px;
+    background: light-dark(#f8f9fa, #212529);
+    font-weight: 600;
+    min-height: 2.2em;
+    display: inline-block;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.hcc-value-inner:has(.hcc-toggle) {
+    border: none;
+    background: none;
+}
+
+.hcc-button-control .hcc-value-inner {
+    border: none;
+    background: none;
+    text-align: right;
+}
+
+.hcc-value-inner.hcc-color-control {
+    white-space: nowrap;
+}
+
+/* Nullable button styles */
+.hcc-nullable-button {
+    background: none;
+    border: none;
+    border-left: 1px solid light-dark(#dddddd, #555555);
+    color: light-dark(#888888, #888888);
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0.3em 0.6em;
+    margin: 0;
+    height: 2.2em;
+    min-height: 2.2em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms, background 200ms;
+    vertical-align: middle;
+}
+
+.hcc-nullable-button:hover {
+    background: light-dark(#f0f0f0, #2a2a2a);
+    color: light-dark(#666666, #aaaaaa);
+}
+
+/* Display mode adjustments, when the width should fit into a container */
+&.hcc-display-block {
 
     .hcc-container {
-        display: inline-table;
-        width: 100%;
-        position: relative;
+        display: block;
+    }
+
+    .hcc-group {
+        display: block;
     }
 
     .hcc-control {
-        display: table-row;
-        align-items: center;
+        display: block;
+        height: 3.2em;
+        position: relative;
     }
 
     .hcc-key,
     .hcc-value {
-        display: table-cell;
-        line-height: 2em;
-        padding: 0.3em 0;
+        display: block;
+        position: absolute;
     }
 
     .hcc-key {
-        text-align: left;
-        white-space: nowrap;
-        padding-right: 1em;
+        top: 0.3em;
     }
 
     .hcc-value {
-        text-align: right;
-        padding-right: 3px;
+        right: 0;
+        padding-left: 1.5em;
+        background: linear-gradient(
+            to right,
+            light-dark(#ffffff00, #14141400) 0,
+            light-dark(#ffffff, #141414) 1.4em
+        );
     }
 
-    .hcc-value-inner {
-        border: 1px solid light-dark(#dddddd, #555555);
-        border-radius: 7px;
-        background: light-dark(#f8f9fa, #212529);
-        font-weight: 600;
-        min-height: 2.2em;
-        display: inline-block;
-        text-align: center;
-        white-space: nowrap;
-    }
-
-    .hcc-value-inner:has(.hcc-toggle) {
-        border: none;
-        background: none;
-    }
-
-    .hcc-button-control .hcc-value-inner {
-        border: none;
-        background: none;
-        text-align: right;
-    }
-
-    .hcc-value-inner.hcc-color-control {
-        white-space: nowrap;
-    }
-
-    /* Nullable button styles */
-    .hcc-nullable-button {
-        background: none;
-        border: none;
-        border-left: 1px solid light-dark(#dddddd, #555555);
-        color: light-dark(#888888, #888888);
-        cursor: pointer;
-        font-size: 1em;
-        padding: 0.3em 0.6em;
-        margin: 0;
-        height: 2.2em;
-        min-height: 2.2em;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: color 200ms, background 200ms;
-        vertical-align: middle;
-    }
-
-    .hcc-nullable-button:hover {
-        background: light-dark(#f0f0f0, #2a2a2a);
-        color: light-dark(#666666, #aaaaaa);
-    }
-
-    /* Display mode adjustments, when the width should fit into a container */
-    &.hcc-display-block {
-
-        .hcc-container {
-            display: block;
-        }
-
-        .hcc-group {
-            display: block;
-        }
-
-        .hcc-control {
-            display: block;
-            height: 3.2em;
-            position: relative;
-        }
-
-        .hcc-key,
-        .hcc-value {
-            display: block;
-            position: absolute;
-        }
-
-        .hcc-key {
-            top: 0.3em;
-        }
-
-        .hcc-value {
-            right: 0;
-            padding-left: 1.5em;
-            background: linear-gradient(
-                to right,
-                light-dark(#ffffff00, #14141400) 0,
-                light-dark(#ffffff, #141414) 1.4em
-            );
-        }
-
-        .hcc-separator-cell {
-            display: block;
-            padding: 0.3em 0;
-        }
-
-        .hcc-preview-section {
-            display: block;
-        }
-    }
-
-    /* Group styles */
-    .hcc-group {
-        display: table-caption;
-        margin-bottom: 2em;
-    }
-
-    .hcc-group-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-        margin-bottom: 0.5em;
-        padding-bottom: 0.5em;
-        user-select: none;
-        border-bottom: 1px solid light-dark(#dee2e6, #495057);
-    }
-
-    .hcc-group-toggle {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        font-size: 0.8em;
-        opacity: 0.7;
-        padding: 0.2em 0.4em;
-        transform: rotate(90deg);
-        transition: transform 200ms;
-    }
-
-    .hcc-group-collapsed .hcc-group-toggle {
-        transform: rotate(0deg);
-    }
-
-    .hcc-group-title {
-        margin: 0;
-        font-size: 1.2em;
-        font-weight: 600;
-        color: light-dark(#495057, #adb5bd);
-    }
-
-    .hcc-group-description {
-        margin: -0.25em 0 1em 0;
-        font-size: 0.9em;
-        color: light-dark(#6c757d, #868e96);
-        line-height: 1.5;
-    }
-
-    .hcc-group-collapsed .hcc-group-description {
-        display: none;
-    }
-
-    .hcc-group-controls {
-        max-height: 1000px;
-        width: 100%;
-        overflow: hidden;
-        transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out;
-        opacity: 1;
-    }
-
-    .hcc-group-collapsed .hcc-group-controls {
-        max-height: 0;
-        opacity: 0;
+    .hcc-separator-cell {
+        display: block;
+        padding: 0.3em 0;
     }
 
     .hcc-preview-section {
-        display: table-caption;
-        caption-side: bottom;
-        padding-top: 1em;
-        max-height: 600px;
-        opacity: 1;
-        overflow: visible;
-        transition:
-            max-height 250ms ease-in-out,
-            opacity 250ms ease-in-out,
-            padding-top 250ms ease-in-out;
+        display: block;
     }
+}
 
-    .hcc-preview-wrapper {
-        max-height: 600px;
-        overflow: visible;
-        position: relative;
-        width: 100%;
-        transition: all 250ms ease-in-out;
-        container-type: inline-size;
-        container-name: preview;
-    }
+/* Group styles */
+.hcc-group {
+    display: table-caption;
+    margin-bottom: 2em;
+}
 
-    .hcc-preview-content {
-        max-height: 600px;
-        overflow: auto;
-        width: 100%;
-        padding: 0;
-        box-sizing: border-box;
-        transition:
-            padding 250ms ease-in-out,
-            width 250ms ease-in-out;
-    }
+.hcc-group-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.5em;
+    user-select: none;
+    border-bottom: 1px solid light-dark(#dee2e6, #495057);
+}
 
-    .hcc-preview-section.expanded .hcc-preview-content {
-        width: min(600px, 100vw);
-        margin-right: calc(min(600px, 100vw) * -1);
-        padding: 0.5em;
-        background-color: light-dark(#ffffff, #141414);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        border-radius: 7px;
-    }
+.hcc-group-toggle {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 0.8em;
+    opacity: 0.7;
+    padding: 0.2em 0.4em;
+    transform: rotate(90deg);
+    transition: transform 200ms;
+}
 
-    .hcc-preview-section.hidden {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        padding-top: 0;
-    }
+.hcc-group-collapsed .hcc-group-toggle {
+    transform: rotate(0deg);
+}
 
-    .hcc-preview-section h3 {
-        margin: 0 0 1rem;
-        color: light-dark(#495057, #adb5bd);
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+.hcc-group-title {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: light-dark(#495057, #adb5bd);
+}
 
+.hcc-group-description {
+    margin: -0.25em 0 1em 0;
+    font-size: 0.9em;
+    color: light-dark(#6c757d, #868e96);
+    line-height: 1.5;
+}
+
+.hcc-group-collapsed .hcc-group-description {
+    display: none;
+}
+
+.hcc-group-controls {
+    max-height: 1000px;
+    width: 100%;
+    overflow: hidden;
+    transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out;
+    opacity: 1;
+}
+
+.hcc-group-collapsed .hcc-group-controls {
+    max-height: 0;
+    opacity: 0;
+}
+
+.hcc-preview-section {
+    display: table-caption;
+    caption-side: bottom;
+    padding-top: 1em;
+    max-height: 600px;
+    opacity: 1;
+    overflow: visible;
+    transition:
+        max-height 250ms ease-in-out,
+        opacity 250ms ease-in-out,
+        padding-top 250ms ease-in-out;
+}
+
+.hcc-preview-wrapper {
+    max-height: 600px;
+    overflow: visible;
+    position: relative;
+    width: 100%;
+    transition: all 250ms ease-in-out;
+    container-type: inline-size;
+    container-name: preview;
+}
+
+.hcc-preview-content {
+    max-height: 600px;
+    overflow: auto;
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    transition:
+        padding 250ms ease-in-out,
+        width 250ms ease-in-out;
+}
+
+.hcc-preview-section.expanded .hcc-preview-content {
+    width: min(600px, 100vw);
+    margin-right: calc(min(600px, 100vw) * -1);
+    padding: 0.5em;
+    background-color: light-dark(#ffffff, #141414);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 7px;
+}
+
+.hcc-preview-section.hidden {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+}
+
+.hcc-preview-section h3 {
+    margin: 0 0 1rem;
+    color: light-dark(#495057, #adb5bd);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hcc-expand-icon {
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: light-dark(#f8f9fa, #2d2d2d);
+    border: 1px solid light-dark(#dee2e6, #495057);
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 200ms, background 200ms;
+    user-select: none;
+}
+
+.hcc-expand-icon:hover {
+    opacity: 1;
+    background: light-dark(#e9ecef, #3a3a3a);
+}
+
+@container preview (min-width: 600px) {
     .hcc-expand-icon {
-        cursor: pointer;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        background: light-dark(#f8f9fa, #2d2d2d);
-        border: 1px solid light-dark(#dee2e6, #495057);
-        font-size: 0.9rem;
-        opacity: 0.7;
-        transition: opacity 200ms, background 200ms;
-        user-select: none;
-    }
-
-    .hcc-expand-icon:hover {
-        opacity: 1;
-        background: light-dark(#e9ecef, #3a3a3a);
-    }
-
-    @container preview (min-width: 600px) {
-        .hcc-expand-icon {
-            display: none;
-        }
-    }
-
-    .hcc-options-preview {
-        background: light-dark(#ffffff, #1a1d20);
-        border: 1px solid light-dark(#dee2e6, #495057);
-        border-radius: 7px;
-        padding: 0.3rem;
-        margin: 0;
-        font-family: "Courier New", Courier, monospace;
-        font-size: 0.85rem;
-        line-height: 1.4;
-        color: light-dark(#495057, #adb5bd);
-        overflow-x: auto;
-        max-height: 500px;
-        white-space: pre;
-        word-wrap: break-word;
-    }
-
-    .hcc-options-preview span {
-        font-family: "Courier New", Courier, monospace;
-    }
-
-    .hcc-options-preview .hcc-syntax-key {
-        color: light-dark(#0055aa, #66b3ff);
-        font-weight: 500;
-    }
-
-    .hcc-options-preview .hcc-syntax-string {
-        color: light-dark(#008800, #88cc88);
-    }
-
-    .hcc-options-preview .hcc-syntax-number {
-        color: light-dark(#aa5500, #ffaa55);
-    }
-
-    .hcc-options-preview .hcc-syntax-boolean {
-        color: light-dark(#8800aa, #cc88ff);
-        font-weight: 600;
-    }
-
-    .hcc-options-preview .hcc-syntax-null {
-        color: light-dark(#888888, #888888);
-        font-style: italic;
-    }
-
-    .hcc-collapsible {
-        display: inline;
-    }
-
-    .hcc-toggle-json {
-        cursor: pointer;
-        user-select: none;
-        color: light-dark(#666666, #999999);
-        font-size: 0.85em;
-        display: inline-block;
-        width: 1em;
-        text-align: center;
-    }
-
-    .hcc-toggle-json:hover {
-        color: light-dark(#333333, #cccccc);
-    }
-
-    .hcc-collapsed-text {
-        color: light-dark(#888888, #888888);
-        font-style: italic;
-    }
-
-    .hcc-expanded-content {
-        display: inline;
-        white-space: pre;
-    }
-
-    /* Toggle (checkbox) styles */
-    .hcc-toggle {
-        position: relative;
-        display: inline-block;
-        width: 46px;
-        height: 26px;
-        vertical-align: middle;
-        margin-left: 10px;
-    }
-
-    .hcc-toggle input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-        position: absolute;
-    }
-
-    .hcc-toggle-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: light-dark(#cfcfcf, #555555);
-        border-radius: 9999px;
-        transition: background 200ms, box-shadow 200ms;
-    }
-
-    .hcc-toggle-slider::before {
-        content: "";
-        position: absolute;
-        height: 20px;
-        width: 20px;
-        left: 3px;
-        top: 3px;
-        background: light-dark(#ffffff, #141414);
-        border-radius: 50%;
-        box-shadow: 0 1px 3px light-dark(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.5));
-        transition: transform 200ms;
-    }
-
-    .hcc-toggle input:checked + .hcc-toggle-slider {
-        background: light-dark(#141414, #ffffff);
-    }
-
-    .hcc-toggle input:checked + .hcc-toggle-slider::before {
-        transform: translateX(20px);
-    }
-
-    .hcc-toggle input:focus + .hcc-toggle-slider {
-        box-shadow: 0 0 0 3px light-dark(rgba(76, 175, 80, 0.35), rgba(76, 175, 80, 0.5));
-    }
-
-    /* Nullish state styles */
-    .hcc-control-nullish .hcc-toggle-slider {
-        background: repeating-linear-gradient(
-            45deg,
-            light-dark(#e0e0e0, #444444),
-            light-dark(#e0e0e0, #444444) 3px,
-            light-dark(#cfcfcf, #555555) 3px,
-            light-dark(#cfcfcf, #555555) 6px
-        );
-    }
-
-    .hcc-control-nullish .hcc-toggle-slider::before {
-        opacity: 0.6;
-    }
-
-    .hcc-control-nullish .hcc-color-value,
-    .hcc-control-nullish .hcc-opacity-display,
-    .hcc-control-nullish .hcc-range-value {
-        opacity: 0.4;
-    }
-
-    .hcc-control-nullish .hcc-text-input {
-        font-weight: normal;
-    }
-
-    .hcc-control-nullish input[id^="range-input-"] {
-        opacity: 0.35;
-        filter: saturate(0.3);
-    }
-
-    /* Nullable toggle styles - wider toggle with three positions */
-    .hcc-toggle-nullable {
-        width: 70px;
-    }
-
-    .hcc-toggle-nullable .hcc-toggle-slider::before {
-        transition: transform 200ms, opacity 200ms;
-    }
-
-    /* Left position (false) */
-    .hcc-toggle-nullable .hcc-toggle-slider-false {
-        background: light-dark(#cfcfcf, #555555);
-    }
-
-    .hcc-toggle-nullable .hcc-toggle-slider-false::before {
-        transform: translateX(0);
-    }
-
-    /* Middle position (null) */
-    .hcc-toggle-nullable .hcc-toggle-slider-null {
-        background: repeating-linear-gradient(
-            45deg,
-            light-dark(#e0e0e0, #444444),
-            light-dark(#e0e0e0, #444444) 3px,
-            light-dark(#cfcfcf, #555555) 3px,
-            light-dark(#cfcfcf, #555555) 6px
-        );
-    }
-
-    .hcc-toggle-nullable .hcc-toggle-slider-null::before {
-        transform: translateX(22px);
-        opacity: 0.6;
-    }
-
-    /* Right position (true) */
-    .hcc-toggle-nullable .hcc-toggle-slider-true {
-        background: light-dark(#141414, #ffffff);
-    }
-
-    .hcc-toggle-nullable .hcc-toggle-slider-true::before {
-        transform: translateX(44px);
-    }
-
-    /* Tri-state toggle styles for nullable booleans */
-    .hcc-tristate-container {
-        display: inline-block;
-        min-height: 2.2em;
-        margin-left: 10px;
-    }
-
-    .hcc-tristate-button {
-        background: light-dark(#f8f9fa, #212529);
-        border: 1px solid light-dark(#dddddd, #555555);
-        border-radius: 7px;
-        color: light-dark(#141414, #ffffff);
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 0.9em;
-        font-weight: 600;
-        padding: 0.4em 1.2em;
-        min-width: 5em;
-        transition: background 200ms, border-color 200ms, color 200ms;
-    }
-
-    .hcc-tristate-button:hover {
-        background: light-dark(#e9ecef, #2d2d2d);
-    }
-
-    .hcc-tristate-button.hcc-tristate-true {
-        background: light-dark(#141414, #ffffff);
-        color: light-dark(#ffffff, #141414);
-        border-color: light-dark(#141414, #ffffff);
-    }
-
-    .hcc-tristate-button.hcc-tristate-true:hover {
-        background: light-dark(#2a2a2a, #e9e9e9);
-    }
-
-    .hcc-tristate-button.hcc-tristate-false {
-        background: light-dark(#f8f9fa, #212529);
-        color: light-dark(#141414, #ffffff);
-    }
-
-    .hcc-tristate-button.hcc-tristate-null {
-        background: repeating-linear-gradient(
-            45deg,
-            light-dark(#f0f0f0, #2a2a2a),
-            light-dark(#f0f0f0, #2a2a2a) 3px,
-            light-dark(#f8f9fa, #212529) 3px,
-            light-dark(#f8f9fa, #212529) 6px
-        );
-        color: light-dark(#888888, #888888);
-        font-size: 1.2em;
-    }
-
-    .hcc-tristate-button.hcc-tristate-null:hover {
-        background: repeating-linear-gradient(
-            45deg,
-            light-dark(#e5e5e5, #333333),
-            light-dark(#e5e5e5, #333333) 3px,
-            light-dark(#e9ecef, #2d2d2d) 3px,
-            light-dark(#e9ecef, #2d2d2d) 6px
-        );
-    }
-
-    .hcc-color-value {
-        display: inline-block;
-        min-width: 4.7em;
-        margin: 0 0.2em;
-        text-transform: lowercase;
-    }
-
-    /* Button styles */
-    .hcc-button {
-        background: light-dark(#ffffff, #141414);
-        border: 1px solid light-dark(#cccccc, #555555);
-        border-radius: 7px;
-        color: light-dark(#444444, #dddddd);
-        cursor: pointer;
-        display: inline-block;
-        font-size: 0.8rem;
-        line-height: 1rem;
-        padding: 0.3rem 1.5rem;
-        margin: 0.1rem 0 0.5rem 10px;
-        transition: background 250ms;
-    }
-
-    .hcc-button:hover {
-        background: light-dark(#e1e3ff, #3f4699);
-    }
-
-    .hcc-button.active {
-        background: light-dark(#e1e3ff, #3f4699);
-    }
-
-    .hcc-button-group {
-        white-space: nowrap;
-        border: none;
-        background: none;
-    }
-
-    .hcc-button-group .hcc-button {
-        border-radius: 0;
-        height: 2.5em;
-        margin: 0 0 0 -1px;
-        padding: 0.3em 1.2em;
-    }
-
-    .hcc-button-group .hcc-button:first-child {
-        border-top-left-radius: 7px;
-        border-bottom-left-radius: 7px;
-    }
-
-    .hcc-button-group .hcc-button:last-child {
-        border-top-right-radius: 7px;
-        border-bottom-right-radius: 7px;
-    }
-
-    .hcc-show-preview-button {
-        padding: 0.3rem 0.5rem;
-        font-weight: 600;
-    }
-
-    .hcc-show-preview-button .toggle-icon {
-        display: inline-block;
-        transform: rotate(90deg);
-        transition: transform 250ms;
-    }
-
-    .hcc-show-preview-button .toggle-icon-expanded {
-        transform: rotate(270deg);
-    }
-
-    /* Color input styles */
-    .hcc-row label.opacity-label {
-        display: inline;
-        font-family: inherit;
-    }
-
-    .hcc-row .value {
-        opacity: 0.5;
-    }
-
-    input {
-        font-weight: 600;
-    }
-
-    input[type="color"] {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        background-color: transparent;
-        width: 2em;
-        height: 2.2em;
-        border: none;
-        cursor: pointer;
-        vertical-align: middle;
-        padding: 0;
-        margin-left: 10px;
-    }
-
-    input[type="color"]::-webkit-color-swatch {
-        border-radius: 50%;
-        border-width: 2px;
-    }
-
-    input[type="color"]::-moz-color-swatch {
-        border-radius: 50%;
-        border-width: 2px;
-    }
-
-    .hcc-control-nullish input[type="color"]::-webkit-color-swatch {
-        background: repeating-linear-gradient(
-            45deg,
-            light-dark(#e0e0e0, #444444),
-            light-dark(#e0e0e0, #444444) 3px,
-            light-dark(#cfcfcf, #555555) 3px,
-            light-dark(#cfcfcf, #555555) 6px
-        ) !important;
-    }
-
-    .hcc-control-nullish input[type="color"]::-moz-color-swatch {
-        background: repeating-linear-gradient(
-            45deg,
-            light-dark(#e0e0e0, #444444),
-            light-dark(#e0e0e0, #444444) 3px,
-            light-dark(#cfcfcf, #555555) 3px,
-            light-dark(#cfcfcf, #555555) 6px
-        ) !important;
-    }
-
-    .hcc-opacity-display {
-        display: inline-block;
-        text-align: right;
-        min-width: 2em;
-        cursor: pointer;
-        font-weight: 600;
-        padding: 0.3em 0.5em;
-        border-left: 1px solid light-dark(#dddddd, #555555);
-        transition: background 150ms;
-    }
-
-    .hcc-opacity-display:hover {
-        background: light-dark(#f0f0f0, #2a2a2a);
-    }
-
-    .hcc-opacity-range-container {
-        position: absolute;
-        margin-left: 1em;
-        background: light-dark(#ffffff, #1a1a1a);
-        border: 1px solid light-dark(#cccccc, #555555);
-        border-radius: 7px;
-        padding: 0.3em;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-    }
-
-    input.hcc-opacity-input {
-        width: 10.5em;
-        height: 1em;
-        cursor: pointer;
-        -webkit-appearance: none;
-        appearance: none;
-        border: none;
-        padding: 0;
-        background: transparent;
-    }
-
-    /* Slider track styling */
-    input.hcc-opacity-input::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 1em;
-        border-radius: 0.2em;
-        background:
-            linear-gradient(
-                to right,
-                var(--hcc-opacity-gradient-start, rgba(128, 128, 128, 0)),
-                var(--hcc-opacity-gradient-end, rgba(128, 128, 128, 1))
-            ),
-            /* Checkered pattern for transparency visualization */
-            repeating-conic-gradient(
-                light-dark(#e0e0e0, #303030) 0% 25%,
-                light-dark(#f0f0f0, #404040) 0% 50%
-            ) 0 0 / 0.5em 0.5em;
-        border: 1px solid light-dark(#cccccc, #555555);
-    }
-
-    input.hcc-opacity-input::-moz-range-track {
-        width: 100%;
-        height: 1em;
-        border-radius: 0.2em;
-        background:
-            linear-gradient(
-                to right,
-                var(--hcc-opacity-gradient-start, rgba(128, 128, 128, 0)),
-                var(--hcc-opacity-gradient-end, rgba(128, 128, 128, 1))
-            ),
-            /* Checkered pattern for transparency visualization */
-            repeating-conic-gradient(
-                light-dark(#e0e0e0, #303030) 0% 25%,
-                light-dark(#f0f0f0, #404040) 0% 50%
-            ) 0 0 / 0.5em 0.5em;
-        border: 1px solid light-dark(#cccccc, #555555);
-    }
-
-    /* Slider thumb styling */
-    input.hcc-opacity-input::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 0.6em;
-        height: 1.4em;
-        border-radius: 0.2em;
-        background: light-dark(#ffffff, #1a1a1a);
-        border: 2px solid light-dark(#141414, #ffffff);
-        cursor: pointer;
-        margin-top: -0.2em;
-    }
-
-    input.hcc-opacity-input::-moz-range-thumb {
-        width: 0.6em;
-        height: 1.4em;
-        border-radius: 0.2em;
-        background: light-dark(#ffffff, #1a1a1a);
-        border: 2px solid light-dark(#141414, #ffffff);
-        cursor: pointer;
-    }
-
-    input.hcc-opacity-input:focus {
-        outline: none;
-    }
-
-    .hcc-opacity-input-label {
-        opacity: 0.5;
-        margin-right: 0.5em;
-    }
-
-    /* Range (number) styles */
-    .hcc-range-value {
-        display: inline-block;
-        min-width: 3em;
-        margin-left: 0.5em;
-        text-align: center;
-    }
-
-    input[id^="range-input-"] {
-        vertical-align: middle;
-        width: 9em;
-        margin-right: 0.5em;
-        accent-color: light-dark(#141414, #ffffff);
-    }
-
-    /* Text input styles */
-    .hcc-text-input {
-        width: calc(13.25em - 1px);
-        padding: 0.5em 0.8em;
-        border-radius: 7px;
-        border: none;
-        background: light-dark(#ffffff, #2d2d2d);
-        color: light-dark(#141414, #ffffff);
-        font-family: inherit;
-        box-sizing: border-box;
-    }
-
-    .hcc-text-input:focus {
-        outline: 2px solid light-dark(#6366f1, #818cf8);
-        outline-offset: 1px;
-    }
-
-    /* Select dropdown styles */
-    .hcc-select-control {
-        border: none;
-        background: none;
-    }
-
-    .hcc-select-dropdown {
-        padding: 0.5em 0.8em;
-        border-radius: 7px;
-        border: 1px solid light-dark(#dddddd, #555555);
-        background: light-dark(#f8f9fa, #212529);
-        color: light-dark(#141414, #ffffff);
-        font-family: inherit;
-        font-weight: 600;
-        cursor: pointer;
-        box-sizing: border-box;
-    }
-
-    .hcc-select-dropdown:focus {
-        outline: 2px solid light-dark(#6366f1, #818cf8);
-        outline-offset: 1px;
-    }
+        display: none;
+    }
+}
+
+.hcc-options-preview {
+    background: light-dark(#ffffff, #1a1d20);
+    border: 1px solid light-dark(#dee2e6, #495057);
+    border-radius: 7px;
+    padding: 0.3rem;
+    margin: 0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: light-dark(#495057, #adb5bd);
+    overflow-x: auto;
+    max-height: 500px;
+    white-space: pre;
+    word-wrap: break-word;
+}
+
+.hcc-options-preview span {
+    font-family: "Courier New", Courier, monospace;
+}
+
+.hcc-options-preview .hcc-syntax-key {
+    color: light-dark(#0055aa, #66b3ff);
+    font-weight: 500;
+}
+
+.hcc-options-preview .hcc-syntax-string {
+    color: light-dark(#008800, #88cc88);
+}
+
+.hcc-options-preview .hcc-syntax-number {
+    color: light-dark(#aa5500, #ffaa55);
+}
+
+.hcc-options-preview .hcc-syntax-boolean {
+    color: light-dark(#8800aa, #cc88ff);
+    font-weight: 600;
+}
+
+.hcc-options-preview .hcc-syntax-null {
+    color: light-dark(#888888, #888888);
+    font-style: italic;
+}
+
+.hcc-collapsible {
+    display: inline;
+}
+
+.hcc-toggle-json {
+    cursor: pointer;
+    user-select: none;
+    color: light-dark(#666666, #999999);
+    font-size: 0.85em;
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+}
+
+.hcc-toggle-json:hover {
+    color: light-dark(#333333, #cccccc);
+}
+
+.hcc-collapsed-text {
+    color: light-dark(#888888, #888888);
+    font-style: italic;
+}
+
+.hcc-expanded-content {
+    display: inline;
+    white-space: pre;
+}
+
+/* Toggle (checkbox) styles */
+.hcc-toggle {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.hcc-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.hcc-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: light-dark(#cfcfcf, #555555);
+    border-radius: 9999px;
+    transition: background 200ms, box-shadow 200ms;
+}
+
+.hcc-toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    top: 3px;
+    background: light-dark(#ffffff, #141414);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px light-dark(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.5));
+    transition: transform 200ms;
+}
+
+.hcc-toggle input:checked + .hcc-toggle-slider {
+    background: light-dark(#141414, #ffffff);
+}
+
+.hcc-toggle input:checked + .hcc-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.hcc-toggle input:focus + .hcc-toggle-slider {
+    box-shadow: 0 0 0 3px light-dark(rgba(76, 175, 80, 0.35), rgba(76, 175, 80, 0.5));
+}
+
+/* Nullish state styles */
+.hcc-control-nullish .hcc-toggle-slider {
+    background: repeating-linear-gradient(
+        45deg,
+        light-dark(#e0e0e0, #444444),
+        light-dark(#e0e0e0, #444444) 3px,
+        light-dark(#cfcfcf, #555555) 3px,
+        light-dark(#cfcfcf, #555555) 6px
+    );
+}
+
+.hcc-control-nullish .hcc-toggle-slider::before {
+    opacity: 0.6;
+}
+
+.hcc-control-nullish .hcc-color-value,
+.hcc-control-nullish .hcc-opacity-display,
+.hcc-control-nullish .hcc-range-value {
+    opacity: 0.4;
+}
+
+.hcc-control-nullish .hcc-text-input {
+    font-weight: normal;
+}
+
+.hcc-control-nullish input[id^="range-input-"] {
+    opacity: 0.35;
+    filter: saturate(0.3);
+}
+
+/* Nullable toggle styles - wider toggle with three positions */
+.hcc-toggle-nullable {
+    width: 70px;
+}
+
+.hcc-toggle-nullable .hcc-toggle-slider::before {
+    transition: transform 200ms, opacity 200ms;
+}
+
+/* Left position (false) */
+.hcc-toggle-nullable .hcc-toggle-slider-false {
+    background: light-dark(#cfcfcf, #555555);
+}
+
+.hcc-toggle-nullable .hcc-toggle-slider-false::before {
+    transform: translateX(0);
+}
+
+/* Middle position (null) */
+.hcc-toggle-nullable .hcc-toggle-slider-null {
+    background: repeating-linear-gradient(
+        45deg,
+        light-dark(#e0e0e0, #444444),
+        light-dark(#e0e0e0, #444444) 3px,
+        light-dark(#cfcfcf, #555555) 3px,
+        light-dark(#cfcfcf, #555555) 6px
+    );
+}
+
+.hcc-toggle-nullable .hcc-toggle-slider-null::before {
+    transform: translateX(22px);
+    opacity: 0.6;
+}
+
+/* Right position (true) */
+.hcc-toggle-nullable .hcc-toggle-slider-true {
+    background: light-dark(#141414, #ffffff);
+}
+
+.hcc-toggle-nullable .hcc-toggle-slider-true::before {
+    transform: translateX(44px);
+}
+
+/* Tri-state toggle styles for nullable booleans */
+.hcc-tristate-container {
+    display: inline-block;
+    min-height: 2.2em;
+    margin-left: 10px;
+}
+
+.hcc-tristate-button {
+    background: light-dark(#f8f9fa, #212529);
+    border: 1px solid light-dark(#dddddd, #555555);
+    border-radius: 7px;
+    color: light-dark(#141414, #ffffff);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: 600;
+    padding: 0.4em 1.2em;
+    min-width: 5em;
+    transition: background 200ms, border-color 200ms, color 200ms;
+}
+
+.hcc-tristate-button:hover {
+    background: light-dark(#e9ecef, #2d2d2d);
+}
+
+.hcc-tristate-button.hcc-tristate-true {
+    background: light-dark(#141414, #ffffff);
+    color: light-dark(#ffffff, #141414);
+    border-color: light-dark(#141414, #ffffff);
+}
+
+.hcc-tristate-button.hcc-tristate-true:hover {
+    background: light-dark(#2a2a2a, #e9e9e9);
+}
+
+.hcc-tristate-button.hcc-tristate-false {
+    background: light-dark(#f8f9fa, #212529);
+    color: light-dark(#141414, #ffffff);
+}
+
+.hcc-tristate-button.hcc-tristate-null {
+    background: repeating-linear-gradient(
+        45deg,
+        light-dark(#f0f0f0, #2a2a2a),
+        light-dark(#f0f0f0, #2a2a2a) 3px,
+        light-dark(#f8f9fa, #212529) 3px,
+        light-dark(#f8f9fa, #212529) 6px
+    );
+    color: light-dark(#888888, #888888);
+    font-size: 1.2em;
+}
+
+.hcc-tristate-button.hcc-tristate-null:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        light-dark(#e5e5e5, #333333),
+        light-dark(#e5e5e5, #333333) 3px,
+        light-dark(#e9ecef, #2d2d2d) 3px,
+        light-dark(#e9ecef, #2d2d2d) 6px
+    );
+}
+
+.hcc-color-value {
+    display: inline-block;
+    min-width: 4.7em;
+    margin: 0 0.2em;
+    text-transform: lowercase;
+}
+
+/* Button styles */
+.hcc-button {
+    background: light-dark(#ffffff, #141414);
+    border: 1px solid light-dark(#cccccc, #555555);
+    border-radius: 7px;
+    color: light-dark(#444444, #dddddd);
+    cursor: pointer;
+    display: inline-block;
+    font-size: 0.8rem;
+    line-height: 1rem;
+    padding: 0.3rem 1.5rem;
+    margin: 0.1rem 0 0.5rem 10px;
+    transition: background 250ms;
+}
+
+.hcc-button:hover {
+    background: light-dark(#e1e3ff, #3f4699);
+}
+
+.hcc-button.active {
+    background: light-dark(#e1e3ff, #3f4699);
+}
+
+.hcc-button-group {
+    white-space: nowrap;
+    border: none;
+    background: none;
+}
+
+.hcc-button-group .hcc-button {
+    border-radius: 0;
+    height: 2.5em;
+    margin: 0 0 0 -1px;
+    padding: 0.3em 1.2em;
+}
+
+.hcc-button-group .hcc-button:first-child {
+    border-top-left-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+
+.hcc-button-group .hcc-button:last-child {
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+}
+
+.hcc-show-preview-button {
+    padding: 0.3rem 0.5rem;
+    font-weight: 600;
+}
+
+.hcc-show-preview-button .toggle-icon {
+    display: inline-block;
+    transform: rotate(90deg);
+    transition: transform 250ms;
+}
+
+.hcc-show-preview-button .toggle-icon-expanded {
+    transform: rotate(270deg);
+}
+
+/* Color input styles */
+.hcc-row label.opacity-label {
+    display: inline;
+    font-family: inherit;
+}
+
+.hcc-row .value {
+    opacity: 0.5;
+}
+
+input {
+    font-weight: 600;
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    width: 2em;
+    height: 2.2em;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+    padding: 0;
+    margin-left: 10px;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 50%;
+    border-width: 2px;
+}
+
+input[type="color"]::-moz-color-swatch {
+    border-radius: 50%;
+    border-width: 2px;
+}
+
+.hcc-control-nullish input[type="color"]::-webkit-color-swatch {
+    background: repeating-linear-gradient(
+        45deg,
+        light-dark(#e0e0e0, #444444),
+        light-dark(#e0e0e0, #444444) 3px,
+        light-dark(#cfcfcf, #555555) 3px,
+        light-dark(#cfcfcf, #555555) 6px
+    ) !important;
+}
+
+.hcc-control-nullish input[type="color"]::-moz-color-swatch {
+    background: repeating-linear-gradient(
+        45deg,
+        light-dark(#e0e0e0, #444444),
+        light-dark(#e0e0e0, #444444) 3px,
+        light-dark(#cfcfcf, #555555) 3px,
+        light-dark(#cfcfcf, #555555) 6px
+    ) !important;
+}
+
+.hcc-opacity-display {
+    display: inline-block;
+    text-align: right;
+    min-width: 2em;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.3em 0.5em;
+    border-left: 1px solid light-dark(#dddddd, #555555);
+    transition: background 150ms;
+}
+
+.hcc-opacity-display:hover {
+    background: light-dark(#f0f0f0, #2a2a2a);
+}
+
+.hcc-opacity-range-container {
+    position: absolute;
+    margin-left: 1em;
+    background: light-dark(#ffffff, #1a1a1a);
+    border: 1px solid light-dark(#cccccc, #555555);
+    border-radius: 7px;
+    padding: 0.3em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+input.hcc-opacity-input {
+    width: 10.5em;
+    height: 1em;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+}
+
+/* Slider track styling */
+input.hcc-opacity-input::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 1em;
+    border-radius: 0.2em;
+    background:
+        linear-gradient(
+            to right,
+            var(--hcc-opacity-gradient-start, rgba(128, 128, 128, 0)),
+            var(--hcc-opacity-gradient-end, rgba(128, 128, 128, 1))
+        ),
+        /* Checkered pattern for transparency visualization */
+        repeating-conic-gradient(
+            light-dark(#e0e0e0, #303030) 0% 25%,
+            light-dark(#f0f0f0, #404040) 0% 50%
+        ) 0 0 / 0.5em 0.5em;
+    border: 1px solid light-dark(#cccccc, #555555);
+}
+
+input.hcc-opacity-input::-moz-range-track {
+    width: 100%;
+    height: 1em;
+    border-radius: 0.2em;
+    background:
+        linear-gradient(
+            to right,
+            var(--hcc-opacity-gradient-start, rgba(128, 128, 128, 0)),
+            var(--hcc-opacity-gradient-end, rgba(128, 128, 128, 1))
+        ),
+        /* Checkered pattern for transparency visualization */
+        repeating-conic-gradient(
+            light-dark(#e0e0e0, #303030) 0% 25%,
+            light-dark(#f0f0f0, #404040) 0% 50%
+        ) 0 0 / 0.5em 0.5em;
+    border: 1px solid light-dark(#cccccc, #555555);
+}
+
+/* Slider thumb styling */
+input.hcc-opacity-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0.6em;
+    height: 1.4em;
+    border-radius: 0.2em;
+    background: light-dark(#ffffff, #1a1a1a);
+    border: 2px solid light-dark(#141414, #ffffff);
+    cursor: pointer;
+    margin-top: -0.2em;
+}
+
+input.hcc-opacity-input::-moz-range-thumb {
+    width: 0.6em;
+    height: 1.4em;
+    border-radius: 0.2em;
+    background: light-dark(#ffffff, #1a1a1a);
+    border: 2px solid light-dark(#141414, #ffffff);
+    cursor: pointer;
+}
+
+input.hcc-opacity-input:focus {
+    outline: none;
+}
+
+.hcc-opacity-input-label {
+    opacity: 0.5;
+    margin-right: 0.5em;
+}
+
+/* Range (number) styles */
+.hcc-range-value {
+    display: inline-block;
+    min-width: 3em;
+    margin-left: 0.5em;
+    text-align: center;
+}
+
+input[id^="range-input-"] {
+    vertical-align: middle;
+    width: 9em;
+    margin-right: 0.5em;
+    accent-color: light-dark(#141414, #ffffff);
+}
+
+/* Text input styles */
+.hcc-text-input {
+    width: calc(13.25em - 1px);
+    padding: 0.5em 0.8em;
+    border-radius: 7px;
+    border: none;
+    background: light-dark(#ffffff, #2d2d2d);
+    color: light-dark(#141414, #ffffff);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.hcc-text-input:focus {
+    outline: 2px solid light-dark(#6366f1, #818cf8);
+    outline-offset: 1px;
+}
+
+/* Select dropdown styles */
+.hcc-select-control {
+    border: none;
+    background: none;
+}
+
+.hcc-select-dropdown {
+    padding: 0.5em 0.8em;
+    border-radius: 7px;
+    border: 1px solid light-dark(#dddddd, #555555);
+    background: light-dark(#f8f9fa, #212529);
+    color: light-dark(#141414, #ffffff);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.hcc-select-dropdown:focus {
+    outline: 2px solid light-dark(#6366f1, #818cf8);
+    outline-offset: 1px;
 }
