@@ -250,8 +250,68 @@ class BooleanControl extends Control {
     }
 }
 
-/* eslint-disable @highcharts/highcharts/no-highcharts-object */
-const Product$2 = window.Highcharts || window.Grid;
+function clampChannel(value) {
+    return Math.min(255, Math.max(0, value));
+}
+function normalizeAlpha(value) {
+    if (!Number.isFinite(value)) {
+        return 1;
+    }
+    return Math.min(1, Math.max(0, value));
+}
+function parseHexColor(value) {
+    let hex = value.trim().replace(/^#/, '');
+    if (!hex) {
+        return null;
+    }
+    if (hex.length === 3 || hex.length === 4) {
+        hex = hex.split('').map((char) => char + char).join('');
+    }
+    if (!/^[0-9a-f]{6}([0-9a-f]{2})?$/i.test(hex)) {
+        return null;
+    }
+    const alphaHex = hex.length === 8 ? hex.slice(6, 8) : '';
+    const red = parseInt(hex.slice(0, 2), 16);
+    const green = parseInt(hex.slice(2, 4), 16);
+    const blue = parseInt(hex.slice(4, 6), 16);
+    const alpha = alphaHex ? (parseInt(alphaHex, 16) / 255) : 1;
+    return [red, green, blue, alpha];
+}
+function parseCssColor(value) {
+    if (typeof value !== 'string') {
+        return null;
+    }
+    const colorString = value.trim();
+    if (!colorString) {
+        return null;
+    }
+    const hexColor = colorString.startsWith('#') ? parseHexColor(colorString) : null;
+    if (hexColor) {
+        return { rgba: hexColor };
+    }
+    const testElement = document.createElement('div');
+    testElement.style.color = colorString;
+    if (!testElement.style.color) {
+        return null;
+    }
+    const matches = testElement.style.color.match(/^rgba?\(([^)]+)\)$/i);
+    if (!matches) {
+        return null;
+    }
+    const channels = matches[1].split(',').map((part) => Number.parseFloat(part.trim()));
+    if (channels.length < 3 || channels.some((channel) => !Number.isFinite(channel))) {
+        return null;
+    }
+    const [red, green, blue, alpha = 1] = channels;
+    return {
+        rgba: [
+            clampChannel(red),
+            clampChannel(green),
+            clampChannel(blue),
+            normalizeAlpha(alpha)
+        ]
+    };
+}
 /**
  * ColorControl class - standalone color picker with opacity
  */
@@ -466,16 +526,26 @@ class ColorControl extends Control {
         this.elements.controlDiv?.classList.remove('hcc-control-nullish');
         const rgba = this.colorInput.value; // E.g. #RRGGBB
         const opacity = parseFloat(this.opacityInput.value) / 100;
-        // Use Highcharts.color to apply opacity and produce rgba()/hex
-        const hcColor = Product$2.color(rgba).setOpacity(opacity);
-        const newValue = this.getHex(hcColor, true);
+        const parsedColor = parseCssColor(rgba);
+        if (!parsedColor) {
+            return;
+        }
+        const currentColor = {
+            rgba: [
+                parsedColor.rgba[0],
+                parsedColor.rgba[1],
+                parsedColor.rgba[2],
+                opacity
+            ]
+        };
+        const newValue = this.getHex(currentColor, true);
         // Update internal value and emit event
         const oldValue = this._value;
         this._value = newValue;
         // Update display elements
-        this.valueEl.textContent = this.getHex(hcColor);
+        this.valueEl.textContent = this.getHex(currentColor);
         this.opacityDisplay.textContent = this.opacityInput.value;
-        this.updateOpacityGradient(hcColor);
+        this.updateOpacityGradient(currentColor);
         // Emit change event
         this.emit('change', {
             value: newValue,
@@ -492,17 +562,22 @@ class ColorControl extends Control {
             return;
         }
         const isNullish = this._value === null || this._value === undefined;
-        let hcColor = isNullish ? Product$2.color('#808080') : Product$2.color(this._value);
-        if (!isNullish && hcColor.rgba.toString().indexOf('NaN') !== -1) {
-            console.warn(`Highcharts Controls: Invalid color value for path "${this.params.path}": ${this._value}`);
-            // Treat invalid color as nullish
-            this.elements.controlDiv?.classList.add('hcc-control-nullish');
-            this.valueEl.textContent = '—';
-            this.colorInput.value = '#808080';
-            this.opacityInput.value = '100';
-            this.opacityDisplay.textContent = '100';
+        let activeColor = { rgba: [128, 128, 128, 1] };
+        if (!isNullish) {
+            const parsedValue = parseCssColor(this._value);
+            if (!parsedValue) {
+                console.warn(`Highcharts Controls: Invalid color value for path "${this.params.path}": ${this._value}`);
+                this.elements.controlDiv?.classList.add('hcc-control-nullish');
+                this.valueEl.textContent = '—';
+                this.colorInput.value = '#808080';
+                this.opacityInput.value = '100';
+                this.opacityDisplay.textContent = '100';
+                this.updateOpacityGradient(activeColor);
+                return;
+            }
+            activeColor = parsedValue;
         }
-        else if (isNullish) {
+        if (isNullish) {
             this.elements.controlDiv?.classList.add('hcc-control-nullish');
             this.valueEl.textContent = '—';
             this.colorInput.value = '#808080';
@@ -511,32 +586,29 @@ class ColorControl extends Control {
         }
         else {
             this.elements.controlDiv?.classList.remove('hcc-control-nullish');
-            const hex = this.getHex(hcColor);
-            const opacity = (hcColor.rgba[3] || 1) * 100;
+            const hex = this.getHex({ rgba: [activeColor.rgba[0], activeColor.rgba[1], activeColor.rgba[2], 1] });
+            const opacity = (activeColor.rgba[3] || 1) * 100;
             this.colorInput.value = hex;
             this.valueEl.textContent = hex;
             this.opacityInput.value = String(Math.round(opacity));
             this.opacityDisplay.textContent = String(Math.round(opacity));
         }
         // Initialize opacity slider gradient
-        this.updateOpacityGradient(hcColor);
+        this.updateOpacityGradient(activeColor);
     }
     /**
      * Convert color to hex string
      */
     getHex(color, includeAlpha) {
-        const rgba = color.rgba;
-        let hex = `#${(((1 << 24) +
-            (rgba[0] << 16) +
-            (rgba[1] << 8) +
-            rgba[2])
-            .toString(16)
-            .slice(1)).toLowerCase()}`;
-        if (includeAlpha && rgba[3] !== undefined && rgba[3] !== 1) {
-            const alpha = Math.round(rgba[3] * 255);
-            hex += ((1 << 8) + alpha).toString(16).slice(1).toLowerCase();
+        const [red, green, blue, alpha = 1] = color.rgba;
+        let hex = '#';
+        hex += clampChannel(Math.round(red)).toString(16).padStart(2, '0');
+        hex += clampChannel(Math.round(green)).toString(16).padStart(2, '0');
+        hex += clampChannel(Math.round(blue)).toString(16).padStart(2, '0');
+        if (includeAlpha && alpha !== 1) {
+            hex += clampChannel(Math.round(alpha * 255)).toString(16).padStart(2, '0');
         }
-        return hex;
+        return hex.toLowerCase();
     }
     /**
      * Update opacity slider gradient based on color
@@ -1444,6 +1516,18 @@ const controlTypeRegistry = [
  */
 /* eslint-disable @highcharts/highcharts/no-highcharts-object */
 const Product = window.Highcharts || window.Grid;
+function isValidColorString(value) {
+    if (typeof value !== 'string') {
+        return false;
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return false;
+    }
+    const colorTest = document.createElement('div');
+    colorTest.style.color = trimmed;
+    return !!colorTest.style.color;
+}
 class Controls {
     constructor(renderTo, options) {
         renderTo = (typeof renderTo === 'string' &&
@@ -1702,7 +1786,7 @@ class Controls {
             return 'select';
         }
         if (typeof value === 'string') {
-            if (Product.color(value).rgba.toString().indexOf('NaN') === -1) {
+            if (isValidColorString(value)) {
                 return 'color';
             }
             return 'text';

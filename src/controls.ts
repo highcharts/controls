@@ -12,6 +12,21 @@ import './web-components.js';
 
 const Product = (window as any).Highcharts || (window as any).Grid;
 
+function isValidColorString(value: unknown): boolean {
+    if (typeof value !== 'string') {
+        return false;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return false;
+    }
+
+    const colorTest = document.createElement('div');
+    colorTest.style.color = trimmed;
+    return !!colorTest.style.color;
+}
+
 import {
     SeparatorControl,
     controlTypeRegistry,
@@ -459,7 +474,7 @@ class Controls {
             return 'select';
         }
         if (typeof value === 'string') {
-            if (Product.color(value).rgba.toString().indexOf('NaN') === -1) {
+            if (isValidColorString(value)) {
                 return 'color';
             }
             return 'text';

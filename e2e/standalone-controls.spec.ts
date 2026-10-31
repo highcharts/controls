@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Highcharts Controls - Standalone Controls', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.title.includes('works without Highcharts or Grid globals')) {
+      return;
+    }
+
     await page.goto('http://localhost:8080/e2e/fixtures/standalone-controls.html');
     await page.waitForFunction(() => {
       const w = window as any;
@@ -23,6 +27,28 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await expect(page.locator('#boolean-output')).toHaveText('State: undefined');
     await expect(page.locator('#number-output')).toHaveText('Value: undefined');
     await expect(page.locator('#select-output')).toHaveText('Alignment: center');
+  });
+
+  test('works without Highcharts or Grid globals', async ({ page }) => {
+    await page.goto('http://localhost:8080');
+    await page.evaluate(async () => {
+      delete (window as any).Highcharts;
+      delete (window as any).Grid;
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: '#123456'
+      });
+      control.render(container);
+      (window as any).colorControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).colorControl);
+    await expect(page.locator('input[type="color"]')).toHaveValue('#123456');
+    await expect(page.locator('.hcc-color-value')).toHaveText('#123456');
   });
 
   test('updates output text and demo state when standalone controls change', async ({ page }) => {
