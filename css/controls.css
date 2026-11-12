@@ -134,17 +134,29 @@ highcharts-separator {
 
 .hcc-value-inner.hcc-color-control {
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.hcc-control-color .hcc-value {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    vertical-align: middle;
 }
 
 /* Nullable button styles */
-.hcc-nullable-button {
+.hcc-nullable-button,
+.hcc-color-mode-button {
     background: none;
     border: none;
     border-left: 1px solid light-dark(#dddddd, #555555);
     color: light-dark(#888888, #888888);
     cursor: pointer;
     font-size: 1em;
-    padding: 0.3em 0.6em;
+    padding: 0.3em 0.4em;
     margin: 0;
     height: 2.2em;
     min-height: 2.2em;
@@ -155,7 +167,8 @@ highcharts-separator {
     vertical-align: middle;
 }
 
-.hcc-nullable-button:hover {
+.hcc-nullable-button:hover,
+.hcc-color-mode-button:hover {
     background: light-dark(#f0f0f0, #2a2a2a);
     color: light-dark(#666666, #aaaaaa);
 }
@@ -260,7 +273,7 @@ highcharts-separator {
 .hcc-group-controls {
     max-height: 1000px;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
     transition: max-height 250ms ease-in-out, opacity 250ms ease-in-out;
     opacity: 1;
 }
@@ -268,6 +281,7 @@ highcharts-separator {
 .hcc-group-collapsed .hcc-group-controls {
     max-height: 0;
     opacity: 0;
+    overflow: hidden;
 }
 
 .hcc-preview-section {
@@ -614,7 +628,7 @@ highcharts-separator {
 
 .hcc-color-value {
     display: inline-block;
-    min-width: 5.5em;
+    width: 4.5em;
     margin: 0 0.2em;
     text-transform: lowercase;
 }
@@ -663,6 +677,97 @@ highcharts-separator {
 .hcc-button-group .hcc-button:last-child {
     border-top-right-radius: 7px;
     border-bottom-right-radius: 7px;
+}
+
+.hcc-color-mode-control {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.hcc-color-mode-button {
+    background: none;
+    border: none;
+    border-left: 1px solid light-dark(#dddddd, #555555);
+    border-radius: 0;
+    color: light-dark(#666666, #d0d0d0);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    line-height: 1;
+    width: auto;
+    height: 2.2em;
+    min-height: 2.2em;
+    margin: 0;
+    padding: 0.3em 0.4em;
+    transition: color 200ms, background 200ms;
+    vertical-align: middle;
+}
+
+.hcc-color-mode-button.active {
+    background: light-dark(#f3f5ff, #2d355a);
+    color: light-dark(#1f1f1f, #f0f0f0);
+}
+
+.hcc-color-mode-button span {
+    display: inline-block;
+    transform: translateY(-0.02em);
+}
+
+.hcc-color-mode-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.35em);
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.25em;
+    padding: 0.35em;
+    border: 1px solid light-dark(#d9d9d9, #555555);
+    border-radius: 0.55em;
+    background: light-dark(#ffffff, #181818);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    z-index: 10;
+}
+
+.hcc-color-mode-option {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: 0.45em;
+    background: transparent;
+    color: light-dark(#333333, #e6e6e6);
+    cursor: pointer;
+    font-size: 0.8rem;
+    line-height: 1;
+    padding: 0.4em 0.6em;
+    text-align: left;
+    transition: background 150ms ease, border-color 150ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    white-space: nowrap;
+}
+
+.hcc-color-mode-icon {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.hcc-color-mode-label {
+    display: inline-block;
+}
+
+.hcc-color-mode-option:hover,
+.hcc-color-mode-option.active {
+    background: light-dark(#f4f5ff, #2d355a);
+    border-color: light-dark(#cfd4ff, #7c88d8);
 }
 
 .hcc-show-preview-button {
@@ -744,7 +849,7 @@ input[type="color"]::-moz-color-swatch {
     min-width: 2em;
     cursor: pointer;
     font-weight: 600;
-    padding: 0.3em 0.5em;
+    padding: 0.3em 0.2em;
     border-left: 1px solid light-dark(#dddddd, #555555);
     transition: background 150ms;
 }
@@ -755,7 +860,9 @@ input[type="color"]::-moz-color-swatch {
 
 .hcc-opacity-range-container {
     position: absolute;
-    margin-left: 1em;
+    left: 0;
+    top: 100%;
+    margin-left: 0;
     background: light-dark(#ffffff, #1a1a1a);
     border: 1px solid light-dark(#cccccc, #555555);
     border-radius: 7px;
@@ -840,7 +947,7 @@ input.hcc-opacity-input:focus {
 
 .hcc-opacity-input-label {
     opacity: 0.5;
-    margin-right: 0.5em;
+    margin-right: 0.3em;
 }
 
 /* Range (number) styles */

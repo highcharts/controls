@@ -51,6 +51,63 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await expect(page.locator('.hcc-color-value')).toHaveText('#123456');
   });
 
+  test('parses light-dark() colors according to the active color scheme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: 'light-dark(#ffffff, #000000)'
+      });
+      control.render(container);
+      (window as any).dualModeColorControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).dualModeColorControl);
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#000000');
+    const modeButton = page.locator('.hcc-color-mode-button').last();
+    await expect(modeButton).toHaveAttribute('data-mode', 'dark');
+    await expect(modeButton).toHaveText('☾');
+
+    await modeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await expect(modeButton).toHaveAttribute('data-mode', 'light');
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ffffff');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#ffffff');
+  });
+
+  test('allows the color mode dropdown to overflow the group container without clipping', async ({ page }) => {
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const Controls = (await import('/js/controls.js')).default;
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      new Controls(container, {
+        controls: [{
+          group: 'Theme',
+          controls: [{
+            type: 'color',
+            path: 'chart.backgroundColor',
+            value: '#123456'
+          }]
+        }]
+      });
+      (window as any).overflowGroupControl = true;
+    });
+
+    await page.waitForFunction(() => !!(window as any).overflowGroupControl);
+    const groupControls = page.locator('.hcc-group-controls').first();
+    await expect(groupControls).toHaveCSS('overflow', 'visible');
+    await page.locator('.hcc-color-mode-button').first().click();
+    await expect(page.locator('.hcc-color-mode-menu').first()).toBeVisible();
+  });
+
   test('updates output text and demo state when standalone controls change', async ({ page }) => {
     const colorInput = page.locator('#color-control-container input[type="color"]');
     await colorInput.evaluate((input: HTMLInputElement) => {
