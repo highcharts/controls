@@ -166,6 +166,7 @@ declare class ColorControl extends Control<ColorControlParams> {
      * Update UI to reflect current value
      */
     protected updateUI(): void;
+    private updateColorSwatch;
     private getCurrentColorMode;
     private updateModeButtons;
     private setColorMode;

@@ -803,24 +803,36 @@ input[type="color"] {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-color: transparent;
+    background-color: var(--hcc-color-swatch, transparent);
     width: 2em;
-    height: 2.2em;
+    height: 2em;
     border: none;
     cursor: pointer;
     vertical-align: middle;
     padding: 0;
     margin-left: 10px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 input[type="color"]::-webkit-color-swatch {
     border-radius: 50%;
     border-width: 2px;
+    background: var(--hcc-color-swatch, transparent);
+    overflow: hidden;
 }
 
 input[type="color"]::-moz-color-swatch {
     border-radius: 50%;
     border-width: 2px;
+    background: var(--hcc-color-swatch, transparent);
+    overflow: hidden;
 }
 
 .hcc-control-nullish input[type="color"]::-webkit-color-swatch {

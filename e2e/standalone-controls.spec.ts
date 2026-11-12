@@ -79,6 +79,22 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await expect(modeButton).toHaveAttribute('data-mode', 'light');
     await expect(page.locator('input[type="color"]').last()).toHaveValue('#ffffff');
     await expect(page.locator('.hcc-color-value').last()).toHaveText('#ffffff');
+
+    const dualInput = page.locator('input[type="color"]').last();
+    await dualInput.evaluate((input: HTMLInputElement) => {
+      input.value = '#ff8800';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ff8800');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#ff8800');
+
+    const swatchUpdated = await page.locator('input[type="color"]').last().evaluate((input: HTMLInputElement) => {
+      const background = input.style.background || '';
+      return background.includes('rgb(255, 136, 0)') && background.includes('rgb(0, 0, 0)');
+    });
+    expect(swatchUpdated).toBeTruthy();
   });
 
   test('allows the color mode dropdown to overflow the group container without clipping', async ({ page }) => {

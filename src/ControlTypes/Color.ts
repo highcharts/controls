@@ -544,9 +544,7 @@ export class ColorControl extends Control<ColorControlParams> {
                 ]
             };
 
-            this.lightDarkValue = nextColors;
-            this._value = `light-dark(${this.getHex(nextColors.light)}, ${this.getHex(nextColors.dark)})`;
-            this.valueEl!.textContent = this.getHex({
+            const activeHex = this.getHex({
                 rgba: [
                     nextColors[branch].rgba[0],
                     nextColors[branch].rgba[1],
@@ -554,7 +552,13 @@ export class ColorControl extends Control<ColorControlParams> {
                     1
                 ]
             });
+
+            this.lightDarkValue = nextColors;
+            this._value = `light-dark(${this.getHex(nextColors.light)}, ${this.getHex(nextColors.dark)})`;
+            this.valueEl!.textContent = activeHex;
+            this.colorInput.value = activeHex;
             this.opacityDisplay!.textContent = this.opacityInput.value;
+            this.updateColorSwatch(activeHex, nextColors);
             this.updateOpacityGradient(currentColor);
             this.emit('change', {
                 value: this._value,
@@ -593,11 +597,11 @@ export class ColorControl extends Control<ColorControlParams> {
         }
 
         const isNullish = this._value === null || this._value === undefined;
+        const parsedDual = !isNullish ? parseLightDarkColor(this._value) : null;
         let activeColor: RgbaColor = { rgba: [128, 128, 128, 1] };
         let valueLabel = '—';
 
         if (!isNullish) {
-            const parsedDual = parseLightDarkColor(this._value);
             if (parsedDual) {
                 this.lightDarkValue = parsedDual;
                 const preferredMode = this.colorMode === 'light' || this.colorMode === 'dark'
@@ -636,6 +640,7 @@ export class ColorControl extends Control<ColorControlParams> {
             this.colorInput.value = '#808080';
             this.opacityInput.value = '100';
             this.opacityDisplay.textContent = '100';
+            this.updateColorSwatch('#808080');
         } else {
             this.elements.controlDiv?.classList.remove('hcc-control-nullish');
             const hex = this.getHex({ rgba: [activeColor.rgba[0], activeColor.rgba[1], activeColor.rgba[2], 1] });
@@ -644,10 +649,29 @@ export class ColorControl extends Control<ColorControlParams> {
             this.valueEl.textContent = valueLabel || hex;
             this.opacityInput.value = String(Math.round(opacity));
             this.opacityDisplay.textContent = String(Math.round(opacity));
+            this.updateColorSwatch(hex, parsedDual ?? null);
         }
 
         this.updateModeButtons();
         this.updateOpacityGradient(activeColor);
+    }
+
+    private updateColorSwatch(baseHex: string, dual?: LightDarkColor | null): void {
+        if (!this.colorInput) {
+            return;
+        }
+
+        if (dual && this.colorMode !== 'single') {
+            const lightHex = this.getHex({ rgba: [dual.light.rgba[0], dual.light.rgba[1], dual.light.rgba[2], 1] });
+            const darkHex = this.getHex({ rgba: [dual.dark.rgba[0], dual.dark.rgba[1], dual.dark.rgba[2], 1] });
+            const splitGradient = `linear-gradient(135deg, ${lightHex} 0 45%, ${darkHex} 45% 100%)`;
+            this.colorInput.style.setProperty('--hcc-color-swatch', splitGradient);
+            this.colorInput.style.background = splitGradient;
+            return;
+        }
+
+        this.colorInput.style.setProperty('--hcc-color-swatch', baseHex);
+        this.colorInput.style.background = baseHex;
     }
 
     private getCurrentColorMode(): ColorMode {
