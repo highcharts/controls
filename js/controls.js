@@ -752,11 +752,11 @@ class ColorControl extends Control {
             const darkHex = this.getHex({ rgba: [dual.dark.rgba[0], dual.dark.rgba[1], dual.dark.rgba[2], 1] });
             const splitGradient = `linear-gradient(135deg, ${lightHex} 0 45%, ${darkHex} 45% 100%)`;
             this.colorInput.style.setProperty('--hcc-color-swatch', splitGradient);
-            this.colorInput.style.background = splitGradient;
+            this.colorInput.style.background = 'transparent';
             return;
         }
         this.colorInput.style.setProperty('--hcc-color-swatch', baseHex);
-        this.colorInput.style.background = baseHex;
+        this.colorInput.style.background = 'transparent';
     }
     getCurrentColorMode() {
         const computedStyle = window.getComputedStyle(document.documentElement);

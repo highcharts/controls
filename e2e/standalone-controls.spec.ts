@@ -91,8 +91,8 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await expect(page.locator('.hcc-color-value').last()).toHaveText('#ff8800');
 
     const swatchUpdated = await page.locator('input[type="color"]').last().evaluate((input: HTMLInputElement) => {
-      const background = input.style.background || '';
-      return background.includes('rgb(255, 136, 0)') && background.includes('rgb(0, 0, 0)');
+      const swatch = getComputedStyle(input).getPropertyValue('--hcc-color-swatch') || '';
+      return swatch.includes('#ff8800') && swatch.includes('#000000');
     });
     expect(swatchUpdated).toBeTruthy();
   });
