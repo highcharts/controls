@@ -245,7 +245,7 @@ class Controls {
                 '/css/controls.css'
             )
             // Match jsDelivr/npm CDN. Patterns:
-            // - https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.0
+            // - https://cdn.jsdelivr.net/npm/@highcharts/controls@0.9.1
             // - https://cdn.jsdelivr.net/npm/@highcharts/controls
             .replace(
                 /(https?:\/\/cdn\.jsdelivr\.net\/npm\/@highcharts\/controls)(@[\d.]+)?$/,
