@@ -874,7 +874,7 @@ input[type="color"]::-moz-color-swatch {
 .hcc-opacity-range-container {
     position: absolute;
     left: 0;
-    top: 100%;
+    top: calc(100% - 0.5em);
     margin-left: 0;
     background: light-dark(#ffffff, #1a1a1a);
     border: 1px solid light-dark(#cccccc, #555555);

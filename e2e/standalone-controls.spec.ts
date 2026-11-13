@@ -131,6 +131,50 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     expect(restoredValue).toBe('light-dark(#ff0000, #00ff00)');
   });
 
+  test('updates opacity correctly in both light and dark dual-mode branches', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: 'light-dark(#ff0000, #00ff00)'
+      });
+      control.render(container);
+      (window as any).dualModeOpacityControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).dualModeOpacityControl);
+    const opacityDisplay = page.locator('.hcc-opacity-display').last();
+    const opacityInput = page.locator('.hcc-opacity-input').last();
+
+    await opacityDisplay.click();
+    await opacityInput.evaluate((input: HTMLInputElement) => {
+      input.value = '25';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    let dualValue = await page.evaluate(() => (window as any).dualModeOpacityControl.value);
+    expect(dualValue).toBe('light-dark(#ff0000, #00ff0040)');
+
+    await page.locator('.hcc-color-mode-button').last().click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await opacityDisplay.click();
+    await opacityInput.evaluate((input: HTMLInputElement) => {
+      input.value = '75';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    dualValue = await page.evaluate(() => (window as any).dualModeOpacityControl.value);
+    expect(dualValue).toBe('light-dark(#ff0000bf, #00ff0040)');
+  });
+
   test('allows the color mode dropdown to overflow the group container without clipping', async ({ page }) => {
     await page.goto('http://localhost:8080');
 

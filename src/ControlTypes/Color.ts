@@ -554,7 +554,7 @@ export class ColorControl extends Control<ColorControlParams> {
             });
 
             this.lightDarkValue = nextColors;
-            this._value = `light-dark(${this.getHex(nextColors.light)}, ${this.getHex(nextColors.dark)})`;
+            this._value = `light-dark(${this.getHex(nextColors.light, nextColors.light.rgba[3] !== undefined && nextColors.light.rgba[3] !== 1)}, ${this.getHex(nextColors.dark, nextColors.dark.rgba[3] !== undefined && nextColors.dark.rgba[3] !== 1)})`;
             this.valueEl!.textContent = activeHex;
             this.colorInput.value = activeHex;
             this.opacityDisplay!.textContent = this.opacityInput.value;
@@ -765,8 +765,8 @@ export class ColorControl extends Control<ColorControlParams> {
 
             if (dual) {
                 this.lightDarkValue = dual;
-                const lightHex = this.getHex(dual.light);
-                const darkHex = this.getHex(dual.dark);
+                const lightHex = this.getHex(dual.light, dual.light.rgba[3] !== undefined && dual.light.rgba[3] !== 1);
+                const darkHex = this.getHex(dual.dark, dual.dark.rgba[3] !== undefined && dual.dark.rgba[3] !== 1);
                 this._value = `light-dark(${lightHex}, ${darkHex})`;
             } else {
                 const parsedDual = parseLightDarkColor(this._value) as LightDarkColor | null;
