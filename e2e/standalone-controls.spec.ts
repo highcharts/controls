@@ -97,6 +97,40 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     expect(swatchUpdated).toBeTruthy();
   });
 
+  test('keeps dual light/dark colors when toggling back from single mode', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: 'light-dark(#ff0000, #00ff00)'
+      });
+      control.render(container);
+      (window as any).dualModeRoundTripControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).dualModeRoundTripControl);
+    const modeButton = page.locator('.hcc-color-mode-button').last();
+    await modeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="single"]').click();
+    await expect(modeButton).toHaveAttribute('data-mode', 'single');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#00ff00');
+
+    await modeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await expect(modeButton).toHaveAttribute('data-mode', 'light');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#ff0000');
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ff0000');
+
+    const restoredValue = await page.evaluate(() => (window as any).dualModeRoundTripControl.value);
+    expect(restoredValue).toBe('light-dark(#ff0000, #00ff00)');
+  });
+
   test('allows the color mode dropdown to overflow the group container without clipping', async ({ page }) => {
     await page.goto('http://localhost:8080');
 

@@ -666,7 +666,12 @@ class ColorControl extends Control {
         }
         const newValue = this.getHex(currentColor, true);
         this._value = newValue;
-        this.lightDarkValue = null;
+        if (!this.lightDarkValue) {
+            const previousDual = parseLightDarkColor(oldValue ?? '');
+            if (previousDual) {
+                this.lightDarkValue = previousDual;
+            }
+        }
         this.colorMode = 'single';
         // Update display elements
         this.valueEl.textContent = this.getHex(currentColor);
@@ -716,7 +721,7 @@ class ColorControl extends Control {
                     this.updateModeButtons();
                     return;
                 }
-                this.lightDarkValue = null;
+                this.lightDarkValue = this.lightDarkValue ?? parseLightDarkColor(this._value ?? '') ?? null;
                 this.colorMode = 'single';
                 activeColor = parsedValue;
                 valueLabel = this.getHex({ rgba: [activeColor.rgba[0], activeColor.rgba[1], activeColor.rgba[2], 1] });
@@ -808,7 +813,7 @@ class ColorControl extends Control {
                         activeColor.rgba[3] || 1
                     ]
                 }, activeColor.rgba[3] !== undefined && activeColor.rgba[3] !== 1);
-                this.lightDarkValue = null;
+                this.lightDarkValue = dual;
                 this.colorMode = 'single';
             }
             else {
@@ -816,28 +821,35 @@ class ColorControl extends Control {
                 if (parsed) {
                     this._value = this.getHex({ rgba: [parsed.rgba[0], parsed.rgba[1], parsed.rgba[2], parsed.rgba[3] || 1] }, parsed.rgba[3] !== undefined && parsed.rgba[3] !== 1);
                 }
+                if (!this.lightDarkValue) {
+                    const currentDual = parseLightDarkColor(oldValue ?? '');
+                    if (currentDual) {
+                        this.lightDarkValue = currentDual;
+                    }
+                }
                 this.colorMode = 'single';
             }
         }
         else {
             const parsedSingle = parseCssColor(this._value);
-            if (parsedSingle) {
-                const lightColor = {
+            const dual = this.lightDarkValue ?? (parsedSingle ? {
+                light: {
                     rgba: [parsedSingle.rgba[0], parsedSingle.rgba[1], parsedSingle.rgba[2], parsedSingle.rgba[3] || 1]
-                };
-                const darkColor = {
+                },
+                dark: {
                     rgba: [parsedSingle.rgba[0], parsedSingle.rgba[1], parsedSingle.rgba[2], parsedSingle.rgba[3] || 1]
-                };
-                this.lightDarkValue = {
-                    light: lightColor,
-                    dark: darkColor
-                };
-                this._value = `light-dark(${this.getHex(lightColor)}, ${this.getHex(darkColor)})`;
+                }
+            } : null);
+            if (dual) {
+                this.lightDarkValue = dual;
+                const lightHex = this.getHex(dual.light);
+                const darkHex = this.getHex(dual.dark);
+                this._value = `light-dark(${lightHex}, ${darkHex})`;
             }
             else {
-                const dual = parseLightDarkColor(this._value);
-                if (dual) {
-                    this.lightDarkValue = dual;
+                const parsedDual = parseLightDarkColor(this._value);
+                if (parsedDual) {
+                    this.lightDarkValue = parsedDual;
                 }
             }
             this.colorMode = mode;
