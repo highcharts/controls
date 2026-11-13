@@ -117,6 +117,9 @@ declare class ColorControl extends Control<ColorControlParams> {
     private opacityDisplay?;
     private valueEl?;
     private opacityRangeContainer?;
+    private colorModeButton?;
+    private colorModeMenu?;
+    private colorModeControl?;
     private hideRangeHandler?;
     private colorInputCount;
     private lastColorInputAt;
@@ -125,6 +128,8 @@ declare class ColorControl extends Control<ColorControlParams> {
     private opacityMouseIsDown;
     private onOpacityMouseMove?;
     private onOpacityMouseUp?;
+    private colorMode;
+    private lightDarkValue;
     /**
      * Type guard for ColorControlParams
      */
@@ -161,6 +166,10 @@ declare class ColorControl extends Control<ColorControlParams> {
      * Update UI to reflect current value
      */
     protected updateUI(): void;
+    private updateColorSwatch;
+    private getCurrentColorMode;
+    private updateModeButtons;
+    private setColorMode;
     /**
      * Convert color to hex string
      */
@@ -327,6 +336,7 @@ declare class Controls {
      * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
     setNestedValue(path: string, value: any, animation?: boolean): void;
+    private applyColorSchemeToTarget;
     private injectCSS;
     private addPreview;
     /**

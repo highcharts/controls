@@ -199,6 +199,28 @@ class Controls {
         this.updateOptionsPreview();
     }
 
+    private applyColorSchemeToTarget(mode: 'single' | 'light' | 'dark'): void {
+        if (!this.target) {
+            return;
+        }
+
+        const targetEl = (this.target as any).renderTo ||
+            (this.target as any).container ||
+            (this.target as any).element ||
+            (this.target as any).el;
+
+        if (!(targetEl instanceof HTMLElement)) {
+            return;
+        }
+
+        targetEl.classList.remove('highcharts-light', 'highcharts-dark');
+        if (mode === 'light') {
+            targetEl.classList.add('highcharts-light');
+        } else if (mode === 'dark') {
+            targetEl.classList.add('highcharts-dark');
+        }
+    }
+
     private injectCSS(): void {
         // Check if CSS is already injected
         if (document.getElementById('highcharts-controls-css')) {
@@ -524,6 +546,12 @@ class Controls {
                     const customEvent = e as CustomEvent;
                     const value = customEvent.detail?.value;
                     const animation = customEvent.detail?.animation;
+                    const colorMode = customEvent.detail?.colorMode as 'single' | 'light' | 'dark' | undefined;
+
+                    if (colorMode) {
+                        this.applyColorSchemeToTarget(colorMode);
+                    }
+
                     if (controlParams.path) {
                         this.setNestedValue(
                             controlParams.path,

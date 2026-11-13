@@ -277,6 +277,48 @@ function parseHexColor(value) {
     const alpha = alphaHex ? (parseInt(alphaHex, 16) / 255) : 1;
     return [red, green, blue, alpha];
 }
+function splitTopLevelComma(value) {
+    let depth = 0;
+    let inString = false;
+    for (let i = 0; i < value.length; i++) {
+        const char = value[i];
+        if (char === '"' || char === '\'') {
+            inString = !inString;
+            continue;
+        }
+        if (inString) {
+            continue;
+        }
+        if (char === '(') {
+            depth += 1;
+        }
+        else if (char === ')') {
+            depth = Math.max(0, depth - 1);
+        }
+        else if (char === ',' && depth === 0) {
+            return [value.slice(0, i), value.slice(i + 1)];
+        }
+    }
+    return null;
+}
+function parseLightDarkColor(value) {
+    const trimmed = value.trim();
+    if (!trimmed.toLowerCase().startsWith('light-dark(') || !trimmed.endsWith(')')) {
+        return null;
+    }
+    const inner = trimmed.slice('light-dark('.length, -1);
+    const parts = splitTopLevelComma(inner);
+    if (!parts) {
+        return null;
+    }
+    const [lightValue, darkValue] = parts;
+    const lightColor = parseCssColor(lightValue);
+    const darkColor = parseCssColor(darkValue);
+    if (!lightColor || !darkColor) {
+        return null;
+    }
+    return { light: lightColor, dark: darkColor };
+}
 function parseCssColor(value) {
     if (typeof value !== 'string') {
         return null;
@@ -322,6 +364,8 @@ class ColorControl extends Control {
         this.lastColorInputAt = 0;
         this.opacityIsDragging = false;
         this.opacityMouseIsDown = false;
+        this.colorMode = 'single';
+        this.lightDarkValue = null;
     }
     /**
      * Type guard for ColorControlParams
@@ -343,6 +387,7 @@ class ColorControl extends Control {
             innerHTML: this.params.label || `<code>${this.params.path}</code>`,
             title: this.params.label || this.params.path
         }));
+        valueDivInner.classList.add('hcc-color-control');
         this.colorInput = valueDivInner.appendChild(Object.assign(document.createElement('input'), {
             type: 'color',
             id: rid
@@ -362,6 +407,48 @@ class ColorControl extends Control {
             textContent: '%',
             className: 'hcc-opacity-input-label'
         }));
+        this.colorModeControl = valueDivInner.appendChild(Object.assign(document.createElement('span'), {
+            className: 'hcc-color-mode-control'
+        }));
+        this.colorModeButton = this.colorModeControl.appendChild(Object.assign(document.createElement('button'), {
+            type: 'button',
+            className: 'hcc-color-mode-button',
+            title: 'Color mode',
+            'aria-label': 'Color mode'
+        }));
+        this.colorModeMenu = this.colorModeControl.appendChild(Object.assign(document.createElement('div'), {
+            className: 'hcc-color-mode-menu hcc-hidden'
+        }));
+        ['single', 'light', 'dark'].forEach((mode) => {
+            const option = document.createElement('button');
+            option.type = 'button';
+            option.className = 'hcc-color-mode-option';
+            option.dataset.mode = mode;
+            const label = mode === 'single' ? 'Single color' : mode === 'light' ? 'Light mode' : 'Dark mode';
+            const icon = mode === 'single' ? '◐' : mode === 'light' ? '☀' : '☾';
+            option.title = label;
+            option.innerHTML = `<span class="hcc-color-mode-icon">${icon}</span><span class="hcc-color-mode-label">${label}</span>`;
+            option.addEventListener('click', () => {
+                this.setColorMode(mode);
+                this.colorModeMenu?.classList.add('hcc-hidden');
+            });
+            if (this.colorModeMenu) {
+                this.colorModeMenu.appendChild(option);
+            }
+        });
+        this.colorModeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.colorModeMenu?.classList.toggle('hcc-hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!this.colorModeMenu || !this.colorModeButton) {
+                return;
+            }
+            const target = e.target;
+            if (!this.colorModeMenu.contains(target) && !this.colorModeButton.contains(target)) {
+                this.colorModeMenu.classList.add('hcc-hidden');
+            }
+        });
         // Container for the range slider popup
         this.opacityRangeContainer = valueDivInner.appendChild(Object.assign(document.createElement('div'), {
             className: 'hcc-opacity-range-container hcc-hidden'
@@ -538,10 +625,55 @@ class ColorControl extends Control {
                 opacity
             ]
         };
-        const newValue = this.getHex(currentColor, true);
-        // Update internal value and emit event
         const oldValue = this._value;
+        const lightDark = parseLightDarkColor(this._value ?? '');
+        if (lightDark && this.colorMode !== 'single') {
+            const branch = this.colorMode === 'light' ? 'light' : 'dark';
+            const nextColors = {
+                light: { ...lightDark.light },
+                dark: { ...lightDark.dark }
+            };
+            nextColors[branch] = {
+                rgba: [
+                    currentColor.rgba[0],
+                    currentColor.rgba[1],
+                    currentColor.rgba[2],
+                    opacity
+                ]
+            };
+            const activeHex = this.getHex({
+                rgba: [
+                    nextColors[branch].rgba[0],
+                    nextColors[branch].rgba[1],
+                    nextColors[branch].rgba[2],
+                    1
+                ]
+            });
+            this.lightDarkValue = nextColors;
+            this._value = `light-dark(${this.getHex(nextColors.light, nextColors.light.rgba[3] !== undefined && nextColors.light.rgba[3] !== 1)}, ${this.getHex(nextColors.dark, nextColors.dark.rgba[3] !== undefined && nextColors.dark.rgba[3] !== 1)})`;
+            this.valueEl.textContent = activeHex;
+            this.colorInput.value = activeHex;
+            this.opacityDisplay.textContent = this.opacityInput.value;
+            this.updateColorSwatch(activeHex, nextColors);
+            this.updateOpacityGradient(currentColor);
+            this.emit('change', {
+                value: this._value,
+                oldValue,
+                path: this.params.path,
+                animation,
+                colorMode: this.colorMode
+            });
+            return;
+        }
+        const newValue = this.getHex(currentColor, true);
         this._value = newValue;
+        if (!this.lightDarkValue) {
+            const previousDual = parseLightDarkColor(oldValue ?? '');
+            if (previousDual) {
+                this.lightDarkValue = previousDual;
+            }
+        }
+        this.colorMode = 'single';
         // Update display elements
         this.valueEl.textContent = this.getHex(currentColor);
         this.opacityDisplay.textContent = this.opacityInput.value;
@@ -551,7 +683,8 @@ class ColorControl extends Control {
             value: newValue,
             oldValue,
             path: this.params.path,
-            animation
+            animation,
+            colorMode: this.colorMode
         });
     }
     /**
@@ -562,20 +695,39 @@ class ColorControl extends Control {
             return;
         }
         const isNullish = this._value === null || this._value === undefined;
+        const parsedDual = !isNullish ? parseLightDarkColor(this._value) : null;
         let activeColor = { rgba: [128, 128, 128, 1] };
+        let valueLabel = '—';
         if (!isNullish) {
-            const parsedValue = parseCssColor(this._value);
-            if (!parsedValue) {
-                console.warn(`Highcharts Controls: Invalid color value for path "${this.params.path}": ${this._value}`);
-                this.elements.controlDiv?.classList.add('hcc-control-nullish');
-                this.valueEl.textContent = '—';
-                this.colorInput.value = '#808080';
-                this.opacityInput.value = '100';
-                this.opacityDisplay.textContent = '100';
-                this.updateOpacityGradient(activeColor);
-                return;
+            if (parsedDual) {
+                this.lightDarkValue = parsedDual;
+                const preferredMode = this.colorMode === 'light' || this.colorMode === 'dark'
+                    ? this.colorMode
+                    : this.getCurrentColorMode();
+                this.colorMode = preferredMode;
+                activeColor = this.colorMode === 'light' ? parsedDual.light : parsedDual.dark;
+                valueLabel = this.getHex({
+                    rgba: [activeColor.rgba[0], activeColor.rgba[1], activeColor.rgba[2], 1]
+                });
             }
-            activeColor = parsedValue;
+            else {
+                const parsedValue = parseCssColor(this._value);
+                if (!parsedValue) {
+                    console.warn(`Highcharts Controls: Invalid color value for path "${this.params.path}": ${this._value}`);
+                    this.elements.controlDiv?.classList.add('hcc-control-nullish');
+                    this.valueEl.textContent = '—';
+                    this.colorInput.value = '#808080';
+                    this.opacityInput.value = '100';
+                    this.opacityDisplay.textContent = '100';
+                    this.updateOpacityGradient(activeColor);
+                    this.updateModeButtons();
+                    return;
+                }
+                this.lightDarkValue = this.lightDarkValue ?? parseLightDarkColor(this._value ?? '') ?? null;
+                this.colorMode = 'single';
+                activeColor = parsedValue;
+                valueLabel = this.getHex({ rgba: [activeColor.rgba[0], activeColor.rgba[1], activeColor.rgba[2], 1] });
+            }
         }
         if (isNullish) {
             this.elements.controlDiv?.classList.add('hcc-control-nullish');
@@ -583,18 +735,135 @@ class ColorControl extends Control {
             this.colorInput.value = '#808080';
             this.opacityInput.value = '100';
             this.opacityDisplay.textContent = '100';
+            this.updateColorSwatch('#808080');
         }
         else {
             this.elements.controlDiv?.classList.remove('hcc-control-nullish');
             const hex = this.getHex({ rgba: [activeColor.rgba[0], activeColor.rgba[1], activeColor.rgba[2], 1] });
             const opacity = (activeColor.rgba[3] || 1) * 100;
             this.colorInput.value = hex;
-            this.valueEl.textContent = hex;
+            this.valueEl.textContent = valueLabel || hex;
             this.opacityInput.value = String(Math.round(opacity));
             this.opacityDisplay.textContent = String(Math.round(opacity));
+            this.updateColorSwatch(hex, parsedDual ?? null);
         }
-        // Initialize opacity slider gradient
+        this.updateModeButtons();
         this.updateOpacityGradient(activeColor);
+    }
+    updateColorSwatch(baseHex, dual) {
+        if (!this.colorInput) {
+            return;
+        }
+        if (dual && this.colorMode !== 'single') {
+            const lightHex = this.getHex({ rgba: [dual.light.rgba[0], dual.light.rgba[1], dual.light.rgba[2], 1] });
+            const darkHex = this.getHex({ rgba: [dual.dark.rgba[0], dual.dark.rgba[1], dual.dark.rgba[2], 1] });
+            const splitGradient = `linear-gradient(135deg, ${lightHex} 0 45%, ${darkHex} 45% 100%)`;
+            this.colorInput.style.setProperty('--hcc-color-swatch', splitGradient);
+            this.colorInput.style.background = 'transparent';
+            return;
+        }
+        this.colorInput.style.setProperty('--hcc-color-swatch', baseHex);
+        this.colorInput.style.background = 'transparent';
+    }
+    getCurrentColorMode() {
+        const computedStyle = window.getComputedStyle(document.documentElement);
+        const scheme = computedStyle.colorScheme;
+        if (scheme === 'dark') {
+            return 'dark';
+        }
+        if (scheme === 'light') {
+            return 'light';
+        }
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    updateModeButtons() {
+        if (!this.colorModeButton || !this.colorModeMenu) {
+            return;
+        }
+        const map = {
+            single: { glyph: '◐', label: 'Single color' },
+            light: { glyph: '☀', label: 'Light mode' },
+            dark: { glyph: '☾', label: 'Dark mode' }
+        };
+        const state = map[this.colorMode];
+        this.colorModeButton.dataset.mode = this.colorMode;
+        this.colorModeButton.setAttribute('aria-label', state.label);
+        this.colorModeButton.title = state.label;
+        this.colorModeButton.innerHTML = `<span aria-hidden="true">${state.glyph}</span>`;
+        this.colorModeButton.classList.remove('active');
+        Array.from(this.colorModeMenu.querySelectorAll('.hcc-color-mode-option')).forEach((option) => {
+            const button = option;
+            const mode = button.dataset.mode;
+            const isActive = mode === this.colorMode;
+            button.classList.toggle('active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
+        });
+    }
+    setColorMode(mode) {
+        const oldValue = this._value;
+        const isCurrentDual = !!parseLightDarkColor(this._value);
+        const currentSelection = this.colorMode === 'light' ? 'light' : this.colorMode === 'dark' ? 'dark' : 'light';
+        if (mode === 'single') {
+            if (isCurrentDual) {
+                const dual = parseLightDarkColor(this._value);
+                const activeColor = currentSelection === 'light' ? dual.light : dual.dark;
+                this._value = this.getHex({
+                    rgba: [
+                        activeColor.rgba[0],
+                        activeColor.rgba[1],
+                        activeColor.rgba[2],
+                        activeColor.rgba[3] || 1
+                    ]
+                }, activeColor.rgba[3] !== undefined && activeColor.rgba[3] !== 1);
+                this.lightDarkValue = dual;
+                this.colorMode = 'single';
+            }
+            else {
+                const parsed = parseCssColor(this._value);
+                if (parsed) {
+                    this._value = this.getHex({ rgba: [parsed.rgba[0], parsed.rgba[1], parsed.rgba[2], parsed.rgba[3] || 1] }, parsed.rgba[3] !== undefined && parsed.rgba[3] !== 1);
+                }
+                if (!this.lightDarkValue) {
+                    const currentDual = parseLightDarkColor(oldValue ?? '');
+                    if (currentDual) {
+                        this.lightDarkValue = currentDual;
+                    }
+                }
+                this.colorMode = 'single';
+            }
+        }
+        else {
+            const parsedSingle = parseCssColor(this._value);
+            const dual = this.lightDarkValue ?? (parsedSingle ? {
+                light: {
+                    rgba: [parsedSingle.rgba[0], parsedSingle.rgba[1], parsedSingle.rgba[2], parsedSingle.rgba[3] || 1]
+                },
+                dark: {
+                    rgba: [parsedSingle.rgba[0], parsedSingle.rgba[1], parsedSingle.rgba[2], parsedSingle.rgba[3] || 1]
+                }
+            } : null);
+            if (dual) {
+                this.lightDarkValue = dual;
+                const lightHex = this.getHex(dual.light, dual.light.rgba[3] !== undefined && dual.light.rgba[3] !== 1);
+                const darkHex = this.getHex(dual.dark, dual.dark.rgba[3] !== undefined && dual.dark.rgba[3] !== 1);
+                this._value = `light-dark(${lightHex}, ${darkHex})`;
+            }
+            else {
+                const parsedDual = parseLightDarkColor(this._value);
+                if (parsedDual) {
+                    this.lightDarkValue = parsedDual;
+                }
+            }
+            this.colorMode = mode;
+        }
+        this.updateUI();
+        this.emit('change', {
+            value: this._value,
+            oldValue,
+            path: this.params.path,
+            animation: true,
+            colorMode: this.colorMode
+        });
     }
     /**
      * Convert color to hex string
@@ -1612,6 +1881,25 @@ class Controls {
         this.target.update(updateObj, true, false, animation);
         this.updateOptionsPreview();
     }
+    applyColorSchemeToTarget(mode) {
+        if (!this.target) {
+            return;
+        }
+        const targetEl = this.target.renderTo ||
+            this.target.container ||
+            this.target.element ||
+            this.target.el;
+        if (!(targetEl instanceof HTMLElement)) {
+            return;
+        }
+        targetEl.classList.remove('highcharts-light', 'highcharts-dark');
+        if (mode === 'light') {
+            targetEl.classList.add('highcharts-light');
+        }
+        else if (mode === 'dark') {
+            targetEl.classList.add('highcharts-dark');
+        }
+    }
     injectCSS() {
         // Check if CSS is already injected
         if (document.getElementById('highcharts-controls-css')) {
@@ -1830,6 +2118,10 @@ class Controls {
                     const customEvent = e;
                     const value = customEvent.detail?.value;
                     const animation = customEvent.detail?.animation;
+                    const colorMode = customEvent.detail?.colorMode;
+                    if (colorMode) {
+                        this.applyColorSchemeToTarget(colorMode);
+                    }
                     if (controlParams.path) {
                         this.setNestedValue(controlParams.path, value, animation);
                     }

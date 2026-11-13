@@ -51,6 +51,202 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     await expect(page.locator('.hcc-color-value')).toHaveText('#123456');
   });
 
+  test('parses light-dark() colors according to the active color scheme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: 'light-dark(#ffffff, #000000)'
+      });
+      control.render(container);
+      (window as any).dualModeColorControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).dualModeColorControl);
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#000000');
+    const modeButton = page.locator('.hcc-color-mode-button').last();
+    await expect(modeButton).toHaveAttribute('data-mode', 'dark');
+    await expect(modeButton).toHaveText('☾');
+
+    await modeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await expect(modeButton).toHaveAttribute('data-mode', 'light');
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ffffff');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#ffffff');
+
+    const dualInput = page.locator('input[type="color"]').last();
+    await dualInput.evaluate((input: HTMLInputElement) => {
+      input.value = '#ff8800';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ff8800');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#ff8800');
+
+    const swatchUpdated = await page.locator('input[type="color"]').last().evaluate((input: HTMLInputElement) => {
+      const swatch = getComputedStyle(input).getPropertyValue('--hcc-color-swatch') || '';
+      return swatch.includes('#ff8800') && swatch.includes('#000000');
+    });
+    expect(swatchUpdated).toBeTruthy();
+  });
+
+  test('keeps dual light/dark colors when toggling back from single mode', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: 'light-dark(#ff0000, #00ff00)'
+      });
+      control.render(container);
+      (window as any).dualModeRoundTripControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).dualModeRoundTripControl);
+    const modeButton = page.locator('.hcc-color-mode-button').last();
+    await modeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="single"]').click();
+    await expect(modeButton).toHaveAttribute('data-mode', 'single');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#00ff00');
+
+    await modeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await expect(modeButton).toHaveAttribute('data-mode', 'light');
+    await expect(page.locator('.hcc-color-value').last()).toHaveText('#ff0000');
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ff0000');
+
+    const restoredValue = await page.evaluate(() => (window as any).dualModeRoundTripControl.value);
+    expect(restoredValue).toBe('light-dark(#ff0000, #00ff00)');
+  });
+
+  test('updates opacity correctly in both light and dark dual-mode branches', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { ColorControl } = await import('/js/controls.js');
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const control = new ColorControl({
+        type: 'color',
+        path: 'chart.backgroundColor',
+        value: 'light-dark(#ff0000, #00ff00)'
+      });
+      control.render(container);
+      (window as any).dualModeOpacityControl = control;
+    });
+
+    await page.waitForFunction(() => !!(window as any).dualModeOpacityControl);
+    const opacityDisplay = page.locator('.hcc-opacity-display').last();
+    const opacityInput = page.locator('.hcc-opacity-input').last();
+
+    await opacityDisplay.click();
+    await opacityInput.evaluate((input: HTMLInputElement) => {
+      input.value = '25';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    let dualValue = await page.evaluate(() => (window as any).dualModeOpacityControl.value);
+    expect(dualValue).toBe('light-dark(#ff0000, #00ff0040)');
+
+    await page.locator('.hcc-color-mode-button').last().click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await opacityDisplay.click();
+    await opacityInput.evaluate((input: HTMLInputElement) => {
+      input.value = '75';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    dualValue = await page.evaluate(() => (window as any).dualModeOpacityControl.value);
+    expect(dualValue).toBe('light-dark(#ff0000bf, #00ff0040)');
+  });
+
+  test('applies target color scheme when selecting light or dark mode', async ({ page }) => {
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { default: Controls } = await import('/js/controls.js');
+      const target = {
+        options: {},
+        renderTo: document.createElement('div'),
+        getOptions() { return this.options; },
+        update() { return; }
+      };
+      document.body.appendChild(target.renderTo);
+
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      new Controls(host, {
+        target,
+        controls: [{
+          type: 'color',
+          path: 'chart.backgroundColor',
+          value: 'light-dark(#ff0000, #00ff00)'
+        }]
+      });
+      (window as any).schemeTarget = target;
+    });
+
+    await page.waitForFunction(() => !!(window as any).schemeTarget);
+    const colorModeButton = page.locator('.hcc-color-mode-button').last();
+
+    await colorModeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ff0000');
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-light'))).resolves.toBeTruthy();
+
+    await colorModeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="dark"]').click();
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#00ff00');
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-dark'))).resolves.toBeTruthy();
+
+    await colorModeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="single"]').click();
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-light'))).resolves.toBeFalsy();
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-dark'))).resolves.toBeFalsy();
+  });
+
+  test('allows the color mode dropdown to overflow the group container without clipping', async ({ page }) => {
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const Controls = (await import('/js/controls.js')).default;
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      new Controls(container, {
+        controls: [{
+          group: 'Theme',
+          controls: [{
+            type: 'color',
+            path: 'chart.backgroundColor',
+            value: '#123456'
+          }]
+        }]
+      });
+      (window as any).overflowGroupControl = true;
+    });
+
+    await page.waitForFunction(() => !!(window as any).overflowGroupControl);
+    const groupControls = page.locator('.hcc-group-controls').first();
+    await expect(groupControls).toHaveCSS('overflow', 'visible');
+    await page.locator('.hcc-color-mode-button').first().click();
+    await expect(page.locator('.hcc-color-mode-menu').first()).toBeVisible();
+  });
+
   test('updates output text and demo state when standalone controls change', async ({ page }) => {
     const colorInput = page.locator('#color-control-container input[type="color"]');
     await colorInput.evaluate((input: HTMLInputElement) => {
