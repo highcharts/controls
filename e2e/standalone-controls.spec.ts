@@ -175,6 +175,51 @@ test.describe('Highcharts Controls - Standalone Controls', () => {
     expect(dualValue).toBe('light-dark(#ff0000bf, #00ff0040)');
   });
 
+  test('applies target color scheme when selecting light or dark mode', async ({ page }) => {
+    await page.goto('http://localhost:8080');
+
+    await page.evaluate(async () => {
+      const { default: Controls } = await import('/js/controls.js');
+      const target = {
+        options: {},
+        renderTo: document.createElement('div'),
+        getOptions() { return this.options; },
+        update() { return; }
+      };
+      document.body.appendChild(target.renderTo);
+
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      new Controls(host, {
+        target,
+        controls: [{
+          type: 'color',
+          path: 'chart.backgroundColor',
+          value: 'light-dark(#ff0000, #00ff00)'
+        }]
+      });
+      (window as any).schemeTarget = target;
+    });
+
+    await page.waitForFunction(() => !!(window as any).schemeTarget);
+    const colorModeButton = page.locator('.hcc-color-mode-button').last();
+
+    await colorModeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="light"]').click();
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#ff0000');
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-light'))).resolves.toBeTruthy();
+
+    await colorModeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="dark"]').click();
+    await expect(page.locator('input[type="color"]').last()).toHaveValue('#00ff00');
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-dark'))).resolves.toBeTruthy();
+
+    await colorModeButton.click();
+    await page.locator('.hcc-color-mode-option[data-mode="single"]').click();
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-light'))).resolves.toBeFalsy();
+    await expect(page.evaluate(() => (window as any).schemeTarget.renderTo.classList.contains('highcharts-dark'))).resolves.toBeFalsy();
+  });
+
   test('allows the color mode dropdown to overflow the group container without clipping', async ({ page }) => {
     await page.goto('http://localhost:8080');
 

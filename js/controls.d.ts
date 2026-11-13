@@ -336,6 +336,7 @@ declare class Controls {
      * Supports array notation, e.g., 'series[0].name' or 'xAxis[0].title.text'
      */
     setNestedValue(path: string, value: any, animation?: boolean): void;
+    private applyColorSchemeToTarget;
     private injectCSS;
     private addPreview;
     /**

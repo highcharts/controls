@@ -660,7 +660,8 @@ class ColorControl extends Control {
                 value: this._value,
                 oldValue,
                 path: this.params.path,
-                animation
+                animation,
+                colorMode: this.colorMode
             });
             return;
         }
@@ -682,7 +683,8 @@ class ColorControl extends Control {
             value: newValue,
             oldValue,
             path: this.params.path,
-            animation
+            animation,
+            colorMode: this.colorMode
         });
     }
     /**
@@ -859,7 +861,8 @@ class ColorControl extends Control {
             value: this._value,
             oldValue,
             path: this.params.path,
-            animation: true
+            animation: true,
+            colorMode: this.colorMode
         });
     }
     /**
@@ -1878,6 +1881,25 @@ class Controls {
         this.target.update(updateObj, true, false, animation);
         this.updateOptionsPreview();
     }
+    applyColorSchemeToTarget(mode) {
+        if (!this.target) {
+            return;
+        }
+        const targetEl = this.target.renderTo ||
+            this.target.container ||
+            this.target.element ||
+            this.target.el;
+        if (!(targetEl instanceof HTMLElement)) {
+            return;
+        }
+        targetEl.classList.remove('highcharts-light', 'highcharts-dark');
+        if (mode === 'light') {
+            targetEl.classList.add('highcharts-light');
+        }
+        else if (mode === 'dark') {
+            targetEl.classList.add('highcharts-dark');
+        }
+    }
     injectCSS() {
         // Check if CSS is already injected
         if (document.getElementById('highcharts-controls-css')) {
@@ -2096,6 +2118,10 @@ class Controls {
                     const customEvent = e;
                     const value = customEvent.detail?.value;
                     const animation = customEvent.detail?.animation;
+                    const colorMode = customEvent.detail?.colorMode;
+                    if (colorMode) {
+                        this.applyColorSchemeToTarget(colorMode);
+                    }
                     if (controlParams.path) {
                         this.setNestedValue(controlParams.path, value, animation);
                     }

@@ -564,7 +564,8 @@ export class ColorControl extends Control<ColorControlParams> {
                 value: this._value,
                 oldValue,
                 path: this.params.path,
-                animation
+                animation,
+                colorMode: this.colorMode
             });
             return;
         }
@@ -589,7 +590,8 @@ export class ColorControl extends Control<ColorControlParams> {
             value: newValue,
             oldValue,
             path: this.params.path,
-            animation
+            animation,
+            colorMode: this.colorMode
         });
     }
 
@@ -782,7 +784,8 @@ export class ColorControl extends Control<ColorControlParams> {
             value: this._value,
             oldValue,
             path: this.params.path,
-            animation: true
+            animation: true,
+            colorMode: this.colorMode
         });
     }
 
